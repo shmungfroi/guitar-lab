@@ -5,7 +5,7 @@ Three pytest suites. They read `index.html` and never edit it.
 | Suite | What it checks | Time |
 |---|---|---|
 | `test_chords.py` | The 18 chord shapes (frets, fingers, barres, the notes they sound against their spelling), fretboard diagrams, key spellings, roman numerals and functions, sol-fa roots, bass root/fifth positions, song maps vs keys and labelled progressions, strum and Finish patterns, capo sounding keys | ~1 s |
-| `test_ui.py` | Render matrix (8 stages x 7 tabs x 5 instruments x 360/768/1280 px x light/dark: no console errors, no page-level horizontal overflow, key panels present); functional tests (gates, sign-off, grading, playback start/stop, capo, mute, gig max four, gig timer, roles); one or more tests per register item M1-M5, S1-S15 in `reports/spec06/SPEC_06.md` R1-R11 in `reports/spec07/SPEC_07.md` (`test_R<n>_...`; R6 and R7 also have data tests in `test_chords.py`) and T1-T5 in `reports/spec08/SPEC_08.md` (`test_T<n>_...`) | ~3 min |
+| `test_ui.py` | Render matrix (8 stages x 7 tabs x 5 instruments x 360/768/1280 px x light/dark: no console errors, no page-level horizontal overflow, key panels present); functional tests (gates, sign-off, grading, playback start/stop, capo, mute, gig max four, gig timer, roles); one or more tests per register item M1-M5, S1-S15 in `reports/spec06/SPEC_06.md` R1-R11 in `reports/spec07/SPEC_07.md` (`test_R<n>_...`; R6 and R7 also have data tests in `test_chords.py`) T1-T5 in `reports/spec08/SPEC_08.md` (`test_T<n>_...`) and U1, U3 in `reports/spec09/SPEC_09.md` (`test_U<n>_...`) | ~4 min |
 | `test_timing.py` | Records every WebAudio source start via an init script and checks the schedule against the beat grid (4/4 at two tempos, swung shuffle, 3/4, 6/8), that nothing is scheduled late, and that a double tap on Play can't stack two bands (S2) | ~30 s |
 
 ## Setup (fresh session)
@@ -24,11 +24,12 @@ Node is not needed.
 From the repo root (`/home/claude/guitar`):
 
 ```bash
-python3 -m pytest tests -q -p no:cacheprovider                 # everything, ~4 min
+python3 -m pytest tests -q -p no:cacheprovider                 # everything, ~5 min
 python3 -m pytest tests/test_chords.py -q -p no:cacheprovider  # one suite
 python3 -m pytest tests/test_ui.py -q -p no:cacheprovider -k "not matrix"   # skip the big matrix
 python3 -m pytest tests/test_ui.py -q -p no:cacheprovider -k "M3 or S6"     # register items
 python3 -m pytest tests/test_ui.py -q -p no:cacheprovider -k "T1 or R10"    # 0.8 items (T1-T5) with the 0.7 test they touch
+python3 -m pytest tests/test_ui.py -q -p no:cacheprovider -k "U1 or U3 or T2 or T3 or R1 or version"   # 0.9 items (U1, U3) with the tests they touch
 ```
 
 `-p no:cacheprovider` just stops pytest writing `.pytest_cache` into the repo.
@@ -79,4 +80,12 @@ SHREDDER_INDEX=/tmp/shredder05/index.html python3 -m pytest tests -q -p no:cache
   warnings from the whole page. The font files can't load in that frame over `file://`, so the tests count only messages logged
   after the button press.
 - T4 (0.8): `T4_STRUM` is the spec's own word list ("downs", "down-up", "strum"); the wider `STRUM_WORDS` belongs to R8's drum panel test.
+- U1 (0.9): the sandboxed-frame test reuses `sandbox()`; the normal-page test holds the three 0.8 sentences as `U1_INTRO_08`,
+  `U1_FOOT_08` and `U1_ASK_08`, and also checks that the start-up storage check leaves storage exactly as it found it
+  (nothing on a first visit, the same text otherwise).
+- U3 (0.9): drums, every Path stage and every gig song, the stage's or song's own pattern and each of the four Finish feels,
+  at 320 and 360 px, Present off and on (Present only exists on the Gig tab). `U3_PATH_1280`, `U3_GIG_1280` and
+  `U3_PRESENT_1280` are table widths measured on 0.8 (a51db99) in headless Chromium with the bundled fonts; a different
+  browser build may need them re-measured with `SHREDDER_INDEX` pointed at 0.8.
+- 0.9 version: `test_version_0_9_...` import 0.7, 0.8 and 0.9 wrappers and a bare state, and check the newer-version message.
 - Results for each build go in `reports/<spec>/TEST_BASELINE.md` or that spec's `BUILD_REPORT.md`.
