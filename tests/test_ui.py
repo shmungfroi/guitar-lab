@@ -1720,3 +1720,72 @@ def test_T5_clipboard_still_used_when_allowed(app):
     assert json.loads(pg.evaluate("()=>window.__clip[0]"))["state"] == RICH
     pg.wait_for_function("()=>/Backup copied/.test(document.getElementById('bkMsg').textContent)")
     assert not pg.locator("#bkOut").is_visible()
+
+
+# ===================================================================== 0.9 register (SPEC_09): U1, U3
+
+# --------------------------------------------------------------------- U1 (wording where storage is blocked)
+
+U1_BROWSER = re.compile(r"saved in this browser|lives in this browser", re.I)
+U1_BACKUP = '{"app":"The Guitar Lab","format":1,"version":"0.8","state":' + json.dumps(RICH) + "}"
+U1_INTRO_08 = ("Your progress lives in this browser only. A backup holds all of it: every instrument's levels, gates and marks, the journal, "
+               "the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device.")
+U1_FOOT_08 = "Progress is saved in this browser only: keep a backup from the Record tab."
+U1_ASK_08 = re.compile(r"Everything saved in this browser now \(.+\) will be replaced, and that can't be undone\.")
+
+
+def test_U1_sandbox_wording_does_not_promise_storage(browser, tmp_path):
+    ctx, pg, fr, log = sandbox(browser, tmp_path)
+    fr.evaluate(POPUPS_JS)
+    intro = fr.inner_text("#backup > p.note")
+    foot = fr.inner_text(".foot")
+    fr.fill("#bkIn", U1_BACKUP)
+    fr.click("#bkImport")
+    ask = fr.inner_text("#bkAsk")
+    for name, t in (("Backup intro", intro), ("footer", foot), ("import question", ask)):
+        assert not U1_BROWSER.search(t), f"{name} still promises browser storage: {t!r}"
+        assert re.search(r"\bbackup\b", t, re.I), f"{name} doesn't mention a backup: {t!r}"
+    assert re.search(r"can't keep your progress here", intro) and "Download backup" in intro and "Copy backup" in intro, intro
+    assert re.search(r"can't keep your progress here", foot) and re.search(r"backup \(Download or Copy\) is the only way to keep it", foot), foot
+    assert fr.get_attribute(".foot a", "href") == "#record", "the footer still links to the Record tab"
+    assert "A backup holds all of it" in intro and "move to another device" in intro, "the rest of the intro is unchanged"
+    assert "Replace your progress with this backup?" in ask and re.search(r"The progress loaded on this page now \(.+\) will be replaced, and that can't be undone\.", ask), ask
+    fr.click("#bkNo")
+    assert fr.inner_text("#bkAsk").strip() == "" and not U1_BROWSER.search(fr.inner_text("#backup")), "the card keeps the honest wording after a re-render"
+    fr.fill("#bkIn", U1_BACKUP)
+    fr.click("#bkImport")
+    fr.click("#bkYes")
+    after = fr.inner_text("#backup") + fr.inner_text(".foot")
+    assert "Backup imported" in after and "Your path: Keys" in fr.inner_text("#v-record"), "the import itself must still work"
+    assert not U1_BROWSER.search(after), after
+    assert fr.evaluate("()=>window.__pop") == []
+    assert not [m for m in log if m.startswith("pageerror")], log
+    ctx.close()
+
+
+@pytest.mark.parametrize("seed", [None, {}, RICH], ids=["first-visit", "empty", "rich"])
+def test_U1_normal_page_wording_unchanged_from_0_8(app, seed):
+    pg = app(state=seed, hash_="record")
+    if seed is None:
+        assert raw(pg) is None, "checking for storage must not write anything on a first visit"
+    else:
+        assert json.loads(raw(pg)) == seed, "checking for storage must not change what is stored"
+    assert text(pg, "#backup > p.note") == U1_INTRO_08
+    assert U1_FOOT_08 in " ".join(text(pg, ".foot").split())
+    assert pg.get_attribute(".foot a", "href") == "#record"
+    offer(pg, U1_BACKUP)
+    ask = text(pg, "#bkAsk")
+    assert U1_ASK_08.search(ask) and "loaded on this page" not in ask, ask
+    assert "can't keep your progress here" not in pg.evaluate("()=>document.body.innerText")
+    assert pg.evaluate("()=>Object.keys(localStorage)") in ([], ["shredder"]), "only the app's own key may exist"
+    pg.click("#bkYes")
+    assert "saved in this browser" in text(pg, "#bkMsg") and state(pg) == RICH
+    assert not pg.errors
+
+
+def test_U1_sandbox_footer_is_honest_on_another_tab(browser, tmp_path):
+    ctx, pg, fr, log = sandbox(browser, tmp_path, hash_="gig", sel="#present")
+    foot = fr.inner_text(".foot")
+    assert not U1_BROWSER.search(foot) and "can't keep your progress here" in foot, foot
+    assert "Lyrics and scores are not reproduced".lower() in foot.lower() and "SIL Open Font License" in foot, "the rest of the footer is unchanged"
+    ctx.close()

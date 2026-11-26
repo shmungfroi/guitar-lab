@@ -149,7 +149,7 @@ table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px
 <section id="v-invent" class="view hide"></section>
 <section id="v-gig" class="view hide"></section>
 <section id="v-record" class="view hide"></section>
-<p class="note foot" style="padding-bottom:28px">Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. Progress is saved in this browser only: <a href="#record">keep a backup from the Record tab</a>. Fonts: Outfit and Poiret One, SIL Open Font License.</p>
+<p class="note foot" style="padding-bottom:28px">Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. <span id="footKeep">Progress is saved in this browser only: <a href="#record">keep a backup from the Record tab</a>.</span> Fonts: Outfit and Poiret One, SIL Open Font License.</p>
 </div>
 <div id="toast" class="toast hide" role="status" aria-live="polite"></div>
 
@@ -297,9 +297,13 @@ for(const o of ['marks','best','gates','sign'])for(const k in S[o]){const v=+S[o
 /* 0.6: changes and journal entries carry their instrument; anything saved before 0.6 was guitar's. Rudiment, technique and best-tempo keys without an @instrument suffix are guitar's too. */
 S.changes.forEach(c=>{if(!IK.includes(c.inst))c.inst='guitar'});S.journal.forEach(j=>{if(!IK.includes(j.inst))j.inst='guitar'});
 if(!FIN.some(f=>f.k===S.finish))S.finish='bossa';if(!ST.some(s=>s.id===S.stage))S.stage='a-e';if(!Array.isArray(S.changes))S.changes=[];if(!Array.isArray(S.journal))S.journal=[]}
-{let L=null;try{L=JSON.parse(localStorage.getItem('shredder')||'{}')}catch(e){}loadState(L)}
+const lsGet=()=>localStorage.getItem('shredder'),lsSet=v=>localStorage.setItem('shredder',v);
+{let L=null;try{L=JSON.parse(lsGet()||'{}')}catch(e){}loadState(L)}
 /* true when the browser kept it; false where storage is blocked (a sandboxed frame, private mode), so the page can say so (0.8) */
-const save=()=>{try{localStorage.setItem('shredder',JSON.stringify(S));return true}catch(e){return false}};
+const save=()=>{try{lsSet(JSON.stringify(S));return true}catch(e){return false}};
+/* can this page keep anything? (0.9) Checked once, by writing back what storage already holds for this app: no other key is made, and nothing stored is changed. Where it can't, the Backup card, the import question and the footer say so. */
+const canStore=(()=>{try{const v=lsGet();lsSet(v===null?'{}':v);if(v===null)localStorage.removeItem('shredder');return true}catch(e){return false}})();
+if(!canStore){const f=document.getElementById('footKeep');if(f)f.innerHTML='This page can\'t keep your progress here, so a backup (Download or Copy) is the only way to keep it: <a href="#record">make one from the Record tab</a> before you leave.'}
 const $=id=>document.getElementById(id);
 const shp=c=>String(c).replace(/#/g,'♯');
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -562,13 +566,13 @@ function readBackup(txt){txt=String(txt||'').replace(/^﻿/,'').trim();if(!txt)r
  if(Array.isArray(st.changes)&&st.changes.some(c=>!isO(c))||Array.isArray(st.journal)&&st.journal.some(j=>!isO(j)))return {err:'That backup is damaged: its practice log or journal has entries this app can\'t read.'+NOCHG};
  return {st,saved:wrapped&&typeof o.saved==='string'&&isFinite(Date.parse(o.saved))?Date.parse(o.saved):0}}
 const bkCount=st=>{const n=(v,one,many)=>v+' '+(v===1?one:many),o=v=>v&&typeof v==='object'?v:{};return [n(Object.keys(o(st.lv)).filter(k=>st.lv[k]>0).length,'level set','levels set'),n((st.journal||[]).length,'journal entry','journal entries'),n((st.changes||[]).length,'one-minute log','one-minute logs'),n(Object.keys(o(st.warm)).length,'warm-up day','warm-up days')].join(', ')};
-function backupCard(){const q=bk.pend;return `<div class="card" id="backup"><h3>Backup</h3><p class="note" style="margin:0 0 10px">Your progress lives in this browser only. A backup holds all of it: every instrument's levels, gates and marks, the journal, the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device.</p>
+function backupCard(){const q=bk.pend;return `<div class="card" id="backup"><h3>Backup</h3><p class="note" style="margin:0 0 10px">${canStore?'Your progress lives in this browser only.':'This page can\'t keep your progress here, so a backup is the only way to keep it: use Download backup or Copy backup before you leave.'} A backup holds all of it: every instrument's levels, gates and marks, the journal, the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device.</p>
  <div class="row"><button id="bkDown">Download backup</button><button id="bkCopy">Copy backup</button></div>
  <textarea id="bkOut" class="bkta${bk.out?'':' hide'}" rows="6" readonly aria-label="Backup text, to select and copy">${esc(bk.out)}</textarea>
  <h3 style="margin:18px 0 6px">Bring a backup back</h3><div class="row"><button id="bkPick">Choose a backup file</button><input type="file" id="bkFile" class="sr" accept=".json,.txt,application/json,text/plain" tabindex="-1" aria-label="Backup file"><span class="note">or paste the backup text here:</span></div>
  <textarea id="bkIn" class="bkta" rows="3" spellcheck="false" autocomplete="off" aria-label="Backup text to import" placeholder="{ … }">${esc(bk.inTxt)}</textarea>
  <div class="row" style="margin-top:8px"><button id="bkImport">Import pasted backup</button><span class="note">You'll be asked before anything is replaced.</span></div>
- <div id="bkAsk">${q?`<div class="gate bkask" role="group" aria-labelledby="bkQ"><b id="bkQ" style="font-weight:500">Replace your progress with this backup?</b><p>${q.saved?'Backup made '+audDate(q.saved)+': ':'This backup has '}${esc(bkCount(q.st))}. Everything saved in this browser now (${esc(bkCount(S))}) will be replaced, and that can't be undone.</p><div class="row"><button id="bkYes">Replace my progress</button><button id="bkNo">Cancel</button></div></div>`:''}</div>
+ <div id="bkAsk">${q?`<div class="gate bkask" role="group" aria-labelledby="bkQ"><b id="bkQ" style="font-weight:500">Replace your progress with this backup?</b><p>${q.saved?'Backup made '+audDate(q.saved)+': ':'This backup has '}${esc(bkCount(q.st))}. ${canStore?'Everything saved in this browser now':'The progress loaded on this page now'} (${esc(bkCount(S))}) will be replaced, and that can't be undone.</p><div class="row"><button id="bkYes">Replace my progress</button><button id="bkNo">Cancel</button></div></div>`:''}</div>
  <div id="bkMsg" role="status" aria-live="polite">${bk.note?`<p class="bkmsg${bk.note[1]?' bad':''}">${esc(bk.note[0])}</p>`:''}</div></div>`}
 function bkSay(m,bad){bk.note=m?[m,!!bad]:null;const el=$('bkMsg');if(el)el.innerHTML=m?`<p class="bkmsg${bad?' bad':''}">${esc(m)}</p>`:''}
 function bkShowOut(txt){bk.out=txt;const ta=$('bkOut');if(!ta)return null;ta.value=txt;ta.classList.remove('hide');return ta}
