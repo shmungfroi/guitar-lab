@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>The Shredder 0.5</title>
+<title>The Shredder 0.6</title>
 <style>
 /* VOICE: a patient guitar teacher in the Shmungfroi family: warm, exact, unhurried.
    IDEA: the guitar neck is the map; each fret is a stage, the inlays are the gates you earn.
@@ -70,7 +70,7 @@ background-image:repeating-linear-gradient(180deg,transparent 0 13px,rgba(236,22
 .cb{display:block;align-self:start;text-align:center;border:0;background:transparent;padding:4px;min-height:0}
 .cb svg{width:100%;max-width:140px;display:block;margin:0 auto}
 .cb .rn{font-size:13px}
-.kb{width:100%;max-width:170px;display:block;margin:6px auto}.dg{border-collapse:collapse;margin:8px 0;font-size:15px;width:auto}.dg th,.dg td{border:1px solid var(--rule);padding:6px 8px;text-align:center;min-width:30px}.dg th{color:var(--mut);font-weight:400}
+.kb{width:100%;max-width:170px;display:block;margin:6px auto}.dg{border-collapse:collapse;margin:8px 0;font-size:15px;width:auto}.dg th,.dg td{border:1px solid var(--rule);padding:6px 8px;text-align:center;min-width:30px}.dg th{color:var(--mut);font-weight:400}.dgw{overflow-x:auto;max-width:100%}
 .gt{font:500 clamp(56px,12vw,140px)/1 'G Outfit',system-ui,sans-serif;font-variant-numeric:tabular-nums}.present .gt{font-size:clamp(90px,22vw,240px)}.present #v-gig{font-size:20px}
 .step{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:start;padding:12px 0;border-top:1px solid var(--rule)}
 .step .n{font:24px 'G Poiret','Poiret One',sans-serif;color:var(--mut)}
@@ -106,6 +106,7 @@ table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;max-width:92vw;background:var(--card);border:1px solid var(--hi);border-radius:12px;padding:12px 16px;font-size:15px;z-index:20}
 .gate{border:1px solid var(--inlay);border-radius:16px;padding:14px 18px;background:color-mix(in srgb,var(--inlay) 10%,transparent)}
 @media(max-width:900px){.cols,.two{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:480px){.dg{font-size:13px}.dg th,.dg td{padding:5px 3px;min-width:22px}}
 @media(max-width:640px){.top h1{font-size:32px}.title h2{font-size:34px}
 .neck{grid-template-columns:minmax(0,1fr);background-image:repeating-linear-gradient(90deg,transparent 0 calc(16.66% - 1px),rgba(236,226,200,.45) calc(16.66% - 1px) 16.66%)}
 .nut{height:12px}.fr{border-right:0;border-bottom:3px solid var(--fret);min-height:56px;text-align:left;padding:8px 12px 14px}
@@ -118,7 +119,7 @@ table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px
 <div class="wrap">
 <header>
 <div class="top">
-<div><h1>The Shredder</h1><div class="sub">Working title · version 0.5 · a Shmungfroi instrument</div></div>
+<div><h1>The Shredder</h1><div class="sub">Working title · version 0.6 · a Shmungfroi instrument</div></div>
 <div class="sp"></div>
 <div class="chips" role="group" aria-label="Finish" id="finishes"></div>
 </div>
@@ -247,7 +248,17 @@ const TECH=[
  {id:'bends',f:'metal',n:'Bends and vibrato (electric)',w:'Push the string up with three fingers together until it reaches the pitch a fret or two higher. Vibrato is a small, even, repeated bend.',st:5}];
 const FORM={'a-e':[['Chorus',4]],'twelve-bar':[['12 bars',3]],'am-e7':[['Chorus',2]],'c-g-f':[['Verse',3]],'four-chords':[['Verse',1],['Chorus',1],['Verse',1],['Chorus',1]],'six-eight':[['Verse',1],['Refrain',1],['Verse',1],['Refrain',1]],'hallelujah':[['Verse',1],['Chorus',1],['Verse',1],['Chorus',1]],'beyond':[['Verse',2]]};
 const TON={A:[9,'major'],Am:[9,'minor'],C:[0,'major'],Am6:[9,'minor'],Bm:[11,'minor']};const PCN={major:['C','D♭','D','E♭','E','F','F♯','G','A♭','A','B♭','B'],minor:['C','C♯','D','E♭','E','F','F♯','G','G♯','A','B♭','B']};
-const sounds=s=>{const [pc,md]=TON[s.key],c=S.capo[s.id]||0;return PCN[md][(pc+c)%12]+' '+md};
+/* spelling: notes are moved by letter as well as by semitone, so the sounding key is spelt properly (capo 1 on A shapes = B♭, not A♯) */
+const LET='CDEFGAB',LPC=[0,2,4,5,7,9,11],ENH={1:['D♭','C♯'],3:['E♭','D♯'],6:['F♯','G♭'],8:['A♭','G♯'],10:['B♭','A♯']};
+const pcN=n=>(LPC[LET.indexOf(n[0])]+(n.split('♯').length-1)-(n.split('♭').length-1)+12)%12;
+const trN=(n,from,to)=>{const li=(LET.indexOf(n[0])+LET.indexOf(to[0])-LET.indexOf(from[0])+7)%7,pc=(pcN(n)+pcN(to)-pcN(from)+12)%12;let d=(pc-LPC[li]+12)%12;if(d>6)d-=12;return LET[li]+(d>0?'♯'.repeat(d):'♭'.repeat(-d))};
+function keyAt(s,cp){const [pc,md]=TON[s.key],from=PCN[md][pc],np=(pc+(cp||0))%12;if(!cp)return {from,to:from,md};
+ const cand=[...new Set([PCN[md][np]].concat(ENH[np]||[]))],cost=to=>s.ch.reduce((a,c)=>a+spell(c).filter(n=>/♯♯|♭♭/.test(trN(n,from,to))).length,0);
+ let to=cand[0];cand.forEach(c=>{if(cost(c)<cost(to))to=c});return {from,to,md}}
+const spellAt=(c,K)=>spell(c).map(n=>trN(n,K.from,K.to));
+const nameAt=(c,K)=>{const r=spell(c)[0];return trN(r,K.from,K.to)+c.replace('#','♯').slice(r.length)};
+const capoOf=s=>S.capo[s.id]||0;
+const sounds=s=>{const K=keyAt(s,capoOf(s));return K.to+' '+K.md};
 const LV=['Not started','Exploring','Consistent','Applied'];
 const CPM=s=>s.id==='beyond'?[20,30]:[30,45];
 const STEPS=s=>S.inst==='guitar'?GSTEPS(s):PSTEPS(s);
@@ -329,20 +340,29 @@ function fretboard(d){const groups=d.groups||[[d.title,d.notes]];const from=d.fr
  s+='</svg>';s+=`<p class="sr">${groups.map(([g,ns])=>g+': '+ns.map(([st,f,nm])=>nm+' on the '+['low E','A','D','G','B','high E'][st]+' string, '+(f?'fret '+f:'open')).join('; ')).join('. ')}</p>`;const key=d.groups?`<div class="row note">${groups.map(([g],i)=>`<span><span class="sw" style="background:${gcol(g)}"></span>${g}</span>`).join('')}<span>ringed: the root</span></div>`:'';return s+key}
 function lvlCtl(k,label){const l=lvl(k);return `<div class="lvl" role="group" aria-label="${esc(label)} level"><button data-lv="${k}" data-dir="-1" aria-label="Lower ${esc(label)} level">−</button><span class="lvname" style="color:${l>=2?'var(--ok)':l===1?'var(--hi)':'var(--mut)'}">${LV[l]}</span><button data-lv="${k}" data-dir="1" aria-label="Raise ${esc(label)} level">+</button></div>`}
 /* band parts */
-function bassPos(n){const pc=rootOf(n),e=(pc-4+12)%12;if(e<=3)return {r:['E',e],f:['A',e+2]};const a=(pc-9+12)%12;return {r:['A',a],f:['D',a+2]}}
+function bassPos(pc){const e=(pc-4+12)%12;if(e<=4)return {r:['E',e],f:['A',e+2]};return {r:['A',e-5],f:['D',e-3],alt:e===10}}
 const spell=n=>(CH[n].t||n).split(' ');
-function kbd(n){const pcs=pcsOf(n),r=rootOf(n),W=[0,2,4,5,7,9,11],B=[1,3,6,8,10],ww=22;let s=`<svg viewBox="0 0 ${7*ww+2} 70" class="kb" role="img" aria-label="${esc(n.replace('#','♯'))}: ${spell(n).join(' ')}, root ${spell(n)[0]}">`;
- W.forEach((pc,i)=>{const on=pcs.includes(pc);s+=`<rect x="${1+i*ww}" y="1" width="${ww}" height="66" rx="2" style="fill:${on?'#f0d48a':'#ece2c8'};stroke:#12100b"/>`+(pc===r?`<circle cx="${1+i*ww+ww/2}" cy="56" r="5" style="fill:#12100b"/>`:'')});
- const bx={1:1,3:2,6:4,8:5,10:6};B.forEach(pc=>{const on=pcs.includes(pc),x=1+bx[pc]*ww-7;s+=`<rect x="${x}" y="1" width="14" height="40" rx="2" style="fill:${on?'#c9a24a':'#12100b'};stroke:#12100b"/>`+(pc===r?`<circle cx="${x+7}" cy="32" r="4" style="fill:#12100b"/>`:'')});return s+'</svg>'}
-function drumGrid(s){const p=PAT[s.pat],n=p.b*(p.m===3?1:p.m===6?3:2),lab=p.m===6?['1','2','3','4','5','6']:p.m===3?['1','2','3']:['1','&','2','&','3','&','4','&'];
- const hit=(row,i)=>{const beatIdx=p.m===6?(i===0?0:i===3?1:-1):p.m===3?i:(i%2===0?i/2:-1);if(row==='HH')return true;if(row==='BD')return beatIdx===0||(p.m===4&&beatIdx===2);if(row==='SN')return (p.m===4&&(beatIdx===1||beatIdx===3))||(p.m===6&&beatIdx===1);if(row==='Rim')return p.m===3&&beatIdx>0;return false};
- const rows=p.m===3?['HH','Rim','BD']:['HH','SN','BD'];
- return `<table class="dg" aria-label="Drum groove, ${p.m===6?'6/8':p.m+'/4'}"><tr><th></th>${lab.slice(0,n).map(l=>`<th>${l}</th>`).join('')}</tr>${rows.map(r=>`<tr><th>${r==='HH'?'Hi-hat':r==='SN'?'Snare':r==='Rim'?'Rim':'Kick'}</th>${lab.slice(0,n).map((_,i)=>`<td>${hit(r,i)?'●':''}</td>`).join('')}</tr>`).join('')}</table><p class="note">${p.sw?'Swing the hi-hat quavers. ':''}Play a one-bar fill into each new section; end with a crash on the home chord.</p>`}
-function partPanel(s){const I=S.inst,uniq=[...new Set(s.ch)];
- if(I==='bass')return `<div class="boxes" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">${uniq.map(c=>{const b=bassPos(c),[,fn]=fnOf(s.key,c),col=fn?`var(${FN[fn][1]})`:'var(--ink)';return `<div class="card"><div style="font-size:20px;font-weight:600;color:${col}">${esc(c.replace('#','♯'))}</div><div>Root ${spell(c)[0]}: ${b.r[0]} string, ${b.r[1]?'fret '+b.r[1]:'open'}</div><div class="note">Fifth ${spell(c)[2]||spell(c)[1]}: ${b.f[0]} string, fret ${b.f[1]}</div></div>`}).join('')}</div><p class="note">Bass notes come from the chord's root. Start with roots on beat 1, then 1 and 3, then root–fifth.</p>`;
+const KFONT='font-family="G Outfit, Outfit, system-ui, sans-serif"';
+function kbd(n,K){K=K||{from:'C',to:'C'};const sp=spellAt(n,K),by={};sp.forEach(x=>{by[pcN(x)]=x});const r=pcN(sp[0]),W=[0,2,4,5,7,9,11],B=[1,3,6,8,10],ww=22;
+ let s=`<svg viewBox="0 0 ${7*ww+2} 70" class="kb" role="img" aria-label="${esc(nameAt(n,K))}: ${sp.join(' ')}, root ${sp[0]}">`;
+ W.forEach((pc,i)=>{const on=by[pc],x=1+i*ww;s+=`<rect class="${on?'k-on':'k-off'}" x="${x}" y="1" width="${ww}" height="66" rx="2" style="fill:${on?'#7a5c12':'#ece2c8'};stroke:#12100b"/>`+(on?`<text x="${x+ww/2}" y="60" text-anchor="middle" font-size="11" font-weight="700" ${KFONT} style="fill:#fffaf0">${on}</text>`:'')+(on&&pc===r?`<circle cx="${x+ww/2}" cy="45" r="3.2" style="fill:#fffaf0"/>`:'')});
+ const bx={1:1,3:2,6:4,8:5,10:6};B.forEach(pc=>{const on=by[pc],x=1+bx[pc]*ww-7;s+=`<rect class="${on?'k-on':'k-off'}" x="${x}" y="1" width="14" height="40" rx="2" style="fill:${on?'#f0d48a':'#12100b'};stroke:#12100b;stroke-width:${on?1.5:1}"/>`+(on?`<text x="${x+7}" y="35" text-anchor="middle" font-size="8.5" font-weight="700" ${KFONT} style="fill:#12100b">${on}</text>`:'')+(on&&pc===r?`<circle cx="${x+7}" cy="16" r="2.8" style="fill:#12100b"/>`:'')});return s+'</svg>'}
+/* one bar of the band's drum part, by strum cell. playSeq plays exactly this, and drumGrid draws it. */
+function drumPat(p){const cs=cells(p),bd=[],sn=[],rim=[];for(let k=0;k<p.b;k++){const i=k*p.s;if(k===0||(p.m===4&&k===2))bd.push(i);if((p.m===4&&(k===1||k===3))||(p.m===6&&k===1))sn.push(i);if(p.m===3&&k>0)rim.push(i)}
+ return {n:cs.length,lab:cs.map((_,i)=>p.s===2?(i%2?'&':String(i/2+1)):String(i+1)),hh:cs.map((_,i)=>i),bd,sn,rim}}
+function drumGrid(s){const p=bandPat(s),d=drumPat(p),fin=p!==PAT[s.pat],mt=p.m===6?'6/8':p.m+'/4';
+ const rows=[['Hi-hat (closed)',d.hh]].concat(d.sn.length?[['Snare',d.sn]]:[],d.rim.length?[['Rim click',d.rim]]:[],[['Kick',d.bd]]);
+ return `<div class="dgw"><table class="dg" aria-label="Drum groove, one bar of ${mt}: ${esc(p.n)}"><tr><th>Count</th>${d.lab.map(l=>`<th>${l}</th>`).join('')}</tr>${rows.map(([n,hits])=>`<tr><th style="text-align:left;white-space:nowrap">${n}</th>${d.lab.map((_,i)=>`<td>${hits.includes(i)?'●':''}</td>`).join('')}</tr>`).join('')}</table></div><p class="note">One bar of ${mt}, read left to right. A dot means play. This is the part the band's drummer plays${fin?' in the '+FIN.find(f=>f.k===S.finish).n+' feel':''}: ${esc(p.n.toLowerCase())}. ${p.sw?'Swing the hi-hat quavers. ':''}${d.rim.length?'Rim click: lay the stick across the snare and tap the rim. ':''}Play a one-bar fill into each new section; end with a crash on the home chord.</p>`}
+const bassHow=p=>p.m===3?'In 3/4, start with one root on beat 1 of each bar and let it ring. Then add the fifth on beat 3.':p.m===6?'In 6/8, count 1 2 3 4 5 6. Start with roots on 1, then on 1 and 4, then root on 1 and fifth on 4.':'Start with roots on beat 1, then beats 1 and 3, then root and fifth.';
+const invName=sp=>{if(sp.length<3)return '';const lo=sp.slice().sort((a,b)=>pcN(a)-pcN(b)),i=sp.indexOf(lo[0]);return 'Low to high: '+lo.join(' ')+' · '+['root position','1st inversion','2nd inversion','3rd inversion'][i]};
+function partPanel(s,cp){cp=cp||0;const I=S.inst,uniq=[...new Set(s.ch)],K=keyAt(s,cp),p=PAT[s.pat],fcol=c=>{const [,fn]=fnOf(s.key,c);return fn?`var(${FN[fn][1]})`:'var(--ink)'};
+ const cn=cp?`<p class="note capo-note">Capo ${cp}: the chart shows the guitar's shapes. Your part is written where it sounds, in ${K.to} ${K.md}.</p>`:'';
+ if(I==='bass')return cn+`<div class="boxes" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">${uniq.map(c=>{const sp=spellAt(c,K),b=bassPos(pcN(sp[0])),fi=sp[2]||sp[1];return `<div class="card bcard"><div class="bname" style="font-size:20px;font-weight:600;color:${fcol(c)}">${esc(nameAt(c,K))}</div>${cp?`<div class="note">Chart shows ${esc(c.replace('#','♯'))}</div>`:''}<div>Root ${sp[0]}: ${b.r[0]} string, ${b.r[1]?'fret '+b.r[1]:'open'}</div><div class="note">Fifth ${fi}: ${b.f[0]} string, fret ${b.f[1]}</div>${b.alt?`<div class="note">Or play the open D string, with the fifth (${fi}) on the G string, fret 2.</div>`:''}</div>`}).join('')}</div><p class="note">Bass notes come from the chord's root. ${bassHow(p)}</p>`;
  if(I==='drums')return drumGrid(s);
- if(I==='keys')return `<div class="boxes" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">${uniq.map(c=>{const [,fn]=fnOf(s.key,c),col=fn?`var(${FN[fn][1]})`:'var(--ink)';return `<button class="cb" data-strum="${esc(c)}" aria-label="Play ${esc(c.replace('#','♯'))}"><div style="font-size:18px;font-weight:600;color:${col}">${esc(c.replace('#','♯'))}</div>${kbd(c)}<div class="note">${spell(c).join(' ')} · root dot</div></button>`}).join('')}</div><p class="note">Right hand: the highlighted keys. Left hand: the root, an octave lower.</p>`;
- if(I==='vocals'){const [pc,md]=TON[s.key];return `<div class="card"><h3>Cue sheet</h3><p>Home note (${md==='minor'?'la':'do'}): ${PCN[md][(pc+(S.capo[s.id]||0))%12]}. Sounds in ${sounds(s)}.</p>${s.song.pick?`<p>${s.song.pick}</p>`:'<p>Come in after the count-in.</p>'}<ol>${(FORM[s.id]||s.song.form||s.song.map.map(m=>[m.s,1])).map(([n,r])=>{const sec=s.song.map.find(m=>m.s===n);return `<li>${esc(n)}${r>1?' ×'+r:''}: ${sec?sec.b.length:'?'} bars</li>`}).join('')}<li>Outro: hold the last note with the home chord</li></ol><p class="note">Lyrics aren't reproduced here: learn them from the recording.</p></div>`}
+ if(I==='keys')return cn+`<div class="boxes" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">${uniq.map(c=>{const sp=spellAt(c,K),nm=nameAt(c,K);return `<button class="cb" data-strum="${esc(c)}" aria-label="Play ${esc(nm)}: ${sp.join(' ')}"><div class="kname" style="font-size:16px;font-weight:600;color:${fcol(c)}">${esc(nm)} — ${sp.join(' ')}</div>${kbd(c,K)}<div class="note">${invName(sp)}${c.includes('maj7')?'<br>Right hand can leave the root to the left hand':''}</div></button>`}).join('')}</div><p class="note">Right hand: the lit keys, each with its note name; the dot marks the root. Left hand: the root, an octave lower. The same notes in any order are the same chord, so use the inversion nearest your hand.</p>`;
+ if(I==='vocals'){const md=K.md,sf=c=>(SOLFA[s.key]||{})[c]||'?',seen=[],rl=[];uniq.forEach(c=>{const r=spellAt(c,K)[0];if(!seen.includes(r)){seen.push(r);rl.push(sf(c)+' = '+r)}});
+  const entry=s.song.pick||(s.song.pd?'Come in after the count-in.':'Listen for the entry: the recording shows where the voice comes in.');
+  return `<div class="card"><h3>Cue sheet</h3><p>Home note (${md==='minor'?'la':'do'}): ${K.to}. Sounds in ${K.to} ${md}.</p><p class="solfa"><b style="font-weight:500">Roots in sol-fa:</b> ${rl.join(' · ')}</p>${s.song.map.map(m=>`<p class="note solfa-sec" style="margin:2px 0">${esc(m.s)}: ${m.b.map(b=>b.split(' ').map(sf).join(' ')).join(' | ')}</p>`).join('')}<p class="note">${md==='minor'?'Minor key, so home is la. ':''}One bar between each line. Sing each chord's root on its sol-fa name while the band plays.${cp?' The capo moves the pitch, not the sol-fa names.':''}</p><p>${entry}</p><ol>${(FORM[s.id]||s.song.form||s.song.map.map(m=>[m.s,1])).map(([n,r])=>{const sec=s.song.map.find(m=>m.s===n);return `<li>${esc(n)}${r>1?' ×'+r:''}: ${sec?sec.b.length:'?'} bars</li>`}).join('')}<li>Outro: hold the last note with the home chord</li></ol><p class="note">Lyrics aren't reproduced here: learn them from the recording.</p></div>`}
  return ''}
 /* road map chart */
 function roadmap(s){const sg=s.song,p=PAT[s.pat],beats=p.m===4?4:p.m===3?3:2,narrow=window.innerWidth<700,bpl=narrow?4:8,W=narrow?340:1000,x0=44,bw=(W-x0-12)/bpl,LH=84;
@@ -370,7 +390,7 @@ function pcsOf(n){const c=CH[n];const st=new Set();[...c.f].forEach((v,i)=>{if(v
 function rootOf(n){const c=CH[n];const i=[...c.f].findIndex(v=>v!=='x');return (OPEN[i]+(+c.f[i]))%12}
 function synth(m,t,d,type,gain,dest,lp){const a=A();const o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.value=440*2**((m-69)/12);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(gain,t+.02);g.gain.setValueAtTime(gain,t+Math.max(.03,d-.08));g.gain.linearRampToValueAtTime(0,t+d);
  if(lp){const f=a.createBiquadFilter();f.type='lowpass';f.frequency.value=lp;o.connect(f).connect(g)}else o.connect(g);g.connect(dest);o.start(t);o.stop(t+d+.02);track(o)}
-function bass(n,t,d,dest){if(!CH[n])return;dest=dest||part('bass');const m=28+((rootOf(n)-4+12)%12)+capo();synth(m,t,d*.9,'triangle',.3,dest);synth(m+12,t,d*.9,'sawtooth',.06,dest,900)}
+function bass(n,t,d,dest){if(!CH[n])return;dest=dest||part('bass');const m=28+((rootOf(n)+capo()-4+12)%12);synth(m,t,d*.9,'triangle',.3,dest);synth(m+12,t,d*.9,'sawtooth',.06,dest,900)}
 function keys(n,t,d,dest){if(!CH[n])return;const r=rootOf(n);pcsOf(n).filter(pc=>!(n.includes('maj7')&&pc===r)).forEach(pc=>synth(55+((pc-7+12)%12)+capo(),t,d*.95,'sine',.045,dest||part('keys')))}
 const PARTS=[['guitar','Guitar'],['bass','Bass'],['drums','Drums'],['keys','Keys']];
 /* path */
@@ -389,7 +409,7 @@ function renderStage(){const s=stage(),sg=s.song,steps=STEPS(s);const link=sg.q?
  const gate=passed(s)?`<div class="gate"><b>Gate passed${S.gates[gk(s)]?' on '+audDate(S.gates[gk(s)]):''}.</b> Every step is at Consistent or better. Take steps to Applied, or move on.</div>`:'';
  $('stage').innerHTML=`<div class="title"><div class="note">Stage ${ST.indexOf(s)+1} of ${ST.length} · ${KEYS[s.key].name} · ${INST.find(x=>x[0]===S.inst)[1]} · ${done(s)} of 5 steps done</div><h2>${esc(s.title)}</h2></div>${gate}
  <div class="row" role="group" aria-label="Your instrument"><span class="note">Your instrument:</span>${INST.map(([k,n])=>`<button data-inst="${k}" aria-pressed="${S.inst===k}">${n}</button>`).join('')}</div>
- ${S.inst==='guitar'?`<div class="boxes">${s.ch.map(c=>box(c,s.key)).join('')}</div><p class="note">Tap a chord box to hear it. Sing the root in sol-fa as you strum.${s.tip?' '+s.tip:''}</p>`:partPanel(s)}
+ ${S.inst==='guitar'?`<div class="boxes">${s.ch.map(c=>box(c,s.key)).join('')}</div><p class="note">Tap a chord box to hear it. Sing the root in sol-fa as you strum.${s.tip?' '+s.tip:''}</p>`:partPanel(s,capoOf(s))}
  <div class="card"><div class="row"><div><div class="pd" style="font-size:30px">${esc(sg.t)}</div><div class="meta">${esc(sg.by)} · ${sg.time}${sg.pd?' · public domain':''}</div></div><div class="sp"></div>${link}</div>
  ${map}${sg.riff?`<p class="note">${sg.riff.title}</p><div class="tab">${esc(mkTab(sg.riff.ev))}</div>`:''}${sg.note?`<p class="note">${sg.note}</p>`:''}
  <div class="row"><button id="playMap">${playing==='map'?'Stop':'Play the chart'}</button><span class="note">Count-in, then the band plays the practice form at the metronome tempo (${unit(PAT[s.pat])}) and ends on the home chord.</span></div>
@@ -453,16 +473,17 @@ GIG.forEach(g=>{g.key='A';g.ch=['A','D','E'];g.pat=g.loop?'eighths':'shuffle';g.
 const gigS=()=>{const G=S.gig;if(!Array.isArray(G.songs))G.songs=['g-boogie','g-clock','g-johnny','g-bamba'];if(!Array.isArray(G.bands)||!G.bands.length)G.bands=[{name:'Band 1',m:{}}];if(!(G.block>=5&&G.block<=60))G.block=20;if(typeof G.rotate!=='boolean')G.rotate=true;if(!G.open)G.open=G.songs[0];return G};
 let gt=null,gtEnd=0;
 function runSheet(G){const songs=G.songs.map(id=>GIG.find(g=>g.id===id)).filter(Boolean),roles=INST.map(x=>x[0]);
- return songs.map((_,ph)=>({ph,rows:G.bands.map((b,bi)=>{const sg=songs[(bi+ph)%songs.length];const people=roles.map(r=>b.m[r]).filter(Boolean);const who=roles.map((r,ri)=>{const nm=G.rotate&&people.length?people[(ri+ph)%people.length]:b.m[r];return nm?[r,nm]:null}).filter(Boolean);return {b,sg,who}})}))}
+ return songs.map((_,ph)=>({ph,rows:G.bands.map((b,bi)=>{const sg=songs[(bi+ph)%songs.length];const filled=roles.filter(r=>(b.m[r]||'').trim());const who=filled.map((r,i)=>[r,b.m[G.rotate?filled[(i+ph)%filled.length]:r].trim()]);return {b,sg,who}})}))}
 function gigText(G){return 'Gig set: '+G.songs.map((id,i)=>(i+1)+'. '+GIG.find(g=>g.id===id).t).join(', ')+'\n\n'+runSheet(G).map(({ph,rows})=>`Phase ${ph+1} (${G.block} min)\n`+rows.map(({b,sg,who})=>`  ${b.name}: ${sg.t} · `+(who.map(([r,n])=>INST.find(x=>x[0]===r)[1]+': '+n).join(', ')||'roles not assigned')).join('\n')).join('\n\n')}
+function gigRunH(G){const rs=runSheet(G);return (rs.length?rs.map(({ph,rows})=>`<h3 style="margin:12px 0 4px">Phase ${ph+1} · ${G.block} min</h3><table>${rows.map(({b,sg,who})=>`<tr><td>${esc(b.name)}</td><td><button class="lk" data-gopen="${sg.id}" style="min-height:44px;border:0;background:none;text-decoration:underline">${esc(sg.t)}</button></td><td>${who.map(([r,n])=>INST.find(x=>x[0]===r)[1]+': '+esc(n)).join(', ')||'<span class="note">roles not assigned</span>'}</td></tr>`).join('')}</table>`).join(''):'<p class="note">Choose at least one song to build the run sheet.</p>')+`<div class="row" style="margin-top:10px"><button id="copyGig">Copy the gig list</button></div><textarea id="gigTxt" class="hide" rows="8" style="width:100%">${esc(gigText(G))}</textarea>`}
+function renderRun(){const el=$('gigRun');if(el)el.innerHTML=gigRunH(gigS())}
 function renderGig(){const G=gigS();save();const g=GIG.find(x=>x.id===G.open)||GIG[0];
  $('v-gig').innerHTML=`<div class="two"><div class="stk"><h2 style="font-size:40px">Gig</h2><p class="note">Plan a rock and roll gig for a class or one band. Choose four of the six songs, set up the bands, then run it with the run sheet and timers.</p>
  <div class="card"><h3>1. Choose four songs</h3>${GIG.map(x=>`<label class="chk"><input type="checkbox" data-gsong="${x.id}" ${G.songs.includes(x.id)?'checked':''}><span><b style="font-weight:500">${esc(x.t)}</b> <span class="note">${esc(x.by)}</span></span></label>`).join('')}<p class="note">${G.songs.length} of 4 chosen. Order: ${G.songs.map((id,i)=>`<button data-gup="${id}" aria-label="Move ${esc(GIG.find(x=>x.id===id).t)} earlier">${i+1}. ${esc(GIG.find(x=>x.id===id).t)}</button>`).join(' ')}</p></div>
  <div class="card"><h3>2. Bands and roles</h3>${G.bands.map((b,bi)=>`<div style="margin-bottom:12px"><input data-bname="${bi}" value="${esc(b.name)}" aria-label="Band ${bi+1} name"><div class="list" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:6px">${INST.map(([r,n])=>`<label>${n}<br><input data-bm="${bi}:${r}" value="${esc(b.m[r]||'')}" placeholder="Name" style="width:100%"></label>`).join('')}</div></div>`).join('')}
  <div class="row"><button id="addBand">Add a band</button>${G.bands.length>1?'<button id="delBand">Remove the last band</button>':''}<label class="row"><input type="checkbox" id="rot" ${G.rotate?'checked':''} style="width:24px;height:24px;min-height:0"> Rotate instruments each phase</label><label>Block <input id="blk" type="number" min="5" max="60" value="${G.block}" style="width:80px"> min</label></div><p class="note">One band and one student works too: leave the other roles empty.</p></div></div>
  <div class="stk"><div class="card"><h3>Timer</h3><div class="gt" id="gtime" role="timer" aria-live="off">${gt?'':'0:00'}</div><div class="row">${[5,10,15,20].map(m=>`<button data-gtime="${m}">${m} min</button>`).join('')}<button id="gstop">Stop</button><button id="present" aria-pressed="${document.body.classList.contains('present')}">Present</button></div><p class="note">Typical block: 10 minutes to set up, the rehearsal, then pack up.</p></div>
- <div class="card"><h3>3. Run sheet</h3>${runSheet(G).map(({ph,rows})=>`<h3 style="margin:12px 0 4px">Phase ${ph+1} · ${G.block} min</h3><table>${rows.map(({b,sg,who})=>`<tr><td>${esc(b.name)}</td><td><button class="lk" data-gopen="${sg.id}" style="min-height:44px;border:0;background:none;text-decoration:underline">${esc(sg.t)}</button></td><td>${who.map(([r,n])=>INST.find(x=>x[0]===r)[1]+': '+esc(n)).join(', ')||'<span class="note">roles not assigned</span>'}</td></tr>`).join('')}</table>`).join('')}
- <div class="row" style="margin-top:10px"><button id="copyGig">Copy the gig list</button></div><textarea id="gigTxt" class="hide" rows="8" style="width:100%">${esc(gigText(G))}</textarea></div></div></div>
+ <div class="card"><h3>3. Run sheet</h3><div id="gigRun">${gigRunH(G)}</div></div></div></div>
  <div class="card" style="margin-top:16px"><div class="row"><div><div class="pd" style="font-size:30px">${esc(g.t)}</div><div class="meta">${esc(g.by)}${g.yr?' · '+g.yr:''}${g.pd?' · our own arrangement':''}</div></div><div class="sp"></div>${g.q?`<a class="lk" href="${yt(g.q)}" target="_blank" rel="noopener">Find the original recording</a>`:''}</div>
  <p>${esc(g.story)}</p>${roadmap(g)}<div class="row"><button id="playGig">${playing==='gig'?'Stop':'Play the chart'}</button><span class="note">The whole band plays; charted in A for the gig. Recordings vary in key and in bars 10 and 12: listen and adjust.</span></div></div>`}
 /* record */
@@ -483,7 +504,7 @@ function formBars(s){const sg=s.song,idx=[];let off=0;const start={};sg.map.forE
  (FORM[s.id]||sg.form||sg.map.map(m=>[m.s,1])).forEach(([n,r])=>{const m=sg.map.find(x=>x.s===n);if(!m)return;for(let k=0;k<r;k++)m.b.forEach((b,i)=>idx.push({c:b,i:start[n]+i}))});return idx}
 function bandPat(s){const sp=PAT[s.pat];if(!S.useFin)return sp;const fp=finPat(s);return fp&&fp.b===sp.b?Object.assign({},fp,{m:sp.m}):sp}
 async function playSeq(bars,kind,s){const a=A();if(!a)return;stopAll();if(metro)stopMetro();try{await a.resume()}catch(e){}s=s||stage();playing=kind;const p=bandPat(s),beat=60/S.bpm,cs=cells(p),n=cs.length,free=kind==='loop';
- const P=k=>free?out():part(k);let t=a.currentTime+.15;
+ const P=k=>free?out():part(k),dp=drumPat(p);let t=a.currentTime+.15;
  if(p.m===4){[0,2].forEach(k=>click(t+k*beat,k===0));t+=4*beat;for(let k=0;k<4;k++)click(t+k*beat,k===0);t+=4*beat}
  else if(p.m===3){for(let k=0;k<3;k++)click(t+k*beat,k===0);t+=3*beat}
  else{for(let k=0;k<6;k++)click(t+k*beat/3,k%3===0);t+=2*beat}
@@ -493,8 +514,8 @@ async function playSeq(bars,kind,s){const a=A();if(!a)return;stopAll();if(metro)
   cs.forEach((c,ci)=>{const ch=parts[Math.floor(ci*parts.length/n)];if(c!=='.')strum(ch,ct[ci],/^[0-9]/.test(c)?'D':c,P('guitar'))});
   parts.forEach((ch,j)=>keys(ch,ct[Math.floor(j*n/parts.length)],bd/parts.length,P('keys')));
   for(let k=0;k<p.b;k++){const bt=ct[k*p.s];const ch=parts[Math.floor(k*parts.length/p.b)];if(bb.includes(k))bass(ch,bt,Math.min(bl,bd/parts.length),P('bass'));
-   if(k===0||(p.m===4&&k===2))drum('k',bt,P('drums'));if((p.m===4&&(k===1||k===3))||(p.m===6&&k===1))drum('s',bt,P('drums'));if(p.m===3&&k>0)drum('r',bt,P('drums'))}
-  ct.forEach(x=>drum('h',x,P('drums')));
+   }
+  dp.bd.forEach(i=>drum('k',ct[i],P('drums')));dp.sn.forEach(i=>drum('s',ct[i],P('drums')));dp.rim.forEach(i=>drum('r',ct[i],P('drums')));dp.hh.forEach(i=>drum('h',ct[i],P('drums')));
   if(gi!==undefined&&kind!=='loop')hl(`#v-${view} .rm-bar[data-i="${gi}"]`,t0)}
  function finish(){const hc=kind==='loop'?bars[0].c.split(' ')[0]:home(s),L=beat*p.b*(kind==='loop'?1:2);strum(hc,t,'D',P('guitar'));keys(hc,t,L,P('keys'));bass(hc,t,L,P('bass'));drum('k',t,P('drums'));if(kind!=='loop')hl(`#v-${view} .fs-outro`,t);t+=L;seqT.push(setTimeout(()=>stopAll(),(t-a.currentTime)*1000+400))}
  const tick=()=>{while(!ended&&t<a.currentTime+.8){if(idx<bars.length)bar(bars[idx++]);else{ended=true;finish()}}};tick();const iv=setInterval(tick,120);seqT.push(iv);
@@ -541,15 +562,17 @@ document.addEventListener('click',e=>{if(e.target.closest('#tabs a')||e.target.c
  else if(t.dataset.capo){if(playing)stopAll();const s=stage();S.capo[s.id]=Math.max(0,Math.min(7,capo()+(+t.dataset.capo)));if(!S.capo[s.id])delete S.capo[s.id];save();renderStage();refocus(`[data-capo="${t.dataset.capo}"]`);toast((capo()?'Capo '+capo():'No capo')+': sounds in '+sounds(s)+'.')}
  else if(t.id==='timer'){if(tmr){clearInterval(tmr);tmr=null;timerLeft=0;t.textContent='Start 60 s';toast('Timer cancelled');return}A();timerLeft=60;t.textContent='60 s';const end=Date.now()+60000;tmr=setInterval(()=>{timerLeft=Math.max(0,Math.ceil((end-Date.now())/1000));const b=$('timer');if(b)b.textContent=timerLeft?timerLeft+' s':'Start 60 s';if(!timerLeft){clearInterval(tmr);tmr=null;const a=A();if(a){click(a.currentTime,1);click(a.currentTime+.15,1)}toast('Time. Count your changes and log them.');if($('cnt'))$('cnt').focus()}},250)}
  else if(t.id==='logChg'){const v=parseInt($('cnt').value,10);if(!(v>=0&&v<=200)){toast('Enter the number of changes, 0 to 200');return}const s=stage();S.changes.push({d:Date.now(),st:s.id,pair:s.pair.join('-'),n:v});save();renderSide();refocus('#logChg');toast('Logged '+v+' changes'+(v>=CPM(s)[1]?': Applied target met':v>=CPM(s)[0]?': Consistent target met':''))}});
-document.addEventListener('input',e=>{if(e.target.classList.contains('m-bpm')){S.bpm=+e.target.value;save();mUI();tempoStop()}});
+document.addEventListener('input',e=>{const t=e.target,d=t.dataset;if(t.classList.contains('m-bpm')){S.bpm=+t.value;save();mUI();tempoStop()}
+ else if(d.bname!==undefined){const b=gigS().bands[+d.bname];if(b){b.name=t.value.slice(0,40)||'Band '+(+d.bname+1);save();renderRun()}}
+ else if(d.bm){const [bi,r]=d.bm.split(':'),b=gigS().bands[+bi];if(b){const v=t.value.slice(0,40);if(v.trim())b.m[r]=v;else delete b.m[r];save();renderRun()}}});
 function tempoStop(){if(playing){stopAll();toast('Tempo changed: press Play again to hear the band at '+S.bpm+' bpm.');return true}return false}
 function mUI(){const p=curPat();document.querySelectorAll('.m-out').forEach(o=>o.textContent=S.bpm);document.querySelectorAll('.m-bpm').forEach(o=>{if(+o.value!==S.bpm)o.value=S.bpm});document.querySelectorAll('.m-toggle').forEach(b=>b.setAttribute('aria-pressed',!!metro));document.querySelectorAll('.m-name').forEach(n=>n.textContent=p.n);document.querySelectorAll('.m-unit').forEach(n=>n.textContent=unit(p))}
 document.addEventListener('change',e=>{const d=e.target.dataset;
  if(d.gsong){const G=gigS(),id=d.gsong;if(e.target.checked){if(G.songs.length>=4){e.target.checked=false;toast('Four songs per gig: untick one first.');return}G.songs.push(id)}else G.songs=G.songs.filter(x=>x!==id);save();renderGig();refocus(`[data-gsong="${id}"]`);return}
- if(d.bname!==undefined){gigS().bands[+d.bname].name=e.target.value.trim()||'Band '+(+d.bname+1);save();renderGig();return}
- if(d.bm){const [bi,r]=d.bm.split(':');const G=gigS();G.bands[+bi].m[r]=e.target.value.trim().slice(0,40);save();renderGig();refocus(`[data-bm="${d.bm}"]`);return}
- if(e.target.id==='rot'){gigS().rotate=e.target.checked;save();renderGig();refocus('#rot');return}
- if(e.target.id==='blk'){const v=parseInt(e.target.value,10);gigS().block=v>=5&&v<=60?v:20;save();renderGig();return}
+ if(d.bname!==undefined){const b=gigS().bands[+d.bname];if(b){b.name=e.target.value.trim().slice(0,40)||'Band '+(+d.bname+1);e.target.value=b.name;save();renderRun()}return}
+ if(d.bm){const [bi,r]=d.bm.split(':'),b=gigS().bands[+bi];if(b){const v=e.target.value.trim().slice(0,40);if(v)b.m[r]=v;else delete b.m[r];e.target.value=v;save();renderRun()}return}
+ if(e.target.id==='rot'){gigS().rotate=e.target.checked;save();renderRun();return}
+ if(e.target.id==='blk'){const v=parseInt(e.target.value,10),G=gigS();G.block=v>=5&&v<=60?v:20;e.target.value=G.block;save();renderRun();return}
  if(d.mark!==undefined){if(e.target.value==='')delete S.marks[d.mark];else S.marks[d.mark]=+e.target.value;save();grade()}
  else if(d.warm){const t=today(),cur=S.warm[t]||[];S.warm[t]=e.target.checked?[...new Set(cur.concat(d.warm))]:cur.filter(x=>x!==d.warm);save();renderWarm();if((S.warm[t]||[]).length===5)toast('Warm-up done. Off to your Path.');refocus(`[data-warm="${d.warm}"]`)}
  else if(d.best){const v=parseInt(e.target.value,10);if(v>=30&&v<=300){S.best[d.best]=v;save();toast('Best tempo saved: '+v+' bpm')}else{e.target.value=S.best[d.best]||'';toast('Enter a tempo from 30 to 300')}}});
