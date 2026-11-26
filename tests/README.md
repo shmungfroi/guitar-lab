@@ -1,4 +1,4 @@
-# Tests for The Shredder (index.html)
+# Tests for The Guitar Lab (index.html)
 
 Three pytest suites. They read `index.html` and never edit it.
 
