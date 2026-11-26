@@ -1,0 +1,155 @@
+{
+ "0.7 app label": "version 0.7 · a Shmungfroi instrument",
+ "0.7 backup": {
+  "file": "guitar-lab-backup-2026-11-27.json",
+  "version": "0.7",
+  "format": 1,
+  "keys": [
+   "best",
+   "bpm",
+   "capo",
+   "changes",
+   "finish",
+   "gates",
+   "gig",
+   "inst",
+   "journal",
+   "lv",
+   "marks",
+   "mute",
+   "nsw",
+   "sign",
+   "stage",
+   "teacher",
+   "useFin",
+   "warm"
+  ]
+ },
+ "normal page": {
+  "title": "The Guitar Lab 0.8",
+  "header": "version 0.8 · a Shmungfroi instrument",
+  "0.7 strings visible": false,
+  "import 0.7 file (pasted): ask": "Replace your progress with this backup?\n\nBackup made 27 Nov 2026: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Everything saved in this browser now (0 levels set, 0 journal entries, 0 one-minute logs, 0 warm-up days) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel",
+  "import 0.7 file (pasted): msg": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Your progress has been replaced and saved in this browser.",
+  "keys in localStorage": [
+   "shredder"
+  ],
+  "0.7 file: state fields that differ after import": [],
+  "import 0.7 file (chooser): msg": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Your progress has been replaced and saved in this browser.",
+  "0.7 file via chooser: differ": [],
+  "import bare state: ask": "Replace your progress with this backup?\n\nThis backup has 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Everything saved in this browser now (0 levels set, 0 journal entries, 0 one-minute logs, 0 warm-up days) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel",
+  "import bare state: msg": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Your progress has been replaced and saved in this browser.",
+  "bare state: differ": [],
+  "after reload still there": true,
+  "bad import msg": "That isn't a Guitar Lab backup: the text can't be read as JSON, so part of it may be missing or changed. Copy the whole backup, from the first { to the last }, and try again. Nothing has been changed.",
+  "newer-format msg": "That backup was made by a newer version of The Guitar Lab than this one (0.8), so it can't be read here. Nothing has been changed.",
+  "download msg": "Backup prepared as guitar-lab-backup-2026-11-27.json. If no file appeared in your downloads, this page isn't allowed to download here: use Copy backup instead.",
+  "0.8 backup": {
+   "file": "guitar-lab-backup-2026-11-27.json",
+   "app": "The Guitar Lab",
+   "format": 1,
+   "version": "0.8",
+   "state==0.7 state": true
+  },
+  "copy msg (clipboard allowed)": "Backup copied. Paste it into a note or an email to yourself and keep it safe.",
+  "clipboard == backup": true,
+  "fallback box hidden when clipboard works": true,
+  "console": [],
+  "dialogs": [],
+  "requests off-host": [],
+  "requests": [
+   "/fonts/Outfit-Bold.ttf",
+   "/fonts/Outfit-Regular.ttf",
+   "/fonts/PoiretOne-Regular.ttf",
+   "/index.html"
+  ]
+ },
+ "top-level, writeText rejects": {
+  "msg": "Backup copied. It is also shown in the box above. Paste it into a note or an email to yourself and keep it safe.",
+  "fallback visible": true,
+  "console": []
+ },
+ "sandbox=allow-scripts": {
+  "storage": "blocked: SecurityError",
+  "clipboard-write allowed by policy": false,
+  "origin": "http://127.0.0.1:55973 / null",
+  "console after load": [],
+  "import ask": "Replace your progress with this backup?\n\nBackup made 27 Nov 2026: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Everything saved in this browser now (0 levels set, 0 journal entries, 0 one-minute logs, 0 warm-up days) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel",
+  "import msg": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. It is loaded for this visit only: this page isn't allowed to store anything here, so it will be gone when the page closes. Keep your backup file, and use Download backup or Copy backup before you leave to keep anything new.",
+  "imported state on Path": "Bass / C, G and the small F",
+  "console after import": [],
+  "download msg": "Backup prepared as guitar-lab-backup-2026-11-27.json. If no file appeared in your downloads, this page isn't allowed to download here: use Copy backup instead.",
+  "download events": [],
+  "console after download": [],
+  "copy msg": "Backup copied. It is also shown in the box above. Paste it into a note or an email to yourself and keep it safe.",
+  "fallback visible": true,
+  "fallback text is the backup": "0.8 / The Guitar Lab",
+  "fallback selected": true,
+  "console after copy": [],
+  "dialogs": [],
+  "clipboard really holds the backup": true,
+  "console after 2nd copy": [],
+  "control: direct writeText logs": [
+   [
+    "error",
+    "Permissions policy violation: The Clipboard API has been blocked because of a permissions policy applied to the current document. See https://crbug.com/414348233 for more details."
+   ]
+  ]
+ },
+ "sandbox=allow-scripts allow-downloads": {
+  "storage": "blocked: SecurityError",
+  "clipboard-write allowed by policy": false,
+  "origin": "http://127.0.0.1:55973 / null",
+  "console after load": [],
+  "import ask": "Replace your progress with this backup?\n\nBackup made 27 Nov 2026: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Everything saved in this browser now (0 levels set, 0 journal entries, 0 one-minute logs, 0 warm-up days) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel",
+  "import msg": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. It is loaded for this visit only: this page isn't allowed to store anything here, so it will be gone when the page closes. Keep your backup file, and use Download backup or Copy backup before you leave to keep anything new.",
+  "imported state on Path": "Bass / C, G and the small F",
+  "console after import": [],
+  "download msg": "Backup prepared as guitar-lab-backup-2026-11-27.json. If no file appeared in your downloads, this page isn't allowed to download here: use Copy backup instead.",
+  "download events": [
+   "guitar-lab-backup-2026-11-27.json"
+  ],
+  "console after download": [],
+  "copy msg": "Backup copied. It is also shown in the box above. Paste it into a note or an email to yourself and keep it safe.",
+  "fallback visible": true,
+  "fallback text is the backup": "0.8 / The Guitar Lab",
+  "fallback selected": true,
+  "console after copy": [],
+  "dialogs": [],
+  "clipboard really holds the backup": true,
+  "console after 2nd copy": [],
+  "control: direct writeText logs": [
+   [
+    "error",
+    "Permissions policy violation: The Clipboard API has been blocked because of a permissions policy applied to the current document. See https://crbug.com/414348233 for more details."
+   ]
+  ]
+ },
+ "sandbox=allow-scripts allow-same-origin": {
+  "storage": "available",
+  "clipboard-write allowed by policy": true,
+  "origin": "http://127.0.0.1:55973 / http://127.0.0.1:55973",
+  "console after load": [
+   [
+    "warning",
+    "An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing."
+   ]
+  ],
+  "import ask": "Replace your progress with this backup?\n\nBackup made 27 Nov 2026: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Everything saved in this browser now (0 levels set, 0 journal entries, 0 one-minute logs, 0 warm-up days) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel",
+  "import msg": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Your progress has been replaced and saved in this browser.",
+  "imported state on Path": "Bass / C, G and the small F",
+  "console after import": [],
+  "download msg": "Backup prepared as guitar-lab-backup-2026-11-27.json. If no file appeared in your downloads, this page isn't allowed to download here: use Copy backup instead.",
+  "download events": [],
+  "console after download": [],
+  "copy msg": "Backup copied. It is also shown in the box above. Paste it into a note or an email to yourself and keep it safe.",
+  "fallback visible": true,
+  "fallback text is the backup": "0.8 / The Guitar Lab",
+  "fallback selected": true,
+  "console after copy": [],
+  "dialogs": [],
+  "clipboard really holds the backup": true,
+  "console after 2nd copy": [],
+  "control: direct writeText logs": []
+ }
+}

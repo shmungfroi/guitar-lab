@@ -802,7 +802,7 @@ def test_R1_export_import_round_trip_is_lossless(app):
     txt = copy_backup(a)
     assert "copied" in text(a, "#bkMsg").lower()
     out = json.loads(txt)
-    assert out["app"] == "The Guitar Lab" and out["version"] == "0.7" and out["format"] == 1 and out["saved"]
+    assert out["app"] == "The Guitar Lab" and out["version"] == "0.8" and out["format"] == 1 and out["saved"]
     assert out["state"] == RICH, "export must carry the full saved state unchanged"
     with a.expect_download() as dl:
         a.click("#bkDown")
@@ -1007,10 +1007,10 @@ def test_R1_no_browser_popups_in_source():
     assert not re.search(r"<script[^>]+src=|<link[^>]+href=", src), "external script or stylesheet"
 
 
-def test_version_label_is_0_7(app):
+def test_version_label_is_0_8(app):
     pg = app(state={})
-    assert pg.title() == "The Guitar Lab 0.7"
-    assert "version 0.7" in text(pg, "header .sub")
+    assert pg.title() == "The Guitar Lab 0.8"
+    assert "version 0.8" in text(pg, "header .sub")
     assert "0.6" not in pg.evaluate("()=>document.body.innerText")
 
 
@@ -1365,9 +1365,9 @@ def test_R10_lit_black_key_contrast_in_light_mode(app, chord):
     dark = app(scheme="dark", state={"inst": "keys"})
     l, kl = lit_black(light, chord)
     d, kd = lit_black(dark, chord)
-    assert d["key"] == "rgb(240, 212, 138)", "dark mode keeps its light gold"
-    assert l["key"] != d["key"], "light mode should use a darker gold on lit black keys"
-    assert _lum([float(x) for x in re.findall(r"[\d.]+", l["key"])[:3]]) < _lum([float(x) for x in re.findall(r"[\d.]+", d["key"])[:3]])
+    # 0.8 (T1): the keyboard is drawn cream in both themes, so dark mode now uses the darker gold too.
+    assert l["key"] == d["key"], "the keyboard looks the same in both themes, so the lit black keys should too"
+    assert _lum([float(x) for x in re.findall(r"[\d.]+", l["key"])[:3]]) < _lum([240, 212, 138])
     assert l["key"] != kl["unlitWhite"]
     cw = contrast(l["key"], kl["unlitWhite"])
     assert cw >= 3, f"lit black key {l['key']} vs cream white key {kl['unlitWhite']}: contrast {cw:.2f} < 3"
@@ -1429,3 +1429,294 @@ def test_R11_b_minor_capo_4_explains_c_flat(app):
     assert pg.locator("#stage .spell-note").count() == 0, "no note in plain B minor"
     pg2 = app(state={"stage": "beyond", "capo": {"beyond": 4}}, hash_="beyond")
     assert pg2.locator("#stage .spell-note").count() == 0, "guitar shows shapes, so no spelling note"
+
+
+# ===================================================================== 0.8 register (SPEC_08): T1-T5
+
+def _rgb(c):
+    return [float(x) for x in re.findall(r"[\d.]+", c)[:3]]
+
+
+def _hue(c):
+    import colorsys
+    r, g, b = [v / 255 for v in _rgb(c)]
+    h, s_, v = colorsys.rgb_to_hsv(r, g, b)
+    return h * 360, s_
+
+
+def css_colour(pg, var):
+    return pg.evaluate("v=>{const e=document.createElement('i');e.style.color='var('+v+')';document.body.appendChild(e);const c=getComputedStyle(e).color;e.remove();return c}", var)
+
+
+# --------------------------------------------------------------------- T1
+
+@pytest.mark.parametrize("scheme", ["light", "dark"])
+@pytest.mark.parametrize("chord", ["A", "E"])
+def test_T1_lit_black_key_stands_out_in_both_themes(app, scheme, chord):
+    pg = app(scheme=scheme, state={"inst": "keys"})
+    lb, k = lit_black(pg, chord)
+    key = lb["key"]
+    assert k["unlitWhite"] == "rgb(236, 226, 200)", "white keys are cream in both themes"
+    cw = contrast(key, k["unlitWhite"])
+    assert cw >= 3, f"{scheme}: lit black key {key} vs white key {k['unlitWhite']}: {cw:.2f} < 3"
+    assert key != k["unlitBlack"] and contrast(key, k["unlitBlack"]) >= 3, "lit black key must stand out from the unlit black keys"
+    assert contrast(lb["fill"], key) >= 4.5, "note name on the lit black key"
+    dom, sub = css_colour(pg, "--dom"), css_colour(pg, "--sub")
+    assert dom == ("rgb(168, 53, 43)" if scheme == "light" else "rgb(208, 87, 75)"), "Q2: dominant colour must not change"
+    assert key not in (dom, sub), "lit black key must not be the dominant or subtonic colour"
+    h, sat = _hue(key)
+    assert 30 <= h <= 55 and sat >= 0.6, f"lit black key should read as gold, got hue {h:.0f} saturation {sat:.2f}"
+    assert abs(h - _hue(dom)[0]) >= 25, "too close to the dominant red"
+    assert sat - _hue(sub)[1] >= 0.4, "too close to the muted subtonic ivory-brown"
+
+
+def test_T1_lit_black_key_follows_a_forced_theme(app):
+    pg = app(scheme="light", state={"inst": "keys"})
+    pg.evaluate("()=>{document.documentElement.dataset.theme='dark'}")
+    lb, k = lit_black(pg, "A")
+    assert contrast(lb["key"], k["unlitWhite"]) >= 3
+
+
+# --------------------------------------------------------------------- T2
+
+DG_JS = r"""()=>{const w=document.querySelector('#v-gig .dgw'),t=w&&w.querySelector('table');if(!t||!t.getClientRects().length)return null;
+ const td=t.querySelector('td'),r=t.getBoundingClientRect();
+ return {sw:w.scrollWidth,cw:w.clientWidth,tw:r.width,th:r.height,fs:parseFloat(getComputedStyle(td).fontSize),cell:td.getBoundingClientRect().width,
+   heads:[...t.rows[0].cells].map(c=>c.textContent.trim()),rows:[...t.rows].slice(1).map(x=>x.cells[0].textContent.trim()),
+   lines:[...t.rows].map(x=>{const c=x.cells[0],r=document.createRange();r.selectNodeContents(c);return r.getClientRects().length})}}"""
+
+
+@pytest.mark.parametrize("width", [320, 360, 390, 480, 481, 500, 600, 601, 768, 1280])
+def test_T2_present_drum_grid_fits_without_sideways_scroll(app, width):
+    pg = app(width=width, state={"inst": "drums"}, hash_="gig")
+    before = pg.evaluate(DG_JS)
+    assert before, "no drum grid on the Gig tab"
+    pg.click("#present")
+    g = pg.evaluate(DG_JS)
+    assert g["sw"] <= g["cw"] + 1, f"{width}px Present: drum grid scrolls sideways in its card ({g['sw']} > {g['cw']})"
+    assert not pg.evaluate(OVERFLOW_JS), "page overflows"
+    assert g["heads"] == before["heads"] and g["rows"] == before["rows"] and "Kick" in g["rows"], "grid lost a column or row"
+    assert max(g["lines"]) <= 1, "row labels should stay on one line"
+    assert g["fs"] >= 12, f"grid text too small to read ({g['fs']}px)"
+    assert g["tw"] >= min(before["tw"], g["cw"]) - 1, "Present mode should only shrink the grid as far as it must to fit"
+    if width >= 768:
+        assert g["fs"] >= before["fs"] * 1.3 and g["tw"] >= before["tw"] * 1.3, "larger screens keep the enlarged look"
+    assert not pg.errors
+
+
+def test_T2_present_drum_grid_still_enlarged_at_1280(app):
+    pg = app(width=1280, state={"inst": "drums"}, hash_="gig")
+    before = pg.evaluate(DG_JS)
+    pg.click("#present")
+    g = pg.evaluate(DG_JS)
+    assert g["fs"] > before["fs"] * 1.5 and g["cell"] > before["cell"] * 1.3 and g["th"] > before["th"] * 1.3, (before, g)
+    pg.click("#present")
+    assert pg.evaluate(DG_JS)["fs"] == before["fs"], "leaving Present restores the normal grid"
+
+
+# --------------------------------------------------------------------- T4
+
+T4_STRUM = re.compile(r"\bdowns\b|down-up|strum|\bD down\b|\bU up\b", re.I)
+SIDE_JS = "()=>[...document.querySelectorAll('#side .card')].map(c=>[(c.querySelector('h3')||{textContent:''}).textContent.trim(),c.innerText])"
+
+
+def metro_card(pg):
+    return next(t for h, t in pg.evaluate(SIDE_JS) if h == "Metronome")
+
+
+def fn_card(pg):
+    return next(t for h, t in pg.evaluate(SIDE_JS) if h == "Function in this stage")
+
+
+@pytest.mark.parametrize("use_fin", [False, True])
+def test_T4_drums_never_see_strum_names(app, use_fin):
+    pg = app(state={"inst": "drums", "useFin": use_fin})
+    bad = []
+    for s in ST:
+        go(pg, s["id"])
+        bar, card = pg.inner_text(".mbar"), metro_card(pg)
+        for where, t in (("metronome bar", bar), ("metronome card", card)):
+            m = T4_STRUM.search(t)
+            if m:
+                bad.append(f"{s['id']} {where}: {m.group(0)!r}")
+        name = pg.inner_text(".mbar .m-name")
+        if not re.search(r"groove", name, re.I) or not re.search(r"hats", name) or not re.search(r"kick", name):
+            bad.append(f"{s['id']}: bar should name the groove, got {name!r}")
+        if name not in card:
+            bad.append(f"{s['id']}: card and bar disagree")
+        for n in {PAT[s["pat"]]["n"]}:
+            if n in bar or n in card:
+                bad.append(f"{s['id']}: still shows {n!r}")
+        cells = pg.evaluate("()=>[...document.querySelectorAll('#side .grid .cell')].map(c=>c.textContent.trim())")
+        if not cells or any(not re.fullmatch(r"\d+|&", c) for c in cells):
+            bad.append(f"{s['id']}: metronome cells should be counts, got {cells}")
+    go(pg, "gig")
+    if T4_STRUM.search(pg.inner_text(".mbar")) or "Groove" not in pg.inner_text(".mbar .m-name"):
+        bad.append("gig bar: " + pg.inner_text(".mbar .m-name"))
+    assert not bad, bad
+    assert not pg.errors
+
+
+def test_T4_drum_wording_matches_the_grid_and_follows_the_instrument(app):
+    pg = app(state={"inst": "guitar", "stage": "a-e"}, hash_="a-e")
+    assert pg.inner_text(".mbar .m-name") == PAT[ST[0]["pat"]]["n"], "guitar keeps its strum name"
+    assert "D down" in metro_card(pg)
+    pg.click('#stage [data-inst="drums"]')
+    pg.wait_for_function("()=>/Groove/.test(document.querySelector('.mbar .m-name').textContent)")
+    name = pg.inner_text(".mbar .m-name")
+    label = pg.get_attribute("#stage table.dg", "aria-label")
+    assert name.split(": ", 1)[1] in label, f"bar {name!r} should use the same words as the drum grid ({label!r})"
+    go(pg, "rudiments")
+    assert pg.inner_text(".mbar .m-name") == "Plain click"
+    go(pg, "a-e")
+    pg.click('#stage [data-inst="guitar"]')
+    assert pg.inner_text(".mbar .m-name") == PAT[ST[0]["pat"]]["n"]
+
+
+@pytest.mark.parametrize("inst", ["bass", "keys"])
+def test_T4_function_card_shows_sounding_names_with_a_capo(app, inst):
+    pg = app(state={"inst": inst, "stage": "a-e", "capo": {"a-e": 2}}, hash_="a-e")
+    card = fn_card(pg)
+    rows = pg.evaluate("()=>[...document.querySelectorAll('#side .fk > div')].map(d=>{const c=d.cloneNode(true);c.querySelectorAll('.note').forEach(n=>n.remove());return [c.textContent.trim(),(d.querySelector('.note')||{}).textContent||'']})")
+    main = " | ".join(r[0] for r in rows)
+    assert re.search(r"Tonic: B\b", main) and re.search(r"Dominant: F♯", main), f"{inst} capo 2 should read B and F♯, got {main!r}"
+    assert not re.search(r":\s*(A|E)\b", main), f"guitar shape names still lead the rows: {main!r}"
+    notes = [r[1] for r in rows]
+    assert notes == ["Chart shows A", "Chart shows E"], notes
+    assert "Chart shows" in card
+    pg.click('#stage [data-inst="guitar"]')
+    g = fn_card(pg)
+    assert re.search(r"Tonic: A\b", g) and re.search(r"Dominant: E\b", g) and "Chart shows" not in g, "guitar keeps its shapes: " + g
+
+
+@pytest.mark.parametrize("inst", ["bass", "keys", "guitar", "drums"])
+def test_T4_function_card_unchanged_without_a_capo(app, inst):
+    pg = app(state={"inst": inst, "stage": "a-e"}, hash_="a-e")
+    card = fn_card(pg)
+    assert re.search(r"Tonic: A\b", card) and re.search(r"Dominant: E\b", card) and "Chart shows" not in card, card
+
+
+# --------------------------------------------------------------------- T3, T5 (sandboxed frame)
+
+def sandbox(browser, tmp_path, hash_="record", sel="#backup"):
+    """The app inside <iframe sandbox="allow-scripts">: storage, clipboard and downloads are all blocked. Returns (ctx, page, frame, log)."""
+    host = tmp_path / "host.html"
+    host.write_text(f'<!doctype html><meta charset="utf-8"><iframe id="f" sandbox="allow-scripts" src="{URL}#{hash_}" style="width:1100px;height:1400px;border:0"></iframe>', encoding="utf-8")
+    ctx = browser.new_context(viewport={"width": 1200, "height": 1500})
+    pg = ctx.new_page()
+    log = []
+    pg.on("console", lambda m: log.append(m.type + ": " + m.text) if m.type in ("error", "warning") else None)
+    pg.on("pageerror", lambda e: log.append("pageerror: " + str(e)))
+    pg.goto(host.as_uri())
+    fr = pg.frames[1]
+    fr.wait_for_selector(sel)
+    assert fr.evaluate("()=>{try{localStorage.getItem('x');return 'open'}catch(e){return 'blocked'}}") == "blocked", "frame is not sandboxed"
+    return ctx, pg, fr, log
+
+
+MADE = re.compile(r"file (was |has been |is )?(made|saved|downloaded|created)|saved as|downloaded", re.I)
+
+
+def test_T3_sandbox_import_does_not_claim_it_was_saved(browser, tmp_path):
+    ctx, pg, fr, log = sandbox(browser, tmp_path)
+    fr.evaluate(POPUPS_JS)
+    fr.fill("#bkIn", json.dumps({"app": "The Guitar Lab", "format": 1, "version": "0.7", "state": RICH}))
+    fr.click("#bkImport")
+    fr.click("#bkYes")
+    msg = fr.inner_text("#bkMsg")
+    assert "Backup imported" in msg and "Your path: Keys" in fr.inner_text("#v-record"), "the import itself must still work"
+    assert "saved in this browser" not in msg, msg
+    assert re.search(r"this visit only", msg) and re.search(r"Keep your backup file", msg) and "Download backup" in msg, msg
+    assert fr.evaluate("()=>window.__pop") == []
+    ctx.close()
+
+
+def test_T3_sandbox_download_does_not_claim_a_file_was_made(browser, tmp_path):
+    ctx, pg, fr, log = sandbox(browser, tmp_path)
+    fr.click("#bkDown")
+    fr.wait_for_function("()=>document.getElementById('bkMsg').textContent.length>10")
+    msg = fr.inner_text("#bkMsg")
+    assert "Copy backup" in msg and re.search(r"If no file appeared", msg), msg
+    lead = msg.split("If no file appeared")[0]
+    assert not MADE.search(lead) and "Look in your downloads" not in lead, f"claims a file before the fallback hint: {lead!r}"
+    assert re.search(r"guitar-lab-backup-\d{4}-\d\d-\d\d\.json", msg), "still names the file to look for"
+    ctx.close()
+
+
+def test_T3_normal_page_messages_still_correct(app):
+    pg = app(state={}, hash_="record")
+    offer(pg, json.dumps({"app": "The Guitar Lab", "format": 1, "version": "0.7", "state": RICH}))
+    pg.click("#bkYes")
+    msg = text(pg, "#bkMsg")
+    assert "saved in this browser" in msg and "this visit only" not in msg, msg
+    assert state(pg) == RICH, "and it really was saved"
+    with pg.expect_download() as dl:
+        pg.click("#bkDown")
+    assert re.fullmatch(r"guitar-lab-backup-\d{4}-\d\d-\d\d\.json", dl.value.suggested_filename)
+    m2 = text(pg, "#bkMsg")
+    assert dl.value.suggested_filename in m2 and "Copy backup" in m2
+    assert not MADE.search(m2.split("If no file appeared")[0]), m2
+    assert json.loads(pathlib.Path(dl.value.path()).read_text(encoding="utf-8"))["version"] == "0.8"
+    assert not pg.errors
+
+
+def test_T3_storage_blocked_on_a_normal_page_is_also_honest(app):
+    pg = app(state={}, hash_="record")
+    pg.evaluate("()=>{Storage.prototype.setItem=function(){throw new DOMException('full','QuotaExceededError')}}")
+    offer(pg, json.dumps(RICH))
+    pg.click("#bkYes")
+    msg = text(pg, "#bkMsg")
+    assert "saved in this browser" not in msg and "this visit only" in msg, msg
+    assert not pg.errors
+
+
+def test_T5_sandbox_copy_is_quiet(browser, tmp_path):
+    ctx, pg, fr, log = sandbox(browser, tmp_path)
+    blocked = fr.evaluate("()=>{const p=document.permissionsPolicy||document.featurePolicy;return !!p&&!p.allowsFeature('clipboard-write')}")
+    assert blocked, "this frame should have the clipboard blocked by policy"
+    n = len(log)
+    fr.click("#bkCopy")
+    fr.wait_for_selector("#bkOut", state="visible")
+    assert json.loads(fr.input_value("#bkOut"))["app"] == "The Guitar Lab"
+    assert len(fr.inner_text("#bkMsg")) > 10
+    pg.wait_for_timeout(300)
+    assert log[n:] == [], f"Copy backup left console messages: {log[n:]}"
+    fr.click("#bkCopy")                       # a second press is just as quiet
+    pg.wait_for_timeout(200)
+    assert log[n:] == [], log[n:]
+    ctx.close()
+
+
+def test_T5_sandbox_gig_copy_is_quiet(browser, tmp_path):
+    ctx, pg, fr, log = sandbox(browser, tmp_path, hash_="gig", sel="#copyGig")
+    n = len(log)
+    fr.click("#copyGig")
+    fr.wait_for_selector("#gigTxt", state="visible")
+    pg.wait_for_timeout(300)
+    assert log[n:] == [], f"Copy gig list left console messages: {log[n:]}"
+    ctx.close()
+
+
+def test_T5_rejected_and_missing_clipboard_stay_quiet(app):
+    pg = app(state=RICH, hash_="record")
+    log = []
+    pg.on("console", lambda m: log.append(m.type + ": " + m.text) if m.type in ("error", "warning") else None)
+    for js in (CLIP_BLOCKED_JS,
+               "()=>{Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:()=>{throw new Error('sync')}}})}",
+               "()=>{Object.defineProperty(navigator,'clipboard',{configurable:true,value:undefined})}"):
+        pg.evaluate(js)
+        pg.evaluate("()=>{document.getElementById('bkOut').classList.add('hide')}")
+        pg.click("#bkCopy")
+        pg.wait_for_selector("#bkOut", state="visible")
+    pg.wait_for_timeout(200)
+    assert log == [] and not pg.errors, log + pg.errors
+
+
+def test_T5_clipboard_still_used_when_allowed(app):
+    pg = app(state=RICH, hash_="record")
+    pg.evaluate("()=>{window.__clip=[];Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:t=>{window.__clip.push(t);return Promise.resolve()}}})}")
+    pg.click("#bkCopy")
+    pg.wait_for_function("()=>window.__clip.length===1")
+    assert json.loads(pg.evaluate("()=>window.__clip[0]"))["state"] == RICH
+    pg.wait_for_function("()=>/Backup copied/.test(document.getElementById('bkMsg').textContent)")
+    assert not pg.locator("#bkOut").is_visible()

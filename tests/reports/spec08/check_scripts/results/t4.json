@@ -1,0 +1,64 @@
+{
+ "drums_hits": {},
+ "stage_panel_mentions": {
+  "stage | swung. On D move it up a string set (D open, G 2 and 4); on E move it down (E open, A 2 and 4). e|-----------------| B|-----": "5 pages, e.g. twelve-bar/own/path"
+ },
+ "samples": {
+  "drums a-e own": {
+   "mbar": "Metronome − 70 + bpm Groove: hats on every beat, snare on 2 and 4, kick on 1 and 3",
+   "metro": "Metronome Stage pattern Bossa feel Groove: hats on every beat, snare on 2 and 4, kick on 1 and 3 1 2 3 4 70 bpm Metronome The cells are the count the click plays. Lean on the shaded cells; the drum grid in your part shows where th",
+   "cells": "1 2 3 4"
+  },
+  "drums gig": {
+   "mbar": "Metronome − 120 + bpm Groove: hats in swung quavers, snare on 2 and 4, kick on 1 and 3"
+  },
+  "drums a-e rock": {
+   "mbar": "Metronome − 70 + bpm Groove: hats in quavers, snare on 2 and 4, kick on 1 and 3",
+   "metro": "Metronome Stage pattern Rock and roll feel Groove: hats in quavers, snare on 2 and 4, kick on 1 and 3 1 & 2 & 3 & 4 & 70 bpm Metronome The cells are the count the click plays. Lean on the shaded cells; the drum grid in your part s",
+   "cells": "1 & 2 & 3 & 4 &"
+  },
+  "drums a-e flam": {
+   "mbar": "Metronome − 70 + bpm Groove: hats on every beat, snare on 2 and 4, kick on 1 and 3",
+   "metro": "Metronome Stage pattern Flamenco feel Groove: hats on every beat, snare on 2 and 4, kick on 1 and 3 1 2 3 4 70 bpm Metronome The cells are the count the click plays. Lean on the shaded cells; the drum grid in your part shows where",
+   "cells": "1 2 3 4"
+  },
+  "drums a-e bossa": {
+   "mbar": "Metronome − 70 + bpm Groove: hats in quavers, snare on 2 and 4, kick on 1 and 3",
+   "metro": "Metronome Stage pattern Bossa feel Groove: hats in quavers, snare on 2 and 4, kick on 1 and 3 1 & 2 & 3 & 4 & 70 bpm Metronome The cells are the count the click plays. Lean on the shaded cells; the drum grid in your part shows whe",
+   "cells": "1 & 2 & 3 & 4 &"
+  },
+  "drums a-e metal": {
+   "mbar": "Metronome − 70 + bpm Groove: hats in quavers, snare on 2 and 4, kick on 1 and 3",
+   "metro": "Metronome Stage pattern Hair metal feel Groove: hats in quavers, snare on 2 and 4, kick on 1 and 3 1 & 2 & 3 & 4 & 70 bpm Metronome The cells are the count the click plays. Lean on the shaded cells; the drum grid in your part show",
+   "cells": "1 & 2 & 3 & 4 &"
+  },
+  "guitar capo 0 Function card": "Function in this stage Tonic: A Dominant: E",
+  "guitar capo 2 Function card": "Function in this stage Tonic: A Dominant: E",
+  "bass capo 0 Function card": "Function in this stage Tonic: A Dominant: E",
+  "bass capo 2 Function card": "Function in this stage Tonic: B Chart shows A Dominant: F♯ Chart shows E",
+  "keys capo 0 Function card": "Function in this stage Tonic: A Dominant: E",
+  "keys capo 2 Function card": "Function in this stage Tonic: B Chart shows A Dominant: F♯ Chart shows E",
+  "vocals capo 0 Function card": "Function in this stage Tonic: A Dominant: E",
+  "vocals capo 2 Function card": "Function in this stage Tonic: B Chart shows A Dominant: F♯ Chart shows E",
+  "drums capo 0 Function card": "Function in this stage Tonic: A Dominant: E",
+  "drums capo 2 Function card": "Function in this stage Tonic: A Dominant: E",
+  "bass after two clicks of Capo up": "Function in this stage Tonic: B Chart shows A Dominant: F♯ Chart shows E"
+ },
+ "stages": [
+  "a-e",
+  "twelve-bar",
+  "am-e7",
+  "c-g-f",
+  "four-chords",
+  "six-eight",
+  "hallelujah",
+  "beyond"
+ ],
+ "drum_pages_checked": 55,
+ "fn_360_overflow": [
+  360,
+  360,
+  360
+ ],
+ "dialogs": []
+}

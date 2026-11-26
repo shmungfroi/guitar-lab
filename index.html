@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>The Guitar Lab 0.7</title>
+<title>The Guitar Lab 0.8</title>
 <style>
 /* VOICE: a patient guitar teacher in the Shmungfroi family: warm, exact, unhurried.
    IDEA: the guitar neck is the map; each fret is a stage, the inlays are the gates you earn.
@@ -14,11 +14,11 @@
 @font-face{font-family:'G Outfit';src:url(fonts/Outfit-Bold.ttf) format('truetype');font-weight:500 700;font-display:swap}
 @font-face{font-family:'G Poiret';src:url(fonts/PoiretOne-Regular.ttf) format('truetype');font-display:swap}
 :root{--bg:#0b0906;--card:#12100b;--ink:#ece2c8;--mut:#9c927c;--rule:#2a2418;--hi:#f0d48a;--ok:#d9cfb6;
---ton:#8fbf6a;--pre:#c9a24a;--dom:#d0574b;--sec:#a493d8;--sub:#b3a98f;--kbl:#f0d48a;--wood:#2b1a12;--fret:#b9b4a8;--ivory:#ece2c8;--inlay:#c9a24a;--fin:#2f9e9b;color-scheme:dark}
+--ton:#8fbf6a;--pre:#c9a24a;--dom:#d0574b;--sec:#a493d8;--sub:#b3a98f;--kbl:#a47510;--wood:#2b1a12;--fret:#b9b4a8;--ivory:#ece2c8;--inlay:#c9a24a;--fin:#2f9e9b;color-scheme:dark}
 @supports (color:light-dark(#000,#fff)){:root{color-scheme:light dark;
 --bg:light-dark(#f7f1e3,#0b0906);--card:light-dark(#fffaf0,#12100b);--ink:light-dark(#2a2216,#ece2c8);--mut:light-dark(#6f634c,#9c927c);
 --rule:light-dark(#d9cdb2,#2a2418);--hi:light-dark(#7a5c12,#f0d48a);--ok:light-dark(#3d3426,#d9cfb6);
---ton:light-dark(#4a7434,#8fbf6a);--pre:light-dark(#8a6a22,#c9a24a);--dom:light-dark(#a8352b,#d0574b);--sec:light-dark(#6b55b0,#a493d8);--sub:light-dark(#5e5340,#b3a98f);--kbl:light-dark(#a47510,#f0d48a)}
+--ton:light-dark(#4a7434,#8fbf6a);--pre:light-dark(#8a6a22,#c9a24a);--dom:light-dark(#a8352b,#d0574b);--sec:light-dark(#6b55b0,#a493d8);--sub:light-dark(#5e5340,#b3a98f)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 'G Outfit',Outfit,system-ui,sans-serif;overflow-x:clip}
@@ -72,7 +72,7 @@ background-image:repeating-linear-gradient(180deg,transparent 0 13px,rgba(236,22
 .cb .rn{font-size:13px}
 .kb{width:100%;max-width:170px;display:block;margin:6px auto}.dg{border-collapse:collapse;margin:8px 0;font-size:15px;width:auto}.dg th,.dg td{border:1px solid var(--rule);padding:6px 8px;text-align:center;min-width:30px}.dg th{color:var(--mut);font-weight:400}.dgw{overflow-x:auto;max-width:100%}
 .gt{font:500 clamp(56px,12vw,140px)/1 'G Outfit',system-ui,sans-serif;font-variant-numeric:tabular-nums}.present .gt{font-size:clamp(90px,22vw,240px)}.present #v-gig{font-size:20px}
-.present .gsetup,.present header .row,.present .foot{display:none}.present .wrap{max-width:none}.present #v-gig .two{grid-template-columns:minmax(0,1fr)}.present #v-gig table{font-size:clamp(20px,2.4vw,34px)}.present #v-gig .pd{font-size:clamp(34px,4.5vw,68px)!important}.present #v-gig .rm{padding:18px}.present #gigRun h3{font-size:clamp(22px,2.6vw,38px);line-height:1.2;margin-top:22px!important}.present #gigRun h3 .note,.present #v-gig .rm .note,.present #v-gig .formstrip{font-size:clamp(15px,1.5vw,22px)}.present #v-gig .fs small{font-size:.8em}.present #v-gig .card>h3{font-size:22px}
+.present .gsetup,.present header .row,.present .foot{display:none}.present .wrap{max-width:none}.present #v-gig .two{grid-template-columns:minmax(0,1fr)}.present #v-gig table{font-size:clamp(20px,2.4vw,34px)}.present #v-gig .dg{font-size:clamp(12px,3.9vw,34px)}.present #v-gig .pd{font-size:clamp(34px,4.5vw,68px)!important}.present #v-gig .rm{padding:18px}.present #gigRun h3{font-size:clamp(22px,2.6vw,38px);line-height:1.2;margin-top:22px!important}.present #gigRun h3 .note,.present #v-gig .rm .note,.present #v-gig .formstrip{font-size:clamp(15px,1.5vw,22px)}.present #v-gig .fs small{font-size:.8em}.present #v-gig .card>h3{font-size:22px}
 .step{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:start;padding:12px 0;border-top:1px solid var(--rule)}
 .step .n{font:24px 'G Poiret','Poiret One',sans-serif;color:var(--mut)}
 .step.up .n{color:var(--hi)}
@@ -108,7 +108,7 @@ table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px
 .bkmsg{border-left:3px solid var(--hi);padding:4px 0 4px 12px;margin:12px 0 0;font-size:14px}.bkmsg.bad{border-left-color:var(--dom)}.bkta{display:block;width:100%;margin-top:10px;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace}.bkask{margin-top:12px}.bkask p{margin:6px 0 10px;font-size:14px}
 .gate{border:1px solid var(--inlay);border-radius:16px;padding:14px 18px;background:color-mix(in srgb,var(--inlay) 10%,transparent)}
 @media(max-width:900px){.cols,.two{grid-template-columns:minmax(0,1fr)}}
-@media(max-width:480px){.dg{font-size:13px}.dg th,.dg td{padding:5px 3px;min-width:22px}}
+@media(max-width:480px){.dg{font-size:13px}.dg th,.dg td{padding:5px 3px;min-width:22px}}@media(max-width:600px){.present #v-gig .dg{width:100%}.present #v-gig .dg th,.present #v-gig .dg td{padding:5px 2px;min-width:0}}
 @media(max-width:640px){.top h1{font-size:32px}.title h2{font-size:34px}
 .neck{grid-template-columns:minmax(0,1fr);background-image:repeating-linear-gradient(90deg,transparent 0 calc(16.66% - 1px),rgba(236,226,200,.45) calc(16.66% - 1px) 16.66%)}
 .nut{height:12px}.fr{border-right:0;border-bottom:3px solid var(--fret);min-height:56px;text-align:left;padding:8px 12px 14px}
@@ -121,7 +121,7 @@ table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px
 <div class="wrap">
 <header>
 <div class="top">
-<div><h1>The Guitar Lab</h1><div class="sub">version 0.7 · a Shmungfroi instrument</div></div>
+<div><h1>The Guitar Lab</h1><div class="sub">version 0.8 · a Shmungfroi instrument</div></div>
 <div class="sp"></div>
 <div class="chips" role="group" aria-label="Finish" id="finishes"></div>
 </div>
@@ -298,7 +298,8 @@ for(const o of ['marks','best','gates','sign'])for(const k in S[o]){const v=+S[o
 S.changes.forEach(c=>{if(!IK.includes(c.inst))c.inst='guitar'});S.journal.forEach(j=>{if(!IK.includes(j.inst))j.inst='guitar'});
 if(!FIN.some(f=>f.k===S.finish))S.finish='bossa';if(!ST.some(s=>s.id===S.stage))S.stage='a-e';if(!Array.isArray(S.changes))S.changes=[];if(!Array.isArray(S.journal))S.journal=[]}
 {let L=null;try{L=JSON.parse(localStorage.getItem('shredder')||'{}')}catch(e){}loadState(L)}
-const save=()=>{try{localStorage.setItem('shredder',JSON.stringify(S))}catch(e){}};
+/* true when the browser kept it; false where storage is blocked (a sandboxed frame, private mode), so the page can say so (0.8) */
+const save=()=>{try{localStorage.setItem('shredder',JSON.stringify(S));return true}catch(e){return false}};
 const $=id=>document.getElementById(id);
 const shp=c=>String(c).replace(/#/g,'♯');
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -441,12 +442,16 @@ function renderStage(){const s=stage(),sg=s.song,steps=STEPS(s);const link=sg.q?
  ${s.also.length?`<div><h3>Also try</h3><ul class="log">${s.also.map(([t,q])=>`<li>${q?`<a class="lk" href="${yt(q)}" target="_blank" rel="noopener">${esc(t)}</a>`:esc(t)}</li>`).join('')}</ul></div>`:''}`;
  grade()}
 function grade(){const g=$('grade');if(!g)return;const s=stage();const ks=[0,1,2,3,4].map(i=>S.marks[kk(s,i)]);if(ks.every(v=>v===undefined)){g.textContent='Not yet marked';return}const t=ks.reduce((a,v)=>a+(v||0),0);const L=t>=9?'A':t>=7?'B':t>=5?'C':t>=3?'D':'E';g.textContent=`${t} / 10 · grade ${L}${ks.some(v=>v===undefined)?' so far':''}`}
-function metroCard(){const s=stage(),f=FIN.find(f=>f.k===S.finish),p=curPat();return `<div class="card"><h3>Metronome</h3><div class="row"><button data-pat="0" aria-pressed="${!S.useFin}">${S.inst==='guitar'?'Stage strum':'Stage pattern'}</button><button data-pat="1" aria-pressed="${S.useFin}">${f.n} feel</button></div>
- <div class="note" style="margin-top:8px">${esc(p.n)}</div>${feelMiss(s)?`<div class="note feel-miss">${esc(feelMiss(s))}</div>`:''}<div class="grid">${cells(p).map((c,i)=>`<div class="cell${p.a.includes(i)?' acc':''}">${c==='.'?'·':esc(c)}</div>`).join('')}</div>
- <div class="row"><input type="range" min="30" max="200" step="1" class="m-bpm" value="${S.bpm}" aria-label="Tempo" style="flex:1"><span class="big m-out">${S.bpm}</span></div><div class="note">${unit(p)}</div><div class="row" style="margin-top:8px"><button class="m-toggle" aria-pressed="${!!metro}">Metronome</button><span class="note">${S.inst==='guitar'?'D down · U up · B thumb bass · C chord':'The letters are the guitar\'s strum: D down, U up, B thumb bass, C chord. On your instrument, follow the count and lean on the shaded cells.'}</span></div></div>`}
-function renderSide(){const s=stage();
- const keyRows=[...new Set(s.ch.map(c=>fnOf(s.key,c)[1]).filter(Boolean))].map(f=>`<div><span class="sw" style="background:var(${FN[f][1]})"></span>${FN[f][0][0].toUpperCase()+FN[f][0].slice(1)}: ${s.ch.filter(c=>fnOf(s.key,c)[1]===f).map(c=>esc(shp(c))).join(', ')}</div>`).join('');
- const pk=s.pair.join('-'),K=keyAt(s,capoOf(s)),pn=c=>S.inst==='guitar'?c.replace('#','♯'):nameAt(c,K),iname=INST.find(x=>x[0]===S.inst)[1];const chg=myChg().filter(c=>c.pair===pk);const mine=chg.slice(-5).reverse();const best=Math.max(0,...chg.map(c=>c.n));
+/* drums (0.8): the metronome names the groove the band's drummer plays, and its cells show the count, never the guitar's strum */
+const patName=p=>{if(S.inst!=='drums'||p===PAT.click)return p.n;const bp=bandPat(view==='gig'?gigOpen():stage());return 'Groove: '+drumWords(bp,drumPat(bp))};
+const countCells=p=>Array.isArray(p.c)?p.c:cells(p).map((_,i)=>p.s===2?(i%2?'&':String(i/2+1)):String(i+1));
+function metroCard(){const s=stage(),f=FIN.find(f=>f.k===S.finish),p=curPat(),dr=S.inst==='drums';return `<div class="card"><h3>Metronome</h3><div class="row"><button data-pat="0" aria-pressed="${!S.useFin}">${S.inst==='guitar'?'Stage strum':'Stage pattern'}</button><button data-pat="1" aria-pressed="${S.useFin}">${f.n} feel</button></div>
+ <div class="note m-pat" style="margin-top:8px">${esc(patName(p))}</div>${feelMiss(s)?`<div class="note feel-miss">${esc(feelMiss(s))}</div>`:''}<div class="grid">${(dr?countCells(p):cells(p)).map((c,i)=>`<div class="cell${p.a.includes(i)?' acc':''}">${c==='.'?'·':esc(c)}</div>`).join('')}</div>
+ <div class="row"><input type="range" min="30" max="200" step="1" class="m-bpm" value="${S.bpm}" aria-label="Tempo" style="flex:1"><span class="big m-out">${S.bpm}</span></div><div class="note">${unit(p)}</div><div class="row" style="margin-top:8px"><button class="m-toggle" aria-pressed="${!!metro}">Metronome</button><span class="note">${S.inst==='guitar'?'D down · U up · B thumb bass · C chord':dr?'The cells are the count the click plays. Lean on the shaded cells; the drum grid in your part shows where the hats, snare and kick fall.':'The letters are the guitar\'s strum: D down, U up, B thumb bass, C chord. On your instrument, follow the count and lean on the shaded cells.'}</span></div></div>`}
+function renderSide(){const s=stage(),cp=capoOf(s),K=keyAt(s,cp),snd=cp>0&&['bass','keys','vocals'].includes(S.inst),fch=f=>[...new Set(s.ch.filter(c=>fnOf(s.key,c)[1]===f))];
+ /* with a capo, bass, keys and voice read the chords where they sound (0.8); the guitar and the chart keep the shapes */
+ const keyRows=[...new Set(s.ch.map(c=>fnOf(s.key,c)[1]).filter(Boolean))].map(f=>`<div><span class="sw" style="background:var(${FN[f][1]})"></span>${FN[f][0][0].toUpperCase()+FN[f][0].slice(1)}: ${fch(f).map(c=>esc(snd?nameAt(c,K):shp(c))).join(', ')}${snd?` <span class="note fk-chart">Chart shows ${fch(f).map(c=>esc(shp(c))).join(', ')}</span>`:''}</div>`).join('');
+ const pk=s.pair.join('-'),pn=c=>S.inst==='guitar'?c.replace('#','♯'):nameAt(c,K),iname=INST.find(x=>x[0]===S.inst)[1];const chg=myChg().filter(c=>c.pair===pk);const mine=chg.slice(-5).reverse();const best=Math.max(0,...chg.map(c=>c.n));
  $('side').innerHTML=`<div class="card"><h3>Function in this stage</h3><div class="fk">${keyRows}</div></div>${metroCard()}
  ${['drums','vocals'].includes(S.inst)?'':`<div class="card"><h3>One-minute changes · ${iname}</h3><p class="note" style="margin:0 0 8px">${s.pair.map(c=>esc(pn(c))).join(' ↔ ')}: change back and forth for one minute, then count. Consistent is ${CPM(s)[0]}, Applied is ${CPM(s)[1]}.</p>
  <div class="row"><button id="timer">${timerLeft?timerLeft+' s':'Start 60 s'}</button><input id="cnt" type="number" min="0" max="200" inputmode="numeric" placeholder="Changes" style="width:110px" aria-label="Number of changes"><button id="logChg">Log</button></div>
@@ -541,7 +546,7 @@ function renderRecord(){const s=stage(),iname=INST.find(x=>x[0]===S.inst)[1],mc=
 let bk={note:null,pend:null,inTxt:'',out:''},dlCap;
 /* a claude.ai artifact can hand files to its viewer; anywhere else this stays empty and the plain download link is used */
 const dlFind=()=>{if(dlCap!==undefined)return Promise.resolve(dlCap);try{const c=window.claude;if(c&&typeof c.use==='function')return Promise.resolve(c.use('downloads')).then(d=>dlCap=(d&&typeof d.save==='function')?d:null,()=>dlCap=null)}catch(e){}return Promise.resolve(null)};
-const backupObj=()=>{gigS();return {app:'The Guitar Lab',format:1,version:'0.7',saved:new Date().toISOString(),state:JSON.parse(JSON.stringify(S))}};
+const backupObj=()=>{gigS();return {app:'The Guitar Lab',format:1,version:'0.8',saved:new Date().toISOString(),state:JSON.parse(JSON.stringify(S))}};
 const backupText=()=>JSON.stringify(backupObj(),null,1);
 const bkName=()=>'guitar-lab-backup-'+today()+'.json';
 const NOCHG=' Nothing has been changed.';
@@ -551,7 +556,7 @@ function readBackup(txt){txt=String(txt||'').replace(/^﻿/,'').trim();if(!txt)r
  try{o=JSON.parse(txt)}catch(e){return {err:'That isn\'t a Guitar Lab backup: the text can\'t be read as JSON, so part of it may be missing or changed. Copy the whole backup, from the first { to the last }, and try again.'+NOCHG}}
  const isO=v=>!!v&&typeof v==='object'&&!Array.isArray(v);if(!isO(o))return {err:'That isn\'t a Guitar Lab backup: a backup is one block of text that starts with { and ends with }.'+NOCHG};
  const wrapped=isO(o.state)&&('format' in o||'app' in o),st=wrapped?o.state:o;
- if(wrapped&&typeof o.format==='number'&&o.format>1)return {err:'That backup was made by a newer version of The Guitar Lab than this one (0.7), so it can\'t be read here.'+NOCHG};
+ if(wrapped&&typeof o.format==='number'&&o.format>1)return {err:'That backup was made by a newer version of The Guitar Lab than this one (0.8), so it can\'t be read here.'+NOCHG};
  const known=Object.keys(DEF).filter(k=>st[k]!==undefined&&st[k]!==null);if(!known.length)return {err:'That JSON isn\'t a Guitar Lab backup: it has none of the things this app saves (levels, journal, gig plan and so on).'+NOCHG};
  const bad=known.filter(k=>!kindOK(DEF[k],st[k]));if(bad.length)return {err:'That backup is damaged: '+bad.map(k=>'"'+k+'"').join(', ')+(bad.length>1?' are':' is')+' not in the form this app saves.'+NOCHG};
  if(Array.isArray(st.changes)&&st.changes.some(c=>!isO(c))||Array.isArray(st.journal)&&st.journal.some(j=>!isO(j)))return {err:'That backup is damaged: its practice log or journal has entries this app can\'t read.'+NOCHG};
@@ -568,15 +573,18 @@ function backupCard(){const q=bk.pend;return `<div class="card" id="backup"><h3>
 function bkSay(m,bad){bk.note=m?[m,!!bad]:null;const el=$('bkMsg');if(el)el.innerHTML=m?`<p class="bkmsg${bad?' bad':''}">${esc(m)}</p>`:''}
 function bkShowOut(txt){bk.out=txt;const ta=$('bkOut');if(!ta)return null;ta.value=txt;ta.classList.remove('hide');return ta}
 function bkBlob(txt){try{const u=URL.createObjectURL(new Blob([txt],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download=bkName();a.rel='noopener';a.style.display='none';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>{try{URL.revokeObjectURL(u)}catch(e){}},4000);return true}catch(e){return false}}
-function bkDownload(){const txt=backupText(),viaLink=()=>{if(bkBlob(txt))bkSay('Backup file made: '+bkName()+'. Look in your downloads. If no file appeared, this page isn\'t allowed to download here: use Copy backup instead.');else{bkShowOut(txt);bkSay('Downloading isn\'t available here. The backup is in the box above: select all of it, copy it, and paste it somewhere safe.',1)}};
+function bkDownload(){const txt=backupText(),viaLink=()=>{if(bkBlob(txt))bkSay('Backup prepared as '+bkName()+'. If no file appeared in your downloads, this page isn\'t allowed to download here: use Copy backup instead.');else{bkShowOut(txt);bkSay('Downloading isn\'t available here. The backup is in the box above: select all of it, copy it, and paste it somewhere safe.',1)}};
  dlFind().then(d=>{if(!d){viaLink();return}let pr;try{pr=Promise.resolve(d.save({filename:bkName(),data:txt}))}catch(e){pr=Promise.reject(e)}
   pr.then(()=>bkSay('Backup saved as '+bkName()+'.'),e=>{const c=e&&e.code;if(c==='declined')bkSay('Download cancelled, so no backup file was made. Your progress is untouched.');else if(c==='rate_limited')bkSay('A download is already waiting for your answer. Finish that one, then try again.',1);else viaLink()})})}
+/* copy without noise (0.8): where the page's permissions policy blocks the clipboard, the browser logs an error just for asking, so check first and go straight to the fallback */
+function clipWrite(txt){try{const fp=document.permissionsPolicy||document.featurePolicy;if(fp&&typeof fp.allowsFeature==='function'&&!fp.allowsFeature('clipboard-write'))return Promise.reject();
+  const c=navigator.clipboard;if(!c||typeof c.writeText!=='function')return Promise.reject();return Promise.resolve(c.writeText(txt))}catch(e){return Promise.reject()}}
 function bkCopy(){const txt=backupText(),done=()=>bkSay('Backup copied. Paste it into a note or an email to yourself and keep it safe.'),
  box=()=>{const ta=bkShowOut(txt);let ok=false;if(ta){ta.focus();ta.select();try{ok=document.execCommand('copy')}catch(e){}}if(ok)bkSay('Backup copied. It is also shown in the box above. Paste it into a note or an email to yourself and keep it safe.');else bkSay('Copying is blocked here. The backup is in the box above, already selected: copy it (Ctrl or ⌘ and C, or press and hold), then paste it somewhere safe.')};
- try{navigator.clipboard.writeText(txt).then(done,box)}catch(e){box()}}
+ clipWrite(txt).then(done,box)}
 function bkOffer(txt){const r=readBackup(txt);if(r.err){bk.pend=null;const a=$('bkAsk');if(a)a.innerHTML='';bkSay(r.err,1);return}bk.pend=r;bk.note=null;renderRecord();const no=$('bkNo');if(no)no.focus()}
 function bkApply(){const q=bk.pend;if(!q)return;const old=S,tch=S.teacher;try{loadState(JSON.parse(JSON.stringify(q.st)));S.teacher=tch;gigS();checkGates()}catch(e){S=old;bk.pend=null;renderRecord();bkSay('That backup couldn\'t be loaded.'+NOCHG,1);return}
- stopAll();if(metro)stopMetro();loop=[];loopChg='';for(const k in bus)bus[k].gain.value=S.mute[k]?0:1;bk={note:['Backup imported: '+bkCount(S)+'. Your progress has been replaced and saved in this browser.',false],pend:null,inTxt:'',out:''};save();all();mUI();toast('Backup imported');const h=$('backup');if(h){h.setAttribute('tabindex','-1');h.focus({preventScroll:true})}}
+ stopAll();if(metro)stopMetro();loop=[];loopChg='';for(const k in bus)bus[k].gain.value=S.mute[k]?0:1;const kept=save();bk={note:['Backup imported: '+bkCount(S)+(kept?'. Your progress has been replaced and saved in this browser.':'. It is loaded for this visit only: this page isn\'t allowed to store anything here, so it will be gone when the page closes. Keep your backup file, and use Download backup or Copy backup before you leave to keep anything new.'),false],pend:null,inTxt:'',out:''};all();mUI();toast('Backup imported');const h=$('backup');if(h){h.setAttribute('tabindex','-1');h.focus({preventScroll:true})}}
 /* sequencing */
 let metro=null,timerLeft=0,tmr=null,seqT=[],playing=false,confirmLower=null;
 const home=s=>s.ch.find(c=>/^(I|i)$/.test(fnOf(s.key,c)[0]))||s.ch[0];
@@ -639,14 +647,14 @@ document.addEventListener('click',e=>{if(e.target.closest('#tabs a')||e.target.c
  else if(t.dataset.gtime){const m=+t.dataset.gtime;if(!(m>0&&m<=60))return;clearInterval(gt);const a0=A();if(a0){try{a0.resume()}catch(err){}click(a0.currentTime+.03,0)}gtEnd=Date.now()+m*60000;const tk=()=>{const r=Math.max(0,Math.ceil((gtEnd-Date.now())/1000));const el=$('gtime');if(el)el.textContent=Math.floor(r/60)+':'+String(r%60).padStart(2,'0');if(!r){clearInterval(gt);gt=null;const a=A();if(a){const beep=()=>[0,.3,.6].forEach(x=>click(a.currentTime+x,1));if(a.state==='running')beep();else{try{a.resume().then(beep,()=>{})}catch(err){}}}toast('Time: change over.')}};tk();gt=setInterval(tk,250)}
  else if(t.id==='gstop'){clearInterval(gt);gt=null;const el=$('gtime');if(el)el.textContent='0:00'}
  else if(t.id==='present'){const on=document.body.classList.toggle('present');renderGig();refocus('#present');toast(on?'Present mode: setup is hidden; the run sheet, its phase headings and the chart are enlarged. Press Present again to go back.':'Present mode off')}
- else if(t.id==='copyGig'){const txt=gigText(gigS());try{navigator.clipboard.writeText(txt).then(()=>toast('Gig list copied'),()=>{$('gigTxt').classList.remove('hide');toast('Copy isn\'t available here: select the text below instead.')})}catch(err){$('gigTxt').classList.remove('hide')}}
+ else if(t.id==='copyGig'){const txt=gigText(gigS());clipWrite(txt).then(()=>toast('Gig list copied'),()=>{$('gigTxt').classList.remove('hide');toast('Copy isn\'t available here: select the text below instead.')})}
  else if(t.id==='bkDown')bkDownload()
  else if(t.id==='bkCopy')bkCopy()
  else if(t.id==='bkPick'){const f=$('bkFile');if(f){f.value='';f.click()}}
  else if(t.id==='bkImport')bkOffer($('bkIn').value)
  else if(t.id==='bkYes')bkApply()
  else if(t.id==='bkNo'){bk.pend=null;renderRecord();bkSay('Import cancelled. Your progress is unchanged.');refocus('#bkImport')}
- else if(t.dataset.inst){S.inst=t.dataset.inst;save();all();refocus(`[data-inst="${S.inst}"]`);toast(INST.find(x=>x[0]===S.inst)[1]+': your steps, gates and record are now for this instrument.')}
+ else if(t.dataset.inst){S.inst=t.dataset.inst;save();all();mUI();refocus(`[data-inst="${S.inst}"]`);toast(INST.find(x=>x[0]===S.inst)[1]+': your steps, gates and record are now for this instrument.')}
  else if(t.dataset.mute){const k=t.dataset.mute;S.mute[k]=!S.mute[k];save();t.setAttribute('aria-pressed',!S.mute[k]);if(bus[k])bus[k].gain.value=S.mute[k]?0:1}
  else if(t.dataset.tgt){setBpm(t.dataset.tgt);mUI();if(!tempoStop())toast('Metronome set to '+bpm()+' bpm')}
  else if(t.dataset.capo){if(playing)stopAll();const s=stage();S.capo[s.id]=Math.max(0,Math.min(7,capo()+(+t.dataset.capo)));if(!S.capo[s.id])delete S.capo[s.id];save();renderStage();renderSide();refocus(`[data-capo="${t.dataset.capo}"]`);toast((capo()?'Capo '+capo():'No capo')+': sounds in '+sounds(s)+'.')}
@@ -656,7 +664,7 @@ document.addEventListener('input',e=>{const t=e.target,d=t.dataset;if(t.id==='bk
  else if(d.bname!==undefined){const b=gigS().bands[+d.bname];if(b){b.name=t.value.slice(0,40)||'Band '+(+d.bname+1);save();renderRun()}}
  else if(d.bm){const [bi,r]=d.bm.split(':'),b=gigS().bands[+bi];if(b){const v=t.value.slice(0,40);if(v.trim())b.m[r]=v;else delete b.m[r];save();renderRun()}}});
 function tempoStop(){if(playing){stopAll();toast('Tempo changed: press Play again to hear the band at '+bpm()+' bpm.');return true}return false}
-function mUI(){const p=curPat();const bp=bpm();document.querySelectorAll('.m-out').forEach(o=>o.textContent=bp);document.querySelectorAll('.m-bpm').forEach(o=>{if(+o.value!==bp)o.value=bp});document.querySelectorAll('.m-toggle').forEach(b=>b.setAttribute('aria-pressed',!!metro));document.querySelectorAll('.m-name').forEach(n=>n.textContent=p.n);document.querySelectorAll('.m-unit').forEach(n=>n.textContent=unit(p))}
+function mUI(){const p=curPat();const bp=bpm();document.querySelectorAll('.m-out').forEach(o=>o.textContent=bp);document.querySelectorAll('.m-bpm').forEach(o=>{if(+o.value!==bp)o.value=bp});document.querySelectorAll('.m-toggle').forEach(b=>b.setAttribute('aria-pressed',!!metro));document.querySelectorAll('.m-name').forEach(n=>n.textContent=patName(p));document.querySelectorAll('.m-unit').forEach(n=>n.textContent=unit(p))}
 document.addEventListener('change',e=>{const d=e.target.dataset;
  if(e.target.id==='bkFile'){const f=e.target.files&&e.target.files[0];if(!f)return;if(f.size>4e6){bk.pend=null;const a=$('bkAsk');if(a)a.innerHTML='';bkSay('That file is too big to be a Guitar Lab backup.'+NOCHG,1);return}const rd=new FileReader();rd.onload=()=>bkOffer(String(rd.result||''));rd.onerror=()=>bkSay('That file couldn\'t be read.'+NOCHG,1);rd.readAsText(f);return}
  if(d.gsong){const G=gigS(),id=d.gsong;if(e.target.checked){if(G.songs.length>=4){e.target.checked=false;toast('Four songs per gig: untick one first.');return}G.songs.push(id)}else G.songs=G.songs.filter(x=>x!==id);save();renderGig();refocus(`[data-gsong="${id}"]`);return}
