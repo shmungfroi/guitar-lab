@@ -1365,9 +1365,9 @@ def test_R10_lit_black_key_contrast_in_light_mode(app, chord):
     dark = app(scheme="dark", state={"inst": "keys"})
     l, kl = lit_black(light, chord)
     d, kd = lit_black(dark, chord)
-    assert d["key"] == "rgb(240, 212, 138)", "dark mode keeps its light gold"
-    assert l["key"] != d["key"], "light mode should use a darker gold on lit black keys"
-    assert _lum([float(x) for x in re.findall(r"[\d.]+", l["key"])[:3]]) < _lum([float(x) for x in re.findall(r"[\d.]+", d["key"])[:3]])
+    # 0.8 (T1): the keyboard is drawn cream in both themes, so dark mode now uses the darker gold too.
+    assert l["key"] == d["key"], "the keyboard looks the same in both themes, so the lit black keys should too"
+    assert _lum([float(x) for x in re.findall(r"[\d.]+", l["key"])[:3]]) < _lum([240, 212, 138])
     assert l["key"] != kl["unlitWhite"]
     cw = contrast(l["key"], kl["unlitWhite"])
     assert cw >= 3, f"lit black key {l['key']} vs cream white key {kl['unlitWhite']}: contrast {cw:.2f} < 3"
@@ -1429,3 +1429,49 @@ def test_R11_b_minor_capo_4_explains_c_flat(app):
     assert pg.locator("#stage .spell-note").count() == 0, "no note in plain B minor"
     pg2 = app(state={"stage": "beyond", "capo": {"beyond": 4}}, hash_="beyond")
     assert pg2.locator("#stage .spell-note").count() == 0, "guitar shows shapes, so no spelling note"
+
+
+# ===================================================================== 0.8 register (SPEC_08): T1-T5
+
+def _rgb(c):
+    return [float(x) for x in re.findall(r"[\d.]+", c)[:3]]
+
+
+def _hue(c):
+    import colorsys
+    r, g, b = [v / 255 for v in _rgb(c)]
+    h, s_, v = colorsys.rgb_to_hsv(r, g, b)
+    return h * 360, s_
+
+
+def css_colour(pg, var):
+    return pg.evaluate("v=>{const e=document.createElement('i');e.style.color='var('+v+')';document.body.appendChild(e);const c=getComputedStyle(e).color;e.remove();return c}", var)
+
+
+# --------------------------------------------------------------------- T1
+
+@pytest.mark.parametrize("scheme", ["light", "dark"])
+@pytest.mark.parametrize("chord", ["A", "E"])
+def test_T1_lit_black_key_stands_out_in_both_themes(app, scheme, chord):
+    pg = app(scheme=scheme, state={"inst": "keys"})
+    lb, k = lit_black(pg, chord)
+    key = lb["key"]
+    assert k["unlitWhite"] == "rgb(236, 226, 200)", "white keys are cream in both themes"
+    cw = contrast(key, k["unlitWhite"])
+    assert cw >= 3, f"{scheme}: lit black key {key} vs white key {k['unlitWhite']}: {cw:.2f} < 3"
+    assert key != k["unlitBlack"] and contrast(key, k["unlitBlack"]) >= 3, "lit black key must stand out from the unlit black keys"
+    assert contrast(lb["fill"], key) >= 4.5, "note name on the lit black key"
+    dom, sub = css_colour(pg, "--dom"), css_colour(pg, "--sub")
+    assert dom == ("rgb(168, 53, 43)" if scheme == "light" else "rgb(208, 87, 75)"), "Q2: dominant colour must not change"
+    assert key not in (dom, sub), "lit black key must not be the dominant or subtonic colour"
+    h, sat = _hue(key)
+    assert 30 <= h <= 55 and sat >= 0.6, f"lit black key should read as gold, got hue {h:.0f} saturation {sat:.2f}"
+    assert abs(h - _hue(dom)[0]) >= 25, "too close to the dominant red"
+    assert sat - _hue(sub)[1] >= 0.4, "too close to the muted subtonic ivory-brown"
+
+
+def test_T1_lit_black_key_follows_a_forced_theme(app):
+    pg = app(scheme="light", state={"inst": "keys"})
+    pg.evaluate("()=>{document.documentElement.dataset.theme='dark'}")
+    lb, k = lit_black(pg, "A")
+    assert contrast(lb["key"], k["unlitWhite"]) >= 3
