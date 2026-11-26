@@ -14,11 +14,11 @@
 @font-face{font-family:'G Outfit';src:url(fonts/Outfit-Bold.ttf) format('truetype');font-weight:500 700;font-display:swap}
 @font-face{font-family:'G Poiret';src:url(fonts/PoiretOne-Regular.ttf) format('truetype');font-display:swap}
 :root{--bg:#0b0906;--card:#12100b;--ink:#ece2c8;--mut:#9c927c;--rule:#2a2418;--hi:#f0d48a;--ok:#d9cfb6;
---ton:#8fbf6a;--pre:#c9a24a;--dom:#d0574b;--sec:#a493d8;--wood:#2b1a12;--fret:#b9b4a8;--ivory:#ece2c8;--inlay:#c9a24a;--fin:#2f9e9b;color-scheme:dark}
+--ton:#8fbf6a;--pre:#c9a24a;--dom:#d0574b;--sec:#a493d8;--sub:#b3a98f;--kbl:#f0d48a;--wood:#2b1a12;--fret:#b9b4a8;--ivory:#ece2c8;--inlay:#c9a24a;--fin:#2f9e9b;color-scheme:dark}
 @supports (color:light-dark(#000,#fff)){:root{color-scheme:light dark;
 --bg:light-dark(#f7f1e3,#0b0906);--card:light-dark(#fffaf0,#12100b);--ink:light-dark(#2a2216,#ece2c8);--mut:light-dark(#6f634c,#9c927c);
 --rule:light-dark(#d9cdb2,#2a2418);--hi:light-dark(#7a5c12,#f0d48a);--ok:light-dark(#3d3426,#d9cfb6);
---ton:light-dark(#4a7434,#8fbf6a);--pre:light-dark(#8a6a22,#c9a24a);--dom:light-dark(#a8352b,#d0574b);--sec:light-dark(#6b55b0,#a493d8)}
+--ton:light-dark(#4a7434,#8fbf6a);--pre:light-dark(#8a6a22,#c9a24a);--dom:light-dark(#a8352b,#d0574b);--sec:light-dark(#6b55b0,#a493d8);--sub:light-dark(#5e5340,#b3a98f);--kbl:light-dark(#a47510,#f0d48a)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 'G Outfit',Outfit,system-ui,sans-serif;overflow-x:clip}
@@ -72,7 +72,7 @@ background-image:repeating-linear-gradient(180deg,transparent 0 13px,rgba(236,22
 .cb .rn{font-size:13px}
 .kb{width:100%;max-width:170px;display:block;margin:6px auto}.dg{border-collapse:collapse;margin:8px 0;font-size:15px;width:auto}.dg th,.dg td{border:1px solid var(--rule);padding:6px 8px;text-align:center;min-width:30px}.dg th{color:var(--mut);font-weight:400}.dgw{overflow-x:auto;max-width:100%}
 .gt{font:500 clamp(56px,12vw,140px)/1 'G Outfit',system-ui,sans-serif;font-variant-numeric:tabular-nums}.present .gt{font-size:clamp(90px,22vw,240px)}.present #v-gig{font-size:20px}
-.present .gsetup,.present header .row,.present .foot{display:none}.present .wrap{max-width:none}.present #v-gig .two{grid-template-columns:minmax(0,1fr)}.present #v-gig table{font-size:clamp(20px,2.4vw,34px)}.present #v-gig .pd{font-size:clamp(34px,4.5vw,68px)!important}.present #v-gig .rm{padding:18px}
+.present .gsetup,.present header .row,.present .foot{display:none}.present .wrap{max-width:none}.present #v-gig .two{grid-template-columns:minmax(0,1fr)}.present #v-gig table{font-size:clamp(20px,2.4vw,34px)}.present #v-gig .pd{font-size:clamp(34px,4.5vw,68px)!important}.present #v-gig .rm{padding:18px}.present #gigRun h3{font-size:clamp(22px,2.6vw,38px);line-height:1.2;margin-top:22px!important}.present #gigRun h3 .note,.present #v-gig .rm .note,.present #v-gig .formstrip{font-size:clamp(15px,1.5vw,22px)}.present #v-gig .fs small{font-size:.8em}.present #v-gig .card>h3{font-size:22px}
 .step{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:start;padding:12px 0;border-top:1px solid var(--rule)}
 .step .n{font:24px 'G Poiret','Poiret One',sans-serif;color:var(--mut)}
 .step.up .n{color:var(--hi)}
@@ -171,23 +171,23 @@ const KEYS={
  A:{name:'A major',m:{A:['I','T'],D:['IV','P'],E:['V','D'],Amaj7:['Imaj7','T'],E7:['V7','D']}},
  Am:{name:'A minor',m:{Am:['i','T'],E7:['V7','D']}},
  C:{name:'C major',m:{C:['I','T'],F:['IV','P'],Fmaj7:['IVmaj7','P'],G:['V','D'],Am:['vi','T'],E7:['V7/vi','S']}},
- Am6:{name:'A minor (relative of C)',m:{Am:['i','T'],C:['III','T'],F:['VI','P'],G:['VII','D','subtonic'],E:['V','D']}},
- Bm:{name:'B minor',m:{Bm:['i','T'],'F#':['V','D'],A:['VII','D','subtonic'],E:['IV','P'],G:['VI','P'],D:['III','T'],Em:['iv','P']}}};
-const FN={T:['tonic','--ton'],P:['predominant','--pre'],D:['dominant','--dom'],S:['secondary dominant','--sec']};
+ Am6:{name:'A minor (relative of C)',m:{Am:['i','T'],C:['III','T'],F:['VI','P'],G:['VII','N','subtonic'],E:['V','D']}},
+ Bm:{name:'B minor',m:{Bm:['i','T'],'F#':['V','D'],A:['VII','N','subtonic'],E:['IV','P'],G:['VI','P'],D:['III','T'],Em:['iv','P']}}};
+const FN={T:['tonic','--ton'],P:['predominant','--pre'],D:['dominant','--dom'],S:['secondary dominant','--sec'],N:['subtonic','--sub']};
 const yt=q=>'https://www.youtube.com/results?search_query='+encodeURIComponent(q);
 const PAT={
  four:{n:'Four downs',m:4,b:4,s:1,c:'DDDD',a:[0]},
  shuffle:{n:'Boogie shuffle, swung',m:4,b:4,s:2,c:'DUDUDUDU',a:[2,6],sw:1},
- eighths:{n:'Straight eighths',m:4,b:4,s:2,c:'DUDUDUDU',a:[0,4]},
+ eighths:{n:'Straight quavers',m:4,b:4,s:2,c:'DUDUDUDU',a:[0,4]},
  waltz:{n:'Bass, strum, strum',m:3,b:3,s:1,c:'BDD',a:[0]},
  pop:{n:'D · DU · UDU',m:4,b:4,s:2,c:'D.DU.UDU',a:[0]},
  six:{n:'Six-eight sway',m:6,b:2,s:3,c:'DDUDDU',a:[0,3]}};
 PAT.click={n:'Plain click',m:4,b:4,s:1,c:'1234',a:[0]};const C12=['1','2','3','4','5','6','7','8','9','10','11','12'];
 const FIN=[
- {k:'rock',n:'Rock and roll',col:'#e0a24a',lc:'#9a5a12',p:{4:{n:'Backbeat eighths',b:4,s:2,c:'DUDUDUDU',a:[2,6]},3:{n:'Rock waltz eighths',b:3,s:2,c:'DUDUDU',a:[0]},6:{n:'Rock and roll ballad triplets',b:2,s:3,c:'DDDDDD',a:[0,3]}}},
+ {k:'rock',n:'Rock and roll',col:'#e0a24a',lc:'#9a5a12',p:{4:{n:'Backbeat quavers',b:4,s:2,c:'DUDUDUDU',a:[2,6]},3:{n:'Rock waltz quavers',b:3,s:2,c:'DUDUDU',a:[0]},6:{n:'Rock and roll ballad triplets',b:2,s:3,c:'DDDDDD',a:[0,3]}}},
  {k:'flam',n:'Flamenco',col:'#d8b878',lc:'#7d5f1f',p:{4:{n:'Tangos: four, beat 1 light, weight on 2, 3 and 4',b:4,s:1,c:'DDDD',a:[1,2,3]},3:{n:'12-beat compás, counted across the bars',b:12,s:1,c:C12,a:[2,5,7,9,11]},6:{n:'12-beat compás across two bars of 6/8',b:4,s:3,c:C12,a:[2,5,7,9,11]}}},
  {k:'bossa',n:'Bossa',col:'#2f9e9b',lc:'#1f6f6d',p:{4:{n:'Simplified bossa: thumb on 1 and 3, chords on the and of 2 and on 4',b:4,s:2,c:'B..CB.C.',a:[0,3,6]},3:{n:'Bossa waltz: thumb on 1, chords on 2 and 3',b:3,s:1,c:'BCC',a:[0]},6:{n:'Thumb on 1 and 4, chords between',b:2,s:3,c:'B.CB.C',a:[0,3]}}},
- {k:'metal',n:'Hair metal',col:'#ff3d81',lc:'#b3184f',p:{4:{n:'Palm-muted eighths',b:4,s:2,c:'DDDDDDDD',a:[0,4]},3:{n:'Palm-muted eighths in three',b:3,s:2,c:'DDDDDD',a:[0]},6:{n:'Palm-muted quavers in six',b:2,s:3,c:'DDDDDD',a:[0,3]}}}];
+ {k:'metal',n:'Hair metal',col:'#ff3d81',lc:'#b3184f',p:{4:{n:'Palm-muted quavers',b:4,s:2,c:'DDDDDDDD',a:[0,4]},3:{n:'Palm-muted quavers in three',b:3,s:2,c:'DDDDDD',a:[0]},6:{n:'Palm-muted quavers in six',b:2,s:3,c:'DDDDDD',a:[0,3]}}}];
 const KNOW={
  strings:['The six strings','Thickest to thinnest: E A D G B E. One way to remember it: Eddie Ate Dynamite, Good Bye Eddie. The thick E is string 6; the thin E is string 1.'],
  parts:['Parts of the guitar','Headstock and tuners, nut, neck and fretboard, frets, body, then the soundhole on an acoustic or the pickups on an electric, and the bridge and saddle.'],
@@ -217,8 +217,8 @@ const ST=[
  {id:'four-chords',fret:'I V vi IV',title:'C–G–Am–F',key:'C',ch:['C','G','Am','F'],pat:'pop',know:['four'],pair:['Am','F'],tgt:76,
   song:{t:'Let It Be',by:'The Beatles (1970)',pd:0,time:'4/4',map:[{s:'Verse',b:['C G','Am F','C G','F C']},{s:'Chorus',b:['Am G','F C','C G','F C']}],q:'The Beatles Let It Be official'},
   also:[['Riptide, Vance Joy (2013): Am–G–C, from your Guitar Book; capo 1 matches the recording','Vance Joy Riptide official'],['4 Chords, The Axis of Awesome','Axis of Awesome 4 Chords']]},
- {id:'six-eight',fret:'6/8',title:'Six-eight feel',key:'Am6',ch:['Am','G','F','E','C'],pat:'six',know:['six','vii'],pair:['Am','E'],tgt:50,
-  song:{t:'Greensleeves',by:'Traditional English, 16th century',pd:1,time:'6/8',q:'Greensleeves traditional',pick:'The melody starts on the last quaver of the count-in: a pickup into bar 1, and again at the end of each section.',map:[{s:'Verse',b:['Am','G','F','E','Am','G','Am E','Am']},{s:'Refrain',b:['C','G','Am','E','C','G','Am E','Am']}]},also:[]},
+ {id:'six-eight',fret:'6/8',title:'Six-eight feel',key:'Am6',ch:['Am','G','E','C'],pat:'six',know:['six','vii'],pair:['Am','E'],tgt:50,
+  song:{t:'Greensleeves',by:'Traditional English, 16th century',pd:1,time:'6/8',q:'Greensleeves traditional',pick:'The melody starts on the last quaver of the count-in: a pickup into bar 1, and again at the end of each section.',map:[{s:'Verse',b:['Am','G','Am','E','Am','G','Am E','Am']},{s:'Refrain',b:['C','G','Am','E','C','G','Am E','Am']}]},also:[]},
  {id:'hallelujah',fret:'Hallelujah',title:'Hallelujah',key:'C',ch:['C','Am','F','G','E7'],pat:'six',know:['sec'],pair:['G','E7'],tgt:50,
   song:{t:'Hallelujah',by:'Leonard Cohen (1984)',pd:0,time:'6/8 (felt as 12/8)',map:[{s:'Verse',b:['C','Am','C','Am','F','G','C','G','C','F G','Am','F','G','E7','Am','Am']},{s:'Chorus',b:['F','F','Am','Am','F','F','C','G','C','G']}],q:'Leonard Cohen Hallelujah 1984 official',note:'Chord order shown; bar lengths approximate the recording, so check them against it. Add a capo to suit your voice: the shapes stay the same.'},
   also:[['Jeff Buckley\'s version (1994)','Jeff Buckley Hallelujah official']]},
@@ -240,7 +240,7 @@ const TECH=[
  {id:'cscale',f:'core',n:'C major scale, open position',w:'From the Guitar Book, position 1. Say the note names as you play, then sing them in sol-fa: do re mi fa so la ti do.',fb:'cscale',st:3},
  {id:'triads',f:'core',n:'I–IV–V triads up the neck',w:'C, F and G as three-note shapes on the top strings, in root position and both inversions: the Guitar Book\'s chord practical skills. The root is ringed.',fb:['ctri','ftri','gtri'],st:4},
  {id:'shuffle',f:'rock',n:'Boogie shuffle',w:'Root and fifth, then root and sixth, swung. The 12-bar riff on your Path stage 2 is this technique.',st:1},
- {id:'backbeat',f:'rock',n:'Backbeat accents',w:'Strum eighths but dig in on beats 2 and 4, where the snare sits in a rock band.',st:1},
+ {id:'backbeat',f:'rock',n:'Backbeat accents',w:'Strum quavers but dig in on beats 2 and 4, where the snare sits in a rock band.',st:1},
  {id:'rasg',f:'flam',n:'Four-finger rasgueado',w:'Curl your fingers into your palm, then flick them out one at a time across the strings, little finger first (c, a, m, i), to make one rolling strum.',st:3},
  {id:'golpe',f:'flam',n:'Golpe',w:'A tap of the ring finger on the tap plate (golpeador) beside the strings, on the accented beats of the compás.',st:3},
  {id:'andaluz',f:'flam',n:'Andalusian cadence',w:'Am, G, F, E: four chords stepping down to E. Heard in A minor they are i–VII–VI–V. Flamenco hears E as home, in the Phrygian mode on E, where the same chords are iv–III–II–I. Every chord here is one you already know.',ch:['Am','G','F','E'],k:'Am6',st:5},
@@ -379,7 +379,7 @@ function partPanel(s,cp){cp=cp||0;const I=S.inst,uniq=[...new Set(s.ch)],K=keyAt
   return `<div class="card"><h3>Cue sheet</h3><p>Home note (${md==='minor'?'la':'do'}): ${K.to}. Sounds in ${K.to} ${md}.</p><p class="solfa"><b style="font-weight:500">Roots in sol-fa:</b> ${rl.join(' · ')}</p>${s.song.map.map(m=>`<p class="note solfa-sec" style="margin:2px 0">${esc(m.s)}: ${m.b.map(b=>b.split(' ').map(sf).join(' ')).join(' | ')}</p>`).join('')}<p class="note">${md==='minor'?'Minor key, so home is la. ':''}Each | is a barline. Sing each chord's root on its sol-fa name while the band plays.${cp?' The capo moves the pitch, not the sol-fa names.':''}</p><p>${entry}</p><ol>${(FORM[s.id]||s.song.form||s.song.map.map(m=>[m.s,1])).map(([n,r])=>{const sec=s.song.map.find(m=>m.s===n);return `<li>${esc(n)}${r>1?' ×'+r:''}: ${sec?sec.b.length:'?'} bars</li>`}).join('')}<li>Outro: hold the last note with the home chord</li></ol><p class="note">Lyrics aren't reproduced here: learn them from the recording.</p></div>`}
  return ''}
 /* road map chart */
-function roadmap(s){const sg=s.song,p=PAT[s.pat],beats=p.m===4?4:p.m===3?3:2,narrow=window.innerWidth<700,bpl=narrow?4:8,W=narrow?340:1000,x0=44,bw=(W-x0-12)/bpl,LH=84;
+function roadmap(s){const sg=s.song,p=PAT[s.pat],beats=p.m===4?4:p.m===3?3:2,narrow=window.innerWidth<700,big=view==='gig'&&document.body.classList.contains('present'),bpl=big?(narrow?2:4):narrow?4:8,W=big?(narrow?196:520):narrow?340:1000,x0=44,bw=(W-x0-12)/bpl,LH=84;
  let y=6,gi=0,prev='',body='',lines=0;const cnt=p.m===4?'1 · 2 · 1 2 3 4':p.m===3?'1 2 3':'1 2 3 4 5 6';const total=sg.map.reduce((a,m)=>a+m.b.length,0);
  const bp=bandPat(s),fe=bp!==p?FIN.find(f=>f.k===S.finish).n:'',miss=feelMiss(s);const head=`<div class="row" style="margin:0 0 6px"><span class="note">Target ${s.tgt} ${unit(p)} · count in: ${cnt} · whole band, ${p.m===6?'6/8':p.m+'/4'}${p.sw&&!fe?' · swing the quavers':''}${fe?' · band plays the '+fe+' feel':''}</span><button data-tgt="${s.tgt}">Set metronome to target</button></div>${miss?`<p class="note feel-miss" style="margin:0 0 6px"><b style="font-weight:500;color:var(--ink)">${esc(miss)}</b></p>`:''}${sg.pick?`<p class="note" style="margin:0 0 6px">${sg.pick}</p>`:''}`;
  sg.map.forEach((sec,si)=>{for(let li=0;li*bpl<sec.b.length;li++){const row=sec.b.slice(li*bpl,li*bpl+bpl);const top=y;prev='';
@@ -498,7 +498,7 @@ const gigS=()=>{let G=S.gig;if(!G||typeof G!=='object'||Array.isArray(G))G=S.gig
  if(!Array.isArray(G.songs))G.songs=GDEF.slice();else{const ok=[...new Set(G.songs.filter(id=>typeof id==='string'&&GIG.some(g=>g.id===id)))].slice(0,4);G.songs=G.songs.length&&!ok.length?GDEF.slice():ok}
  G.bands=(Array.isArray(G.bands)?G.bands:[]).filter(b=>b&&typeof b==='object'&&!Array.isArray(b)).slice(0,12).map((b,i)=>{const m={},src=b.m&&typeof b.m==='object'?b.m:{};IK.forEach(r=>{const v=src[r];if(typeof v==='string'&&v.trim())m[r]=v.slice(0,40)});return {name:typeof b.name==='string'&&b.name.trim()?b.name.slice(0,40):'Band '+(i+1),m}});
  if(!G.bands.length)G.bands=[{name:'Band 1',m:{}}];
- G.block=typeof G.block==='number'&&G.block>=5&&G.block<=60?Math.round(G.block):20;if(typeof G.rotate!=='boolean')G.rotate=true;
+ G.block=typeof G.block==='number'&&G.block>=5&&G.block<=60?Math.round(G.block):20;if(typeof G.rotate!=='boolean')G.rotate=true;G.useFin=G.useFin===true;
  if(!GIG.some(g=>g.id===G.open))G.open=G.songs[0]||GIG[0].id;
  G.bpm=typeof G.bpm==='number'&&G.bpm>=30&&G.bpm<=200?Math.round(G.bpm):GIG.find(g=>g.id===G.open).tgt;return G};
 const gigOpen=()=>GIG.find(x=>x.id===gigS().open)||GIG[0];
@@ -516,7 +516,7 @@ function renderGig(){const G=gigS();save();const g=gigOpen();
  <div class="stk"><div class="card"><h3>Timer</h3><div class="gt" id="gtime" role="timer" aria-live="off">${gt?'':'0:00'}</div><div class="row"><button id="gblock" data-gtime="${G.block}">Whole block: ${G.block} min</button>${[5,10,15,20].map(m=>`<button data-gtime="${m}">${m} min</button>`).join('')}<button id="gstop">Stop</button><button id="present" aria-pressed="${document.body.classList.contains('present')}">Present</button></div><p class="note">Typical block: 10 minutes to set up, the rehearsal, then pack up. You'll hear a tick when the timer starts and three beeps when it ends.</p></div>
  <div class="card"><h3>3. Run sheet</h3><div id="gigRun">${gigRunH(G)}</div></div></div></div>
  <div class="card" id="gigSong" style="margin-top:16px;scroll-margin-top:120px"><div class="row"><div><div class="pd" style="font-size:30px">${esc(g.t)}</div><div class="meta">${esc(g.by)}${g.yr?' · '+g.yr:''}</div></div><div class="sp"></div>${g.q?`<a class="lk" href="${yt(g.q)}" target="_blank" rel="noopener">Find the original recording</a>`:''}</div>
- <p>${esc(g.story)}</p><div class="row" role="group" aria-label="Your instrument"><span class="note">Your part:</span>${INST.map(([k,n])=>`<button data-inst="${k}" aria-pressed="${S.inst===k}">${n}</button>`).join('')}</div><div id="gigPart" style="margin:10px 0">${S.inst==='guitar'?`<div class="boxes">${g.ch.map(c=>box(c,g.key)).join('')}</div>`:partPanel(g,0)}</div>${roadmap(g)}<div class="row"><button id="playGig">${playing==='gig'?'Stop':'Play the chart'}</button><span class="note">The whole band always plays here, whatever is switched off on the Path; charted in A for the gig. Recordings vary in key and in bars 10 and 12: listen and adjust.</span></div><p class="note" id="gigTempoNote">${g.tgt} bpm is a practice tempo. ${g.q?'The recording is quicker: work up to it once the changes are clean.':'Push it up once the changes are clean.'}</p></div>`}
+ <p>${esc(g.story)}</p><div class="row" role="group" aria-label="Your instrument"><span class="note">Your part:</span>${INST.map(([k,n])=>`<button data-inst="${k}" aria-pressed="${S.inst===k}">${n}</button>`).join('')}</div><div id="gigPart" style="margin:10px 0">${S.inst==='guitar'?`<div class="boxes">${g.ch.map(c=>box(c,g.key)).join('')}</div>`:partPanel(g,0)}</div>${roadmap(g)}<div class="row" role="group" aria-label="Gig feel" style="margin-bottom:8px"><span class="note">Gig feel:</span><button data-gpat="0" aria-pressed="${!G.useFin}">Song's own feel</button><button data-gpat="1" aria-pressed="${G.useFin}">${FIN.find(f=>f.k===S.finish).n} feel</button><span class="note">Each gig song plays in its own feel unless you switch here. This switch is the Gig's own: the Path keeps its setting.</span></div><div class="row"><button id="playGig">${playing==='gig'?'Stop':'Play the chart'}</button><span class="note">The whole band always plays here, whatever is switched off on the Path; charted in A for the gig. Recordings vary in key and in bars 10 and 12: listen and adjust.</span></div><p class="note" id="gigTempoNote">${g.tgt} bpm is a practice tempo. ${g.q?'The recording is quicker: work up to it once the changes are clean.':'Push it up once the changes are clean.'}</p></div>`}
 /* record */
 const JPH={guitar:['Listened for the pull from E7 to Am','Changes at 70 bpm, two clean runs','The small F buzzes on the B string'],bass:['Listened for the bass under the chord changes','Roots on 1 and 3 at 70 bpm, two clean runs','I rush into the D bar'],drums:['Listened for where the snare sits','Four bars of the grid at 70 bpm, twice','My fill into the next section runs long'],keys:['Listened for the pull from E7 to Am','Changes at 70 bpm, two clean runs','I lose the F chord when I look up'],vocals:['Listened for where the voice comes in','Roots in sol-fa through the chart, twice','I go flat on fa when the band gets loud']};
 function renderRecord(){const s=stage(),iname=INST.find(x=>x[0]===S.inst)[1],mc=myChg();const rows=ST.map((x,i)=>`<tr><td>${i+1}. ${esc(x.title)}</td><td>${done(x)} / 5</td><td>${passed(x)?'Gate passed'+(S.gates[gk(x)]?', '+audDate(S.gates[gk(x)]):''):'–'}</td></tr>`).join('');
@@ -574,8 +574,10 @@ let metro=null,timerLeft=0,tmr=null,seqT=[],playing=false,confirmLower=null;
 const home=s=>s.ch.find(c=>/^(I|i)$/.test(fnOf(s.key,c)[0]))||s.ch[0];
 function formBars(s){const sg=s.song,idx=[];let off=0;const start={};sg.map.forEach(m=>{start[m.s]=off;off+=m.b.length});
  (FORM[s.id]||sg.form||sg.map.map(m=>[m.s,1])).forEach(([n,r])=>{const m=sg.map.find(x=>x.s===n);if(!m)return;for(let k=0;k<r;k++)m.b.forEach((b,i)=>idx.push({c:b,i:start[n]+i}))});return idx}
-function feelMiss(s){if(!S.useFin)return '';const f=FIN.find(f=>f.k===S.finish),fp=finPat(s),sp=PAT[s.pat];return fp&&fp.b===sp.b?'':`The band can't follow the ${f.n} feel on this song: its count doesn't fit one bar of ${sp.m===6?'6/8':sp.m+'/4'}. The band keeps the stage pattern; the metronome still plays the feel.`}
-function bandPat(s){const sp=PAT[s.pat];if(!S.useFin)return sp;const fp=finPat(s);return fp&&fp.b===sp.b?Object.assign({},fp,{m:sp.m}):sp}
+/* the Path and the Gig each keep their own feel switch (0.7): a gig song plays its own feel unless the Gig switch is on */
+const finOn=s=>GIG.includes(s)?!!gigS().useFin:S.useFin;
+function feelMiss(s){if(!finOn(s))return '';const f=FIN.find(f=>f.k===S.finish),fp=finPat(s),sp=PAT[s.pat];return fp&&fp.b===sp.b?'':`The band can't follow the ${f.n} feel on this song: its count doesn't fit one bar of ${sp.m===6?'6/8':sp.m+'/4'}. The band keeps the stage pattern; the metronome still plays the feel.`}
+function bandPat(s){const sp=PAT[s.pat];if(!finOn(s))return sp;const fp=finPat(s);return fp&&fp.b===sp.b?Object.assign({},fp,{m:sp.m}):sp}
 async function playSeq(bars,kind,s){const a=A();if(!a)return;stopAll();const my=++runId;if(metro)stopMetro();try{await a.resume()}catch(e){}if(my!==runId)return;s=s||stage();playing=kind;const p=bandPat(s),beat=60/bpm(),cs=cells(p),n=cs.length,free=kind==='loop';
  const P=k=>free||kind==='gig'?out():part(k),dp=drumPat(p);let t=a.currentTime+.15;
  if(p.m===4){[0,2].forEach(k=>click(t+k*beat,k===0));t+=4*beat;for(let k=0;k<4;k++)click(t+k*beat,k===0);t+=4*beat}
@@ -605,7 +607,7 @@ function all(){renderFinish();if(view==='path'){renderNext();renderNeck();render
 function refocus(sel){const el=document.querySelector(sel);if(el)el.focus()}
 let focusView=false,pendingFocus=null;
 document.addEventListener('click',e=>{if(e.target.closest('#tabs a')||e.target.closest('#next a'))focusView=true;const t=e.target.closest('button');if(!t)return;if(!(t.dataset.lv&&t.dataset.lv===confirmLower&&t.dataset.dir==='-1'))confirmLower=null;
- if(t.dataset.fin){if(t.dataset.fin===S.finish)return;const was=playing&&S.useFin&&playing!=='loop';S.finish=t.dataset.fin;save();if(was)stopAll();all();restartMetro();refocus(`[data-fin="${t.dataset.fin}"]`);const ms=view==='path'?feelMiss(stage()):'';if(was||ms)toast((was?'Feel changed, so the band has stopped. Press Play again. ':'')+ms,ms?7000:0)}
+ if(t.dataset.fin){if(t.dataset.fin===S.finish)return;const was=playing==='gig'?gigS().useFin:playing==='map'&&S.useFin;S.finish=t.dataset.fin;save();if(was)stopAll();all();restartMetro();refocus(`[data-fin="${t.dataset.fin}"]`);const ms=view==='path'?feelMiss(stage()):'';if(was||ms)toast((was?'Feel changed, so the band has stopped. Press Play again. ':'')+ms,ms?7000:0)}
  else if(t.dataset.st&&t.dataset.st===S.stage&&view==='path'){t.focus()}
  else if(t.dataset.st){pendingFocus=`[data-st="${t.dataset.st}"]`;try{location.hash=t.dataset.st}catch(err){S.stage=t.dataset.st;all()}}
  else if(t.dataset.strum)strum(t.dataset.strum)
@@ -615,6 +617,7 @@ document.addEventListener('click',e=>{if(e.target.closest('#tabs a')||e.target.c
   confirmLower=null;const sg=ST.find(x=>k.split(/[:@]/)[0]===x.id),wasP=sg&&passed(sg);S.lv[k]=n;if(n<o&&S.sign[k]){delete S.sign[k];toast('Level lowered: teacher sign-off cleared')}else if(wasP&&!passed(sg))toast(`Stage ${ST.indexOf(sg)+1}'s gate closes until this step is back at Consistent.`);checkGates();save();all();refocus(`[data-lv="${k}"][data-dir="${d}"]`)}
  else if(t.dataset.sign){const k=t.dataset.sign;if(S.sign[k])delete S.sign[k];else S.sign[k]=Date.now();save();renderStage();refocus(`[data-sign="${k}"]`)}
  else if(t.dataset.pat){const nf=t.dataset.pat==='1',chg=nf!==S.useFin,was=chg&&playing;S.useFin=nf;save();if(was)stopAll();const r=!!metro;stopMetro();all();if(r)startMetro();mUI();refocus(`[data-pat="${t.dataset.pat}"]`);const ms=feelMiss(stage());if(was||(chg&&ms))toast((was?'Feel changed, so the band has stopped. Press Play again. ':'')+ms,ms?7000:0)}
+ else if(t.dataset.gpat){const G=gigS(),nf=t.dataset.gpat==='1',chg=nf!==G.useFin,was=chg&&playing;G.useFin=nf;save();if(was)stopAll();renderGig();restartMetro();mUI();refocus(`[data-gpat="${t.dataset.gpat}"]`);if(was)toast('Feel changed, so the band has stopped. Press Play again.')}
  else if(t.id==='nswBtn'){S.nsw=!S.nsw;save();all()}
  else if(t.id==='tchBtn'){S.teacher=!S.teacher;save();all()}
  else if(t.classList.contains('m-toggle')){if(metro)stopMetro();else{if(playing)stopAll();startMetro()}mUI()}
@@ -627,7 +630,7 @@ document.addEventListener('click',e=>{if(e.target.closest('#tabs a')||e.target.c
  else if(t.id==='delBand'){const G=gigS();if(G.bands.length>1)G.bands.pop();save();renderGig();refocus('#addBand')}
  else if(t.dataset.gtime){const m=+t.dataset.gtime;if(!(m>0&&m<=60))return;clearInterval(gt);const a0=A();if(a0){try{a0.resume()}catch(err){}click(a0.currentTime+.03,0)}gtEnd=Date.now()+m*60000;const tk=()=>{const r=Math.max(0,Math.ceil((gtEnd-Date.now())/1000));const el=$('gtime');if(el)el.textContent=Math.floor(r/60)+':'+String(r%60).padStart(2,'0');if(!r){clearInterval(gt);gt=null;const a=A();if(a){const beep=()=>[0,.3,.6].forEach(x=>click(a.currentTime+x,1));if(a.state==='running')beep();else{try{a.resume().then(beep,()=>{})}catch(err){}}}toast('Time: change over.')}};tk();gt=setInterval(tk,250)}
  else if(t.id==='gstop'){clearInterval(gt);gt=null;const el=$('gtime');if(el)el.textContent='0:00'}
- else if(t.id==='present'){const on=document.body.classList.toggle('present');t.setAttribute('aria-pressed',on);toast(on?'Present mode: setup is hidden, run sheet and chart are enlarged. Press Present again to go back.':'Present mode off')}
+ else if(t.id==='present'){const on=document.body.classList.toggle('present');renderGig();refocus('#present');toast(on?'Present mode: setup is hidden; the run sheet, its phase headings and the chart are enlarged. Press Present again to go back.':'Present mode off')}
  else if(t.id==='copyGig'){const txt=gigText(gigS());try{navigator.clipboard.writeText(txt).then(()=>toast('Gig list copied'),()=>{$('gigTxt').classList.remove('hide');toast('Copy isn\'t available here: select the text below instead.')})}catch(err){$('gigTxt').classList.remove('hide')}}
  else if(t.id==='bkDown')bkDownload()
  else if(t.id==='bkCopy')bkCopy()
@@ -638,7 +641,7 @@ document.addEventListener('click',e=>{if(e.target.closest('#tabs a')||e.target.c
  else if(t.dataset.inst){S.inst=t.dataset.inst;save();all();refocus(`[data-inst="${S.inst}"]`);toast(INST.find(x=>x[0]===S.inst)[1]+': your steps, gates and record are now for this instrument.')}
  else if(t.dataset.mute){const k=t.dataset.mute;S.mute[k]=!S.mute[k];save();t.setAttribute('aria-pressed',!S.mute[k]);if(bus[k])bus[k].gain.value=S.mute[k]?0:1}
  else if(t.dataset.tgt){setBpm(t.dataset.tgt);mUI();if(!tempoStop())toast('Metronome set to '+bpm()+' bpm')}
- else if(t.dataset.capo){if(playing)stopAll();const s=stage();S.capo[s.id]=Math.max(0,Math.min(7,capo()+(+t.dataset.capo)));if(!S.capo[s.id])delete S.capo[s.id];save();renderStage();refocus(`[data-capo="${t.dataset.capo}"]`);toast((capo()?'Capo '+capo():'No capo')+': sounds in '+sounds(s)+'.')}
+ else if(t.dataset.capo){if(playing)stopAll();const s=stage();S.capo[s.id]=Math.max(0,Math.min(7,capo()+(+t.dataset.capo)));if(!S.capo[s.id])delete S.capo[s.id];save();renderStage();renderSide();refocus(`[data-capo="${t.dataset.capo}"]`);toast((capo()?'Capo '+capo():'No capo')+': sounds in '+sounds(s)+'.')}
  else if(t.id==='timer'){if(tmr){clearInterval(tmr);tmr=null;timerLeft=0;t.textContent='Start 60 s';toast('Timer cancelled');return}A();timerLeft=60;t.textContent='60 s';const end=Date.now()+60000;tmr=setInterval(()=>{timerLeft=Math.max(0,Math.ceil((end-Date.now())/1000));const b=$('timer');if(b)b.textContent=timerLeft?timerLeft+' s':'Start 60 s';if(!timerLeft){clearInterval(tmr);tmr=null;const a=A();if(a){click(a.currentTime,1);click(a.currentTime+.15,1)}toast('Time. Count your changes and log them.');if($('cnt'))$('cnt').focus()}},250)}
  else if(t.id==='logChg'){const v=parseInt($('cnt').value,10);if(!(v>=0&&v<=200)){toast('Enter the number of changes, 0 to 200');return}const s=stage();S.changes.push({d:Date.now(),st:s.id,inst:S.inst,pair:s.pair.join('-'),n:v});save();renderSide();refocus('#logChg');toast('Logged '+v+' changes'+(v>=CPM(s)[1]?': Applied target met':v>=CPM(s)[0]?': Consistent target met':''))}});
 document.addEventListener('input',e=>{const t=e.target,d=t.dataset;if(t.id==='bkIn'){bk.inTxt=t.value;return}if(t.classList.contains('m-bpm')){setBpm(t.value);mUI();tempoStop()}
