@@ -1921,3 +1921,30 @@ def test_version_0_9_newer_backup_message_names_this_version(app):
     msg = text(pg, "#bkMsg")
     assert "newer version of The Guitar Lab than this one (0.9)" in msg and "Nothing has been changed" in msg and "0.8" not in msg, msg
     assert raw(pg) == before and not pg.errors
+
+
+# 0.9 independent check C3: the start-up storage check must not rewrite an existing save
+# (with two tabs open, a rewrite of older text could overwrite newer progress).
+_C3_INIT = """
+localStorage.setItem('shredder', JSON.stringify({inst:'bass'}));
+window.__writes = 0;
+const _set = Storage.prototype.setItem;
+Storage.prototype.setItem = function(k, v){ window.__writes++; return _set.call(this, k, v); };
+"""
+
+
+def test_C3_startup_check_never_rewrites_existing_save(browser):
+    import uihelp
+    ctx = browser.new_context()
+    try:
+        ctx.add_init_script(_C3_INIT)
+        pg = ctx.new_page()
+        pg.goto(uihelp.URL)
+        pg.wait_for_timeout(300)
+        before_any_action = pg.evaluate("()=>window.__writes")
+        stored = pg.evaluate("()=>localStorage.getItem('shredder')")
+    finally:
+        ctx.close()
+    # the seeding write in the init script is counted before the wrapper exists, so it isn't counted
+    assert before_any_action == 0, f"page wrote to storage {before_any_action} time(s) on load with a save present"
+    assert stored is not None

@@ -64,3 +64,8 @@ None are Must or Should. Nothing here blocks 0.9.
 | `check_scripts/adhoc.py` | First-visit save step by step against 0.8; other "save/keep" wording in a blocked frame | `results/adhoc.txt` |
 
 Run from `tests/reports/spec09/check_scripts/` with `python3 <script>`.
+
+## Main-session follow-up (Opus, 27 Nov)
+- **C3 fixed before merge** (named per build-method §3: a new risk to saved progress introduced in 0.9). `canStore` now returns straight away when a save exists, so an existing save is never rewritten at start-up; only a first visit probes with a write-then-remove. New test `test_C3_startup_check_never_rewrites_existing_save` passes on the fix and fails on the pre-fix build (`b5740d8`).
+- Full suites after the fix: **383/383** (163 + 214 + 6). Not re-checked independently: the change is three lines and covered by the new test plus the U1 tests.
+- C1, C2, C4, C5 carried to register 0.9 for Justin.
