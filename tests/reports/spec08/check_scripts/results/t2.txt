@@ -1,0 +1,10 @@
+combos 120 fails 0
+outside the spec widths (320, not Present): 24 combos scroll inside the card, e.g. ('grid scrolls (non-present)', {'w': 320, 'song': 'g-boogie', 'feel': 'own', 'cols': 9, 'wrapSW': 250, 'wrapCW': 250, 'font': 12.48, 'cellW': 18.8, 'nonFont': 13, 'nonCellW': 22, 'nonSW': 269, 'nonCW': 250, 'page': [320, 320], 'clipped': 0})
+320 cols [5, 9] maxSW-CW 0 present font 12.48 - 12.48 non-present font [13] present cellW 18.8 - 26.9 non cellW 22 - 22
+   widest: {'w': 320, 'song': 'g-boogie', 'feel': 'own', 'cols': 9, 'wrapSW': 250, 'wrapCW': 250, 'font': 12.48, 'cellW': 18.8, 'nonFont': 13, 'nonCellW': 22, 'nonSW': 269, 'nonCW': 250, 'page': [320, 320], 'clipped': 0}
+360 cols [5, 9] maxSW-CW 0 present font 14.04 - 14.04 non-present font [13] present cellW 21.5 - 30.7 non cellW 22 - 22
+   widest: {'w': 360, 'song': 'g-boogie', 'feel': 'own', 'cols': 9, 'wrapSW': 290, 'wrapCW': 290, 'font': 14.04, 'cellW': 21.5, 'nonFont': 13, 'nonCellW': 22, 'nonSW': 290, 'nonCW': 290, 'page': [360, 360], 'clipped': 0}
+768 cols [5, 9] maxSW-CW 0 present font 29.952 - 29.952 non-present font [15] present cellW 44.4 - 44.4 non cellW 30.7 - 30.7
+   widest: {'w': 768, 'song': 'g-boogie', 'feel': 'own', 'cols': 9, 'wrapSW': 669, 'wrapCW': 669, 'font': 29.952, 'cellW': 44.4, 'nonFont': 15, 'nonCellW': 30.7, 'nonSW': 669, 'nonCW': 669, 'page': [768, 768], 'clipped': 0}
+1280 cols [5, 9] maxSW-CW 0 present font 34 - 34 non-present font [15] present cellW 48.1 - 48.1 non cellW 30.7 - 30.7
+   widest: {'w': 1280, 'song': 'g-boogie', 'feel': 'own', 'cols': 9, 'wrapSW': 1140, 'wrapCW': 1140, 'font': 34, 'cellW': 48.1, 'nonFont': 15, 'nonCellW': 30.7, 'nonSW': 1100, 'nonCW': 1100, 'page': [1280, 1280], 'clipped': 0}

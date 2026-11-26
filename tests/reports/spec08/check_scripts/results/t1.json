@@ -1,0 +1,200 @@
+{
+ "dark | path a-e capo0": {
+  "lb": [
+   "#a47510"
+  ],
+  "ub": [
+   "#12100b"
+  ],
+  "lw": [
+   "#7a5c12"
+  ],
+  "uw": [
+   "#ece2c8"
+  ],
+  "txt": [
+   "#12100b"
+  ],
+  "dom": "#d0574b",
+  "sub": "#b3a98f",
+  "hi": "#f0d48a",
+  "n_keyboards": 2,
+  "m": {
+   "lit_black_vs_white_key": 3.17,
+   "lit_black_vs_unlit_black": 4.64,
+   "lit_black_vs_lit_white": 1.52,
+   "label_on_lit_black": 4.64,
+   "lit_black_vs_dom": 1.0,
+   "lit_black_vs_sub": 1.75,
+   "hue_deg": 41,
+   "sat": 0.82,
+   "light": 0.35
+  },
+  "console": []
+ },
+ "dark | path a-e capo2": {
+  "lb": [
+   "#a47510"
+  ],
+  "ub": [
+   "#12100b"
+  ],
+  "lw": [
+   "#7a5c12"
+  ],
+  "uw": [
+   "#ece2c8"
+  ],
+  "txt": [
+   "#12100b"
+  ],
+  "dom": "#d0574b",
+  "sub": "#b3a98f",
+  "hi": "#f0d48a",
+  "n_keyboards": 2,
+  "m": {
+   "lit_black_vs_white_key": 3.17,
+   "lit_black_vs_unlit_black": 4.64,
+   "lit_black_vs_lit_white": 1.52,
+   "label_on_lit_black": 4.64,
+   "lit_black_vs_dom": 1.0,
+   "lit_black_vs_sub": 1.75,
+   "hue_deg": 41,
+   "sat": 0.82,
+   "light": 0.35
+  },
+  "console": []
+ },
+ "dark | gig": {
+  "lb": [
+   "#a47510"
+  ],
+  "ub": [
+   "#12100b"
+  ],
+  "lw": [
+   "#7a5c12"
+  ],
+  "uw": [
+   "#ece2c8"
+  ],
+  "txt": [
+   "#12100b"
+  ],
+  "dom": "#d0574b",
+  "sub": "#b3a98f",
+  "hi": "#f0d48a",
+  "n_keyboards": 3,
+  "m": {
+   "lit_black_vs_white_key": 3.17,
+   "lit_black_vs_unlit_black": 4.64,
+   "lit_black_vs_lit_white": 1.52,
+   "label_on_lit_black": 4.64,
+   "lit_black_vs_dom": 1.0,
+   "lit_black_vs_sub": 1.75,
+   "hue_deg": 41,
+   "sat": 0.82,
+   "light": 0.35
+  },
+  "console": []
+ },
+ "light | path a-e capo0": {
+  "lb": [
+   "#a47510"
+  ],
+  "ub": [
+   "#12100b"
+  ],
+  "lw": [
+   "#7a5c12"
+  ],
+  "uw": [
+   "#ece2c8"
+  ],
+  "txt": [
+   "#12100b"
+  ],
+  "dom": "#a8352b",
+  "sub": "#5e5340",
+  "hi": "#7a5c12",
+  "n_keyboards": 2,
+  "m": {
+   "lit_black_vs_white_key": 3.17,
+   "lit_black_vs_unlit_black": 4.64,
+   "lit_black_vs_lit_white": 1.52,
+   "label_on_lit_black": 4.64,
+   "lit_black_vs_dom": 1.6,
+   "lit_black_vs_sub": 1.84,
+   "hue_deg": 41,
+   "sat": 0.82,
+   "light": 0.35
+  },
+  "console": []
+ },
+ "light | path a-e capo2": {
+  "lb": [
+   "#a47510"
+  ],
+  "ub": [
+   "#12100b"
+  ],
+  "lw": [
+   "#7a5c12"
+  ],
+  "uw": [
+   "#ece2c8"
+  ],
+  "txt": [
+   "#12100b"
+  ],
+  "dom": "#a8352b",
+  "sub": "#5e5340",
+  "hi": "#7a5c12",
+  "n_keyboards": 2,
+  "m": {
+   "lit_black_vs_white_key": 3.17,
+   "lit_black_vs_unlit_black": 4.64,
+   "lit_black_vs_lit_white": 1.52,
+   "label_on_lit_black": 4.64,
+   "lit_black_vs_dom": 1.6,
+   "lit_black_vs_sub": 1.84,
+   "hue_deg": 41,
+   "sat": 0.82,
+   "light": 0.35
+  },
+  "console": []
+ },
+ "light | gig": {
+  "lb": [
+   "#a47510"
+  ],
+  "ub": [
+   "#12100b"
+  ],
+  "lw": [
+   "#7a5c12"
+  ],
+  "uw": [
+   "#ece2c8"
+  ],
+  "txt": [
+   "#12100b"
+  ],
+  "dom": "#a8352b",
+  "sub": "#5e5340",
+  "hi": "#7a5c12",
+  "n_keyboards": 3,
+  "m": {
+   "lit_black_vs_white_key": 3.17,
+   "lit_black_vs_unlit_black": 4.64,
+   "lit_black_vs_lit_white": 1.52,
+   "label_on_lit_black": 4.64,
+   "lit_black_vs_dom": 1.6,
+   "lit_black_vs_sub": 1.84,
+   "hue_deg": 41,
+   "sat": 0.82,
+   "light": 0.35
+  },
+  "console": []
+ }
+}
