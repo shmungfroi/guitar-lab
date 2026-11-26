@@ -42,7 +42,7 @@ cream in both themes, so one colour serves both.
 | Note name on the key (`#12100b` text) | 4.64:1 |
 
 Hue 41°, saturation 0.90, so it reads as gold. The dominant reds sit at about 5° and the subtonic colours are far less saturated
-(0.20 to 0.34). The tests check hue and saturation as well as "not equal". Its lightness is the same as the dark-mode dominant
+(0.20 to 0.32). The tests check hue and saturation as well as "not equal". Its lightness is the same as the dark-mode dominant
 `#d0574b` (1.00:1 between them), so it is told apart from the red by hue alone. They never share a keyboard.
 
 Q2 colours are untouched: `--dom` is still `#d0574b` dark / `#a8352b` light, and the T1 test asserts both.
