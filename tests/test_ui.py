@@ -700,3 +700,281 @@ def test_S15_listen_for_the_entry(app, stage):
     assert not re.search(r"come in after the count-in|pickup", cs["all"], re.I), "specific pickup claim"
     pg2 = app(state={"stage": stage}, hash_=stage)
     assert not re.search(r"pickup", text(pg2, "#stage"), re.I)
+
+# ===================================================================== register 0.7
+# One or more tests per item R1-R11 of tests/reports/spec07/SPEC_07.md (R6 and the data half
+# of R7 are in test_chords.py; R12 is the settle-wait in test_M3_keys_spelling_every_capo).
+
+import json
+import pathlib
+
+from uihelp import URL
+
+TS = 1764200000000
+# A full saved state in the app's own normal form: every field of the 0.7 shape is used.
+RICH = {
+    "finish": "rock", "stage": "c-g-f", "nsw": True, "teacher": False,
+    "lv": {"a-e:0": 2, "a-e:1": 2, "a-e:2": 3, "a-e:3": 2, "a-e:4": 2, "c-g-f@keys:0": 1, "r:pulse": 2, "t:power@bass": 1},
+    "sign": {"a-e:0": TS}, "marks": {"a-e:0": 1.5, "a-e:1": 2},
+    "changes": [{"d": TS, "st": "a-e", "inst": "guitar", "pair": "A-E", "n": 31},
+                {"d": TS + 5, "st": "beyond", "inst": "bass", "pair": "Bm-F#", "n": 12}],
+    "journal": [{"d": TS, "st": "a-e", "inst": "guitar", "h": "Heard the pull", "o": "Two clean runs", "w": "B string buzzes"},
+                {"d": TS + 9, "st": "c-g-f", "inst": "keys", "tag": "Invent", "h": "", "o": "Loop: C – F – G – C", "w": "Swap one voicing"}],
+    "bpm": 96, "useFin": True, "gates": {"a-e": TS}, "warm": {"2026-11-20": ["tune", "clap", "spider", "changes", "sing"]},
+    "best": {"r:pulse": 80, "r:pulse@bass": 70}, "capo": {"beyond": 4}, "mute": {"bass": True}, "inst": "keys",
+    "gig": {"songs": ["g-clock", "g-bamba", "g-hound", "g-shoes"],
+            "bands": [{"name": "Band 1", "m": {"guitar": "Player One", "drums": "Player Two"}}, {"name": "The Loud Ones", "m": {}}],
+            "block": 15, "rotate": False, "useFin": True, "open": "g-bamba", "bpm": 110},
+}
+POPUPS_JS = "()=>{window.__pop=[];for(const k of ['alert','confirm','prompt'])window[k]=(...a)=>{window.__pop.push(k+': '+a.join(' '));return k==='confirm'?true:''}}"
+CLIP_OK_JS = "()=>{window.__clip=null;Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:t=>{window.__clip=t;return Promise.resolve()}}})}"
+CLIP_BLOCKED_JS = "()=>{Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:()=>Promise.reject(new Error('blocked'))}})}"
+
+
+def raw(pg):
+    return pg.evaluate("()=>localStorage.getItem('shredder')")
+
+
+def copy_backup(pg):
+    pg.evaluate(CLIP_OK_JS)
+    pg.click("#bkCopy")
+    pg.wait_for_function("()=>window.__clip")
+    return pg.evaluate("()=>window.__clip")
+
+
+def offer(pg, txt):
+    pg.fill("#bkIn", txt)
+    pg.click("#bkImport")
+
+
+def test_R1_backup_panel_is_findable(app):
+    pg = app(state={})
+    foot = pg.locator(".foot a[href='#record']")
+    assert foot.count() == 1 and re.search(r"backup", foot.inner_text(), re.I), "footer should point to the backup"
+    foot.click()
+    pg.wait_for_selector("#backup")
+    card = text(pg, "#backup")
+    for label in ["Download backup", "Copy backup", "Choose a backup file", "Import pasted backup"]:
+        assert label in card, label
+    look = pg.evaluate("""()=>{const b=document.getElementById('bkDown'),o=document.getElementById('playMap')||document.querySelector('#jf button'),c=s=>getComputedStyle(s);
+      return [c(b).fontFamily===c(o).fontFamily,c(b).borderRadius===c(o).borderRadius,c(b).backgroundColor===c(o).backgroundColor,parseFloat(c(b).minHeight)>=44]}""")
+    assert all(look), f"backup buttons should match the app's own buttons: {look}"
+    assert not pg.errors
+
+
+def test_R1_export_import_round_trip_is_lossless(app):
+    a = app(state=RICH, hash_="record")
+    a.evaluate(POPUPS_JS)
+    txt = copy_backup(a)
+    assert "copied" in text(a, "#bkMsg").lower()
+    out = json.loads(txt)
+    assert out["app"] == "The Guitar Lab" and out["version"] == "0.7" and out["format"] == 1 and out["saved"]
+    assert out["state"] == RICH, "export must carry the full saved state unchanged"
+    with a.expect_download() as dl:
+        a.click("#bkDown")
+    assert re.fullmatch(r"guitar-lab-backup-\d{4}-\d\d-\d\d\.json", dl.value.suggested_filename)
+    assert json.loads(pathlib.Path(dl.value.path()).read_text(encoding="utf-8"))["state"] == RICH
+    assert a.evaluate("()=>window.__pop") == []
+
+    b = app(state={}, hash_="record")
+    b.evaluate(POPUPS_JS)
+    before = raw(b)
+    offer(b, txt)
+    ask = b.locator("#bkAsk")
+    assert "Replace your progress with this backup?" in ask.inner_text()
+    assert b.locator("#bkYes").is_visible() and b.locator("#bkNo").is_visible()
+    assert raw(b) == before, "nothing may change before the confirm is answered"
+    b.click("#bkYes")
+    assert state(b) == RICH, "import must restore the full state"
+    rec = text(b, "#v-record")
+    assert "Your path: Keys" in rec and "B string buzzes" in rec, "page should re-render from the imported state"
+    assert "imported" in text(b, "#bkMsg").lower() and b.locator("#bkYes").count() == 0
+    assert json.loads(copy_backup(b))["state"] == RICH, "second export differs from the first"
+    b.reload()
+    b.wait_for_selector("#backup")
+    assert state(b) == RICH and "Your path: Keys" in text(b, "#v-record"), "imported state must survive a reload"
+    go(b, "gig")
+    assert state(b) == RICH, "the gig plan came back in normal form"
+    assert b.evaluate("()=>window.__pop||[]") == [] and not a.errors and not b.errors
+
+
+def test_R1_import_accepts_a_raw_saved_state_and_old_saves(app):
+    old = {"finish": "flam", "stage": "am-e7", "lv": {"a-e:0": 2}, "bpm": 84, "inst": "guitar",
+           "changes": [{"d": TS, "st": "a-e", "pair": "A-E", "n": 20}], "journal": [{"d": TS, "st": "a-e", "h": "x", "o": "", "w": ""}],
+           "gig": {"songs": ["g-boogie"], "bands": [{"name": "Band 1", "m": {}}], "block": 20, "rotate": True}}
+    pg = app(state={}, hash_="record")
+    offer(pg, json.dumps(old))            # exactly what an older build left in localStorage
+    pg.click("#bkYes")
+    s = state(pg)
+    assert s["finish"] == "flam" and s["stage"] == "am-e7" and s["lv"] == {"a-e:0": 2} and s["bpm"] == 84
+    assert s["changes"][0]["inst"] == "guitar" and s["journal"][0]["inst"] == "guitar", "pre-0.6 entries are guitar's"
+    assert s["gig"]["songs"] == ["g-boogie"]
+    assert not pg.errors
+    # and the same old save still loads straight from storage
+    pg2 = app(state=old, hash_="gig")
+    s2 = state(pg2)
+    assert s2["lv"] == {"a-e:0": 2} and s2["gig"]["songs"] == ["g-boogie"]
+    assert not pg2.errors
+
+
+BAD = [
+    ("", r"nothing to import"),
+    ("   ", r"nothing to import"),
+    ("{not json", r"can't be read as JSON"),
+    (json.dumps({"app": "The Guitar Lab", "format": 1, "state": RICH})[:-40], r"can't be read as JSON"),   # cut short
+    ("[1,2,3]", r"isn't a Guitar Lab backup"),
+    ('"hello"', r"isn't a Guitar Lab backup"),
+    ("42", r"isn't a Guitar Lab backup"),
+    ("null", r"isn't a Guitar Lab backup"),
+    ('{"foo":1,"bar":[]}', r"none of the things this app saves"),
+    ('{"lv":[1,2],"journal":[]}', r'damaged: "lv"'),
+    ('{"lv":{},"journal":"none","bpm":"fast"}', r"damaged"),
+    ('{"journal":[1,2]}', r"damaged"),
+    (json.dumps({"app": "The Guitar Lab", "format": 99, "state": {"lv": {}}}), r"newer version"),
+]
+
+
+@pytest.mark.parametrize("bad,why", BAD)
+def test_R1_bad_backup_is_rejected_and_changes_nothing(app, bad, why):
+    pg = app(state=RICH, hash_="record")
+    pg.evaluate(POPUPS_JS)
+    before, shown = raw(pg), text(pg, "#v-record .card")
+    offer(pg, bad)
+    msg = pg.locator("#bkMsg .bkmsg.bad")
+    assert msg.is_visible() and re.search(why, msg.inner_text(), re.I), msg.inner_text()
+    assert "nothing has been changed" in msg.inner_text().lower() or "nothing to import" in msg.inner_text().lower()
+    assert pg.locator("#bkYes").count() == 0, "no confirm for a bad backup"
+    assert raw(pg) == before and text(pg, "#v-record .card") == shown
+    assert json.loads(copy_backup(pg))["state"] == RICH, "state in memory changed"
+    assert pg.evaluate("()=>window.__pop") == [] and not pg.errors
+
+
+def test_R1_confirm_box_cancel_changes_nothing(app):
+    pg = app(state=RICH, hash_="record")
+    pg.evaluate(POPUPS_JS)
+    before = raw(pg)
+    other = dict(RICH, inst="bass", lv={}, journal=[])
+    offer(pg, json.dumps(other))
+    box = pg.locator("#bkAsk .bkask")
+    assert box.is_visible() and "Replace your progress with this backup?" in box.inner_text()
+    assert "can't be undone" in box.inner_text()
+    assert pg.evaluate("()=>document.activeElement&&document.activeElement.id") == "bkNo", "Cancel should hold the focus"
+    pg.click("#bkNo")
+    assert pg.locator("#bkAsk .bkask").count() == 0
+    assert raw(pg) == before and "Your path: Keys" in text(pg, "#v-record")
+    assert "unchanged" in text(pg, "#bkMsg").lower()
+    assert json.loads(copy_backup(pg))["state"] == RICH
+    # a bad paste after a good one withdraws the question
+    offer(pg, json.dumps(other))
+    offer(pg, "{oops")
+    assert pg.locator("#bkYes").count() == 0 and raw(pg) == before
+    # leaving the tab withdraws it too
+    offer(pg, json.dumps(other))
+    go(pg, "path")
+    go(pg, "record")
+    assert pg.locator("#bkYes").count() == 0 and raw(pg) == before
+    assert pg.evaluate("()=>window.__pop") == [] and not pg.errors
+
+
+def test_R1_import_by_file_pick(app):
+    pg = app(state={}, hash_="record")
+    pg.evaluate(POPUPS_JS)
+    payload = json.dumps({"app": "The Guitar Lab", "format": 1, "version": "0.7", "saved": "2026-11-27T01:00:00.000Z", "state": RICH})
+    pg.set_input_files("#bkFile", {"name": "guitar-lab-backup-2026-11-27.json", "mimeType": "application/json", "buffer": payload.encode("utf-8")})
+    pg.wait_for_selector("#bkYes")
+    assert "27 Nov 2026" in text(pg, "#bkAsk"), "confirm should say when the backup was made"
+    assert state(pg) != RICH
+    pg.click("#bkYes")
+    assert state(pg) == RICH
+    pg.set_input_files("#bkFile", {"name": "notes.txt", "mimeType": "text/plain", "buffer": b"these are not the droids"})
+    pg.wait_for_selector("#bkMsg .bkmsg.bad")
+    assert state(pg) == RICH and pg.locator("#bkYes").count() == 0
+    assert pg.evaluate("()=>window.__pop") == [] and not pg.errors
+
+
+def test_R1_copy_falls_back_to_a_visible_textarea(app):
+    pg = app(state=RICH, hash_="record")
+    assert not pg.locator("#bkOut").is_visible()
+    pg.evaluate(CLIP_BLOCKED_JS)
+    pg.click("#bkCopy")
+    pg.wait_for_selector("#bkOut", state="visible")
+    assert json.loads(pg.input_value("#bkOut"))["state"] == RICH
+    assert re.search(r"box above", text(pg, "#bkMsg"))
+    sel = pg.evaluate("()=>{const t=document.getElementById('bkOut');return [document.activeElement===t,t.selectionStart,t.selectionEnd===t.value.length]}")
+    assert sel == [True, 0, True], "the fallback text should be focused and selected"
+    pg.evaluate("()=>{Object.defineProperty(navigator,'clipboard',{configurable:true,value:undefined})}")   # no clipboard API at all
+    pg.click("#bkCopy")
+    assert pg.locator("#bkOut").is_visible() and not pg.errors
+
+
+def test_R1_download_uses_the_viewer_capability_when_present(app):
+    pg = app(state=RICH, hash_="record")
+    pg.evaluate("""()=>{window.__saves=[];window.__mode='ok';window.claude={use:async n=>n==='downloads'?Object.freeze({save:async r=>{window.__saves.push(r);
+       if(window.__mode!=='ok')throw {code:window.__mode,message:'no'};return {status:'saved'}}}):null};
+      window.__anch=0;const c=HTMLAnchorElement.prototype.click;HTMLAnchorElement.prototype.click=function(){if(this.download)window.__anch++;return c.call(this)}}""")
+    pg.click("#bkDown")
+    pg.wait_for_function("()=>window.__saves.length===1")
+    sv = pg.evaluate("()=>window.__saves[0]")
+    assert re.fullmatch(r"guitar-lab-backup-\d{4}-\d\d-\d\d\.json", sv["filename"]) and json.loads(sv["data"])["state"] == RICH
+    pg.wait_for_function("()=>/saved as/i.test(document.getElementById('bkMsg').textContent)")
+    assert pg.evaluate("()=>window.__anch") == 0, "capability present: no blob link needed"
+    pg.evaluate("()=>{window.__mode='declined'}")
+    pg.click("#bkDown")
+    pg.wait_for_function("()=>/cancelled/i.test(document.getElementById('bkMsg').textContent)")
+    assert pg.evaluate("()=>window.__anch") == 0, "a declined save must not download behind the viewer's back"
+    pg.evaluate("()=>{window.__mode='unavailable'}")
+    with pg.expect_download() as dl:          # capability refuses: fall back to the plain link
+        pg.click("#bkDown")
+    assert dl.value.suggested_filename.endswith(".json") and not pg.errors
+
+
+def test_R1_works_in_a_sandboxed_frame(browser, tmp_path):
+    """Sandboxed iframe, no same-origin: storage, clipboard and downloads are all blocked. The panel must still export and import."""
+    host = tmp_path / "host.html"
+    host.write_text(f'<!doctype html><meta charset="utf-8"><iframe id="f" sandbox="allow-scripts" src="{URL}#record" style="width:1100px;height:1400px;border:0"></iframe>', encoding="utf-8")
+    ctx = browser.new_context(viewport={"width": 1200, "height": 1500})
+    pg = ctx.new_page()
+    errs = []
+    pg.on("pageerror", lambda e: errs.append(str(e)))
+    pg.goto(host.as_uri())
+    fr = pg.frames[1]
+    fr.wait_for_selector("#backup")
+    assert fr.evaluate("()=>{try{localStorage.getItem('x');return 'open'}catch(e){return 'blocked'}}") == "blocked", "frame is not sandboxed"
+    fr.evaluate(POPUPS_JS)
+    fr.click("#bkDown")                      # blocked or not, it must not throw and must say something
+    fr.wait_for_function("()=>document.getElementById('bkMsg').textContent.length>10")
+    assert re.search(r"Copy backup", fr.inner_text("#bkMsg"))
+    fr.click("#bkCopy")
+    fr.wait_for_selector("#bkOut", state="visible")
+    empty = json.loads(fr.input_value("#bkOut"))
+    assert empty["state"]["lv"] == {} and empty["state"]["inst"] == "guitar"
+    fr.fill("#bkIn", json.dumps({"app": "The Guitar Lab", "format": 1, "state": RICH}))
+    fr.click("#bkImport")
+    assert "Replace your progress with this backup?" in fr.inner_text("#bkAsk")
+    fr.click("#bkYes")
+    assert "Your path: Keys" in fr.inner_text("#v-record") and "B string buzzes" in fr.inner_text("#v-record")
+    fr.click("#bkCopy")
+    fr.wait_for_function("()=>{try{return JSON.parse(document.getElementById('bkOut').value).state.inst==='keys'}catch(e){return false}}")
+    assert json.loads(fr.input_value("#bkOut"))["state"] == RICH, "round trip inside the sandbox is not lossless"
+    fr.set_input_files("#bkFile", {"name": "b.json", "mimeType": "application/json", "buffer": json.dumps(dict(RICH, inst="drums")).encode()})
+    fr.wait_for_selector("#bkYes")
+    fr.click("#bkYes")
+    assert "Your path: Drums" in fr.inner_text("#v-record")
+    assert fr.evaluate("()=>window.__pop") == [] and not errs, errs
+    ctx.close()
+
+
+def test_R1_no_browser_popups_in_source():
+    src = pathlib.Path(URL.replace("file://", "")).read_text(encoding="utf-8")
+    assert not re.search(r"(?<![\w.$])(alert|confirm|prompt)\s*\(", src), "alert/confirm/prompt call in index.html"
+    assert "'shredder'" in src and len(re.findall(r"localStorage\.(get|set)Item\('([^']+)'", src)) == 2
+    assert {m[1] for m in re.findall(r"localStorage\.(get|set)Item\('([^']+)'", src)} == {"shredder"}
+    assert not re.search(r"\b(fetch|XMLHttpRequest|WebSocket|sendBeacon|importScripts)\b", src), "network call in index.html"
+    assert not re.search(r"<script[^>]+src=|<link[^>]+href=", src), "external script or stylesheet"
+
+
+def test_version_label_is_0_7(app):
+    pg = app(state={})
+    assert pg.title() == "The Guitar Lab 0.7"
+    assert "version 0.7" in text(pg, "header .sub")
+    assert "0.6" not in pg.evaluate("()=>document.body.innerText")

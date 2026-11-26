@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>The Guitar Lab 0.6</title>
+<title>The Guitar Lab 0.7</title>
 <style>
 /* VOICE: a patient guitar teacher in the Shmungfroi family: warm, exact, unhurried.
    IDEA: the guitar neck is the map; each fret is a stage, the inlays are the gates you earn.
    PICTURE: a rosewood neck across the top, chord boxes and fretboards coloured by harmonic function.
    COLOUR and TYPE: Garden black, ivory, gold; function colours reserved; Poiret One display, Outfit text (Garden font files).
-   LAYOUT: tabs (Path, Warm-up, Rudiments, Technique, Invent, Record); Path = neck, next-up line, stage beside a practice column. */
+   LAYOUT: tabs (Path, Warm-up, Rudiments, Technique, Invent, Gig, Record); Path = neck, next-up line, stage beside a practice column. */
 @font-face{font-family:'G Outfit';src:url(fonts/Outfit-Regular.ttf) format('truetype');font-weight:400;font-display:swap}
 @font-face{font-family:'G Outfit';src:url(fonts/Outfit-Bold.ttf) format('truetype');font-weight:500 700;font-display:swap}
 @font-face{font-family:'G Poiret';src:url(fonts/PoiretOne-Regular.ttf) format('truetype');font-display:swap}
@@ -105,6 +105,7 @@ table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px
 .chk input{width:24px;height:24px;min-height:0;margin-top:2px;accent-color:var(--fin)}
 .hide{display:none!important}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;max-width:92vw;background:var(--card);border:1px solid var(--hi);border-radius:12px;padding:12px 16px;font-size:15px;z-index:20}
+.bkmsg{border-left:3px solid var(--hi);padding:4px 0 4px 12px;margin:12px 0 0;font-size:14px}.bkmsg.bad{border-left-color:var(--dom)}.bkta{display:block;width:100%;margin-top:10px;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace}.bkask{margin-top:12px}.bkask p{margin:6px 0 10px;font-size:14px}
 .gate{border:1px solid var(--inlay);border-radius:16px;padding:14px 18px;background:color-mix(in srgb,var(--inlay) 10%,transparent)}
 @media(max-width:900px){.cols,.two{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:480px){.dg{font-size:13px}.dg th,.dg td{padding:5px 3px;min-width:22px}}
@@ -120,7 +121,7 @@ table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px
 <div class="wrap">
 <header>
 <div class="top">
-<div><h1>The Guitar Lab</h1><div class="sub">version 0.6 · a Shmungfroi instrument</div></div>
+<div><h1>The Guitar Lab</h1><div class="sub">version 0.7 · a Shmungfroi instrument</div></div>
 <div class="sp"></div>
 <div class="chips" role="group" aria-label="Finish" id="finishes"></div>
 </div>
@@ -148,7 +149,7 @@ table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px
 <section id="v-invent" class="view hide"></section>
 <section id="v-gig" class="view hide"></section>
 <section id="v-record" class="view hide"></section>
-<p class="note foot" style="padding-bottom:28px">Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. Progress is saved in this browser only. Fonts: Outfit and Poiret One, SIL Open Font License.</p>
+<p class="note foot" style="padding-bottom:28px">Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. Progress is saved in this browser only: <a href="#record">keep a backup from the Record tab</a>. Fonts: Outfit and Poiret One, SIL Open Font License.</p>
 </div>
 <div id="toast" class="toast hide" role="status" aria-live="polite"></div>
 
@@ -284,7 +285,10 @@ const PSTEPS=s=>{const p=PAT[s.pat],six=p.m===6,u=six?' bpm (dotted crotchet)':'
 const DEF={finish:'bossa',stage:'a-e',nsw:false,teacher:false,lv:{},sign:{},marks:{},changes:[],journal:[],bpm:70,useFin:false,gates:{},warm:{},best:{},capo:{},mute:{},inst:'guitar',gig:{}};
 const IK=['guitar','bass','drums','keys','vocals'];
 let S=JSON.parse(JSON.stringify(DEF));
-try{const L=JSON.parse(localStorage.getItem('shredder')||'{}');if(L&&typeof L==='object'&&!Array.isArray(L))for(const k in DEF){const v=L[k],d=DEF[k];if(v===undefined||v===null)continue;const ok=Array.isArray(d)?Array.isArray(v):typeof d==='object'?(typeof v==='object'&&!Array.isArray(v)):typeof v===typeof d;if(ok)S[k]=v}}catch(e){}
+const kindOK=(d,v)=>Array.isArray(d)?Array.isArray(v):typeof d==='object'?(typeof v==='object'&&!Array.isArray(v)):typeof v===typeof d;
+/* one way in for saved data: the page load and a backup import (0.7) both come through here, so an import is treated exactly like a reload */
+function loadState(L){S=JSON.parse(JSON.stringify(DEF));
+if(L&&typeof L==='object'&&!Array.isArray(L))for(const k in DEF){const v=L[k],d=DEF[k];if(v===undefined||v===null)continue;if(kindOK(d,v))S[k]=v}
 S.bpm=Math.min(200,Math.max(30,Math.round(+S.bpm)||70));S.teacher=false;if(!['guitar','bass','drums','keys','vocals'].includes(S.inst))S.inst='guitar';
 for(const k in S.lv){const v=S.lv[k];if(!(v>=0&&v<=3))delete S.lv[k];else S.lv[k]=Math.round(v)}
 S.changes=S.changes.filter(c=>c&&typeof c.n==='number'&&typeof c.pair==='string');S.journal=S.journal.filter(j=>j&&typeof j.d==='number');
@@ -292,7 +296,8 @@ for(const k in S.warm)if(!Array.isArray(S.warm[k]))delete S.warm[k];for(const k 
 for(const o of ['marks','best','gates','sign'])for(const k in S[o]){const v=+S[o][k];if(!isFinite(v))delete S[o][k];else S[o][k]=v}for(const k in S.mute)S.mute[k]=!!S.mute[k];S.changes=S.changes.filter(c=>typeof c.d==='number');
 /* 0.6: changes and journal entries carry their instrument; anything saved before 0.6 was guitar's. Rudiment, technique and best-tempo keys without an @instrument suffix are guitar's too. */
 S.changes.forEach(c=>{if(!IK.includes(c.inst))c.inst='guitar'});S.journal.forEach(j=>{if(!IK.includes(j.inst))j.inst='guitar'});
-if(!FIN.some(f=>f.k===S.finish))S.finish='bossa';if(!ST.some(s=>s.id===S.stage))S.stage='a-e';if(!Array.isArray(S.changes))S.changes=[];if(!Array.isArray(S.journal))S.journal=[];
+if(!FIN.some(f=>f.k===S.finish))S.finish='bossa';if(!ST.some(s=>s.id===S.stage))S.stage='a-e';if(!Array.isArray(S.changes))S.changes=[];if(!Array.isArray(S.journal))S.journal=[]}
+{let L=null;try{L=JSON.parse(localStorage.getItem('shredder')||'{}')}catch(e){}loadState(L)}
 const save=()=>{try{localStorage.setItem('shredder',JSON.stringify(S))}catch(e){}};
 const $=id=>document.getElementById(id);
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -520,10 +525,50 @@ function renderRecord(){const s=stage(),iname=INST.find(x=>x[0]===S.inst)[1],mc=
  <div class="card"><h3>Rudiments and techniques at Consistent or better: ${iname}</h3><p>${rd.length?rd.join(', '):'None yet.'}</p></div>
  <div class="card"><h3>Best tempos: ${iname}</h3><p>${RUD.map(r=>{const v=S.best[ik('r:'+r.id)];return v?esc(r.n)+': '+v+' bpm':''}).filter(Boolean).join(' · ')||'None logged yet.'}</p><h3 style="margin-top:12px">One-minute changes, best: ${iname}</h3><p>${[...new Set(mc.map(c=>c.pair))].map(pk=>esc(pk.replace('-',' ↔ ').replace('#','♯'))+': '+Math.max(...mc.filter(c=>c.pair===pk).map(c=>c.n))).join(' · ')||'None logged yet.'}</p></div>
  <div class="card"><h3>Teacher: ${iname}</h3><p><span id="signCount">${Object.keys(S.sign).filter(mineKey).length}</span> step${Object.keys(S.sign).filter(mineKey).length===1?'':'s'} signed off on ${iname.toLowerCase()}.${ST.filter(x=>[0,1,2,3,4].some(i=>S.marks[kk(x,i)]!==undefined)).map(x=>' '+esc(x.title)+': '+[0,1,2,3,4].reduce((a,i)=>a+(S.marks[kk(x,i)]||0),0)+' / 10.').join('')}</p></div>
- <div class="card"><h3>Warm-ups (all instruments)</h3><p>${Object.values(S.warm).filter(v=>v.length>=5).length} full warm-ups recorded.</p></div></div>
+ <div class="card"><h3>Warm-ups (all instruments)</h3><p>${Object.values(S.warm).filter(v=>v.length>=5).length} full warm-ups recorded.</p></div>${backupCard()}</div>
  <div><h3 style="font-size:18px;margin-top:8px">Journal</h3><p class="note">Hear, do, write: what you listened for, what you played, what you noticed. Each entry is tagged with the instrument you are on (${iname} now).</p><form id="jf" class="stk"><label>Hear<br><input id="jh" style="width:100%" placeholder="${JPH[S.inst][0]}"></label><label>Do<br><input id="jd" style="width:100%" placeholder="${JPH[S.inst][1]}"></label><label>Write<br><textarea id="jw" rows="2" style="width:100%" placeholder="${JPH[S.inst][2]}"></textarea></label><button>Save entry</button></form>
  <ul class="log">${S.journal.slice().sort((a,b)=>b.d-a.d).slice(0,12).map(j=>`<li><b style="font-weight:500">${audDate(j.d)}, ${esc((ST.find(x=>x.id===j.st)||{}).title||'')}</b><span class="tag jtag">${(INST.find(x=>x[0]===j.inst)||INST[0])[1]}</span>${typeof j.tag==='string'&&j.tag?`<span class="tag jtag">${esc(j.tag)}</span>`:''}: ${[j.h,j.o,j.w].filter(Boolean).map(esc).join(' · ')}</li>`).join('')}</ul></div></div>`;
  $('jf').onsubmit=e=>{e.preventDefault();const h=$('jh').value.trim(),o=$('jd').value.trim(),w=$('jw').value.trim();if(!h&&!o&&!w){toast('Write something in one of the three fields first');return}S.journal.push({d:Date.now(),st:s.id,inst:S.inst,h,o,w});save();renderRecord();refocus('#jh');toast('Entry saved')}}
+/* backup (0.7): the whole saved state out as JSON, and back in. Nothing here uses a browser pop-up or the network. */
+let bk={note:null,pend:null,inTxt:'',out:''},dlCap;
+/* a claude.ai artifact can hand files to its viewer; anywhere else this stays empty and the plain download link is used */
+const dlFind=()=>{if(dlCap!==undefined)return Promise.resolve(dlCap);try{const c=window.claude;if(c&&typeof c.use==='function')return Promise.resolve(c.use('downloads')).then(d=>dlCap=(d&&typeof d.save==='function')?d:null,()=>dlCap=null)}catch(e){}return Promise.resolve(null)};
+const backupObj=()=>{gigS();return {app:'The Guitar Lab',format:1,version:'0.7',saved:new Date().toISOString(),state:JSON.parse(JSON.stringify(S))}};
+const backupText=()=>JSON.stringify(backupObj(),null,1);
+const bkName=()=>'guitar-lab-backup-'+today()+'.json';
+const NOCHG=' Nothing has been changed.';
+/* returns {st,saved} for a usable backup, or {err} with a message for the page */
+function readBackup(txt){txt=String(txt||'').replace(/^﻿/,'').trim();if(!txt)return {err:'Nothing to import yet: choose a backup file, or paste the backup text into the box first.'};
+ if(txt.length>4e6)return {err:'That is too big to be a Guitar Lab backup.'+NOCHG};let o;
+ try{o=JSON.parse(txt)}catch(e){return {err:'That isn\'t a Guitar Lab backup: the text can\'t be read as JSON, so part of it may be missing or changed. Copy the whole backup, from the first { to the last }, and try again.'+NOCHG}}
+ const isO=v=>!!v&&typeof v==='object'&&!Array.isArray(v);if(!isO(o))return {err:'That isn\'t a Guitar Lab backup: a backup is one block of text that starts with { and ends with }.'+NOCHG};
+ const wrapped=isO(o.state)&&('format' in o||'app' in o),st=wrapped?o.state:o;
+ if(wrapped&&typeof o.format==='number'&&o.format>1)return {err:'That backup was made by a newer version of The Guitar Lab than this one (0.7), so it can\'t be read here.'+NOCHG};
+ const known=Object.keys(DEF).filter(k=>st[k]!==undefined&&st[k]!==null);if(!known.length)return {err:'That JSON isn\'t a Guitar Lab backup: it has none of the things this app saves (levels, journal, gig plan and so on).'+NOCHG};
+ const bad=known.filter(k=>!kindOK(DEF[k],st[k]));if(bad.length)return {err:'That backup is damaged: '+bad.map(k=>'"'+k+'"').join(', ')+(bad.length>1?' are':' is')+' not in the form this app saves.'+NOCHG};
+ if(Array.isArray(st.changes)&&st.changes.some(c=>!isO(c))||Array.isArray(st.journal)&&st.journal.some(j=>!isO(j)))return {err:'That backup is damaged: its practice log or journal has entries this app can\'t read.'+NOCHG};
+ return {st,saved:wrapped&&typeof o.saved==='string'&&isFinite(Date.parse(o.saved))?Date.parse(o.saved):0}}
+const bkCount=st=>{const n=(v,one,many)=>v+' '+(v===1?one:many),o=v=>v&&typeof v==='object'?v:{};return [n(Object.keys(o(st.lv)).filter(k=>st.lv[k]>0).length,'level set','levels set'),n((st.journal||[]).length,'journal entry','journal entries'),n((st.changes||[]).length,'one-minute log','one-minute logs'),n(Object.keys(o(st.warm)).length,'warm-up day','warm-up days')].join(', ')};
+function backupCard(){const q=bk.pend;return `<div class="card" id="backup"><h3>Backup</h3><p class="note" style="margin:0 0 10px">Your progress lives in this browser only. A backup holds all of it: every instrument's levels, gates and marks, the journal, the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device.</p>
+ <div class="row"><button id="bkDown">Download backup</button><button id="bkCopy">Copy backup</button></div>
+ <textarea id="bkOut" class="bkta${bk.out?'':' hide'}" rows="6" readonly aria-label="Backup text, to select and copy">${esc(bk.out)}</textarea>
+ <h3 style="margin:18px 0 6px">Bring a backup back</h3><div class="row"><button id="bkPick">Choose a backup file</button><input type="file" id="bkFile" class="sr" accept=".json,.txt,application/json,text/plain" tabindex="-1" aria-label="Backup file"><span class="note">or paste the backup text here:</span></div>
+ <textarea id="bkIn" class="bkta" rows="3" spellcheck="false" autocomplete="off" aria-label="Backup text to import" placeholder="{ … }">${esc(bk.inTxt)}</textarea>
+ <div class="row" style="margin-top:8px"><button id="bkImport">Import pasted backup</button><span class="note">You'll be asked before anything is replaced.</span></div>
+ <div id="bkAsk">${q?`<div class="gate bkask" role="group" aria-labelledby="bkQ"><b id="bkQ" style="font-weight:500">Replace your progress with this backup?</b><p>${q.saved?'Backup made '+audDate(q.saved)+': ':'This backup has '}${esc(bkCount(q.st))}. Everything saved in this browser now (${esc(bkCount(S))}) will be replaced, and that can't be undone.</p><div class="row"><button id="bkYes">Replace my progress</button><button id="bkNo">Cancel</button></div></div>`:''}</div>
+ <div id="bkMsg" role="status" aria-live="polite">${bk.note?`<p class="bkmsg${bk.note[1]?' bad':''}">${esc(bk.note[0])}</p>`:''}</div></div>`}
+function bkSay(m,bad){bk.note=m?[m,!!bad]:null;const el=$('bkMsg');if(el)el.innerHTML=m?`<p class="bkmsg${bad?' bad':''}">${esc(m)}</p>`:''}
+function bkShowOut(txt){bk.out=txt;const ta=$('bkOut');if(!ta)return null;ta.value=txt;ta.classList.remove('hide');return ta}
+function bkBlob(txt){try{const u=URL.createObjectURL(new Blob([txt],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download=bkName();a.rel='noopener';a.style.display='none';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>{try{URL.revokeObjectURL(u)}catch(e){}},4000);return true}catch(e){return false}}
+function bkDownload(){const txt=backupText(),viaLink=()=>{if(bkBlob(txt))bkSay('Backup file made: '+bkName()+'. Look in your downloads. If no file appeared, this page isn\'t allowed to download here: use Copy backup instead.');else{bkShowOut(txt);bkSay('Downloading isn\'t available here. The backup is in the box above: select all of it, copy it, and paste it somewhere safe.',1)}};
+ dlFind().then(d=>{if(!d){viaLink();return}let pr;try{pr=Promise.resolve(d.save({filename:bkName(),data:txt}))}catch(e){pr=Promise.reject(e)}
+  pr.then(()=>bkSay('Backup saved as '+bkName()+'.'),e=>{const c=e&&e.code;if(c==='declined')bkSay('Download cancelled, so no backup file was made. Your progress is untouched.');else if(c==='rate_limited')bkSay('A download is already waiting for your answer. Finish that one, then try again.',1);else viaLink()})})}
+function bkCopy(){const txt=backupText(),done=()=>bkSay('Backup copied. Paste it into a note or an email to yourself and keep it safe.'),
+ box=()=>{const ta=bkShowOut(txt);let ok=false;if(ta){ta.focus();ta.select();try{ok=document.execCommand('copy')}catch(e){}}if(ok)bkSay('Backup copied. It is also shown in the box above. Paste it into a note or an email to yourself and keep it safe.');else bkSay('Copying is blocked here. The backup is in the box above, already selected: copy it (Ctrl or ⌘ and C, or press and hold), then paste it somewhere safe.')};
+ try{navigator.clipboard.writeText(txt).then(done,box)}catch(e){box()}}
+function bkOffer(txt){const r=readBackup(txt);if(r.err){bk.pend=null;const a=$('bkAsk');if(a)a.innerHTML='';bkSay(r.err,1);return}bk.pend=r;bk.note=null;renderRecord();const no=$('bkNo');if(no)no.focus()}
+function bkApply(){const q=bk.pend;if(!q)return;const old=S,tch=S.teacher;try{loadState(JSON.parse(JSON.stringify(q.st)));S.teacher=tch;gigS();checkGates()}catch(e){S=old;bk.pend=null;renderRecord();bkSay('That backup couldn\'t be loaded.'+NOCHG,1);return}
+ stopAll();if(metro)stopMetro();loop=[];loopChg='';for(const k in bus)bus[k].gain.value=S.mute[k]?0:1;bk={note:['Backup imported: '+bkCount(S)+'. Your progress has been replaced and saved in this browser.',false],pend:null,inTxt:'',out:''};save();all();mUI();toast('Backup imported');const h=$('backup');if(h){h.setAttribute('tabindex','-1');h.focus({preventScroll:true})}}
 /* sequencing */
 let metro=null,timerLeft=0,tmr=null,seqT=[],playing=false,confirmLower=null;
 const home=s=>s.ch.find(c=>/^(I|i)$/.test(fnOf(s.key,c)[0]))||s.ch[0];
@@ -555,7 +600,7 @@ function restartMetro(){if(metro){stopMetro();startMetro()}}
 function checkGates(){ST.forEach(s=>{if(passed(s)&&!S.gates[gk(s)]){S.gates[gk(s)]=Date.now();toast(`Gate passed: stage ${ST.indexOf(s)+1}, ${s.title}.${[2,4,6].includes(ST.indexOf(s))?' Its inlay is now gold.':''}`)}else if(!passed(s)&&S.gates[gk(s)])delete S.gates[gk(s)]})}
 const VIEWS=['path','warm-up','rudiments','technique','invent','gig','record'];let view='path';
 function route(){let h='';try{h=location.hash.slice(1)}catch(e){}const before=view+S.stage;if(ST.some(s=>s.id===h)){if(S.stage!==h){S.stage=h;loop=[];save();stopAll()}view='path'}else if(VIEWS.includes(h))view=h;else view='path';
- if(before!==view+S.stage&&playing)stopAll();if(view!=='gig')document.body.classList.remove('present');VIEWS.forEach(v=>{$('v-'+v).classList.toggle('hide',v!==view);if(v!==view&&v!=='path')$('v-'+v).innerHTML=''});document.querySelectorAll('#tabs a').forEach(a=>a.setAttribute('aria-current',a.getAttribute('href')==='#'+view?'page':'false'));all();restartMetro();mUI();if(pendingFocus){refocus(pendingFocus);pendingFocus=null}else if(focusView){const hd=view==='path'?$('next'):$('v-'+view).querySelector('h2');if(hd){hd.setAttribute('tabindex','-1');hd.focus()}}focusView=false}
+ if(before!==view+S.stage&&playing)stopAll();if(view!=='gig')document.body.classList.remove('present');if(view!=='record'){bk.pend=null;bk.note=null;bk.out=''}VIEWS.forEach(v=>{$('v-'+v).classList.toggle('hide',v!==view);if(v!==view&&v!=='path')$('v-'+v).innerHTML=''});document.querySelectorAll('#tabs a').forEach(a=>a.setAttribute('aria-current',a.getAttribute('href')==='#'+view?'page':'false'));all();restartMetro();mUI();if(pendingFocus){refocus(pendingFocus);pendingFocus=null}else if(focusView){const hd=view==='path'?$('next'):$('v-'+view).querySelector('h2');if(hd){hd.setAttribute('tabindex','-1');hd.focus()}}focusView=false}
 function all(){renderFinish();if(view==='path'){renderNext();renderNeck();renderStage();renderSide()}else if(view==='warm-up')renderWarm();else if(view==='rudiments')renderRud();else if(view==='technique')renderTech();else if(view==='invent')renderInvent();else if(view==='gig')renderGig();else renderRecord()}
 function refocus(sel){const el=document.querySelector(sel);if(el)el.focus()}
 let focusView=false,pendingFocus=null;
@@ -584,18 +629,25 @@ document.addEventListener('click',e=>{if(e.target.closest('#tabs a')||e.target.c
  else if(t.id==='gstop'){clearInterval(gt);gt=null;const el=$('gtime');if(el)el.textContent='0:00'}
  else if(t.id==='present'){const on=document.body.classList.toggle('present');t.setAttribute('aria-pressed',on);toast(on?'Present mode: setup is hidden, run sheet and chart are enlarged. Press Present again to go back.':'Present mode off')}
  else if(t.id==='copyGig'){const txt=gigText(gigS());try{navigator.clipboard.writeText(txt).then(()=>toast('Gig list copied'),()=>{$('gigTxt').classList.remove('hide');toast('Copy isn\'t available here: select the text below instead.')})}catch(err){$('gigTxt').classList.remove('hide')}}
+ else if(t.id==='bkDown')bkDownload()
+ else if(t.id==='bkCopy')bkCopy()
+ else if(t.id==='bkPick'){const f=$('bkFile');if(f){f.value='';f.click()}}
+ else if(t.id==='bkImport')bkOffer($('bkIn').value)
+ else if(t.id==='bkYes')bkApply()
+ else if(t.id==='bkNo'){bk.pend=null;renderRecord();bkSay('Import cancelled. Your progress is unchanged.');refocus('#bkImport')}
  else if(t.dataset.inst){S.inst=t.dataset.inst;save();all();refocus(`[data-inst="${S.inst}"]`);toast(INST.find(x=>x[0]===S.inst)[1]+': your steps, gates and record are now for this instrument.')}
  else if(t.dataset.mute){const k=t.dataset.mute;S.mute[k]=!S.mute[k];save();t.setAttribute('aria-pressed',!S.mute[k]);if(bus[k])bus[k].gain.value=S.mute[k]?0:1}
  else if(t.dataset.tgt){setBpm(t.dataset.tgt);mUI();if(!tempoStop())toast('Metronome set to '+bpm()+' bpm')}
  else if(t.dataset.capo){if(playing)stopAll();const s=stage();S.capo[s.id]=Math.max(0,Math.min(7,capo()+(+t.dataset.capo)));if(!S.capo[s.id])delete S.capo[s.id];save();renderStage();refocus(`[data-capo="${t.dataset.capo}"]`);toast((capo()?'Capo '+capo():'No capo')+': sounds in '+sounds(s)+'.')}
  else if(t.id==='timer'){if(tmr){clearInterval(tmr);tmr=null;timerLeft=0;t.textContent='Start 60 s';toast('Timer cancelled');return}A();timerLeft=60;t.textContent='60 s';const end=Date.now()+60000;tmr=setInterval(()=>{timerLeft=Math.max(0,Math.ceil((end-Date.now())/1000));const b=$('timer');if(b)b.textContent=timerLeft?timerLeft+' s':'Start 60 s';if(!timerLeft){clearInterval(tmr);tmr=null;const a=A();if(a){click(a.currentTime,1);click(a.currentTime+.15,1)}toast('Time. Count your changes and log them.');if($('cnt'))$('cnt').focus()}},250)}
  else if(t.id==='logChg'){const v=parseInt($('cnt').value,10);if(!(v>=0&&v<=200)){toast('Enter the number of changes, 0 to 200');return}const s=stage();S.changes.push({d:Date.now(),st:s.id,inst:S.inst,pair:s.pair.join('-'),n:v});save();renderSide();refocus('#logChg');toast('Logged '+v+' changes'+(v>=CPM(s)[1]?': Applied target met':v>=CPM(s)[0]?': Consistent target met':''))}});
-document.addEventListener('input',e=>{const t=e.target,d=t.dataset;if(t.classList.contains('m-bpm')){setBpm(t.value);mUI();tempoStop()}
+document.addEventListener('input',e=>{const t=e.target,d=t.dataset;if(t.id==='bkIn'){bk.inTxt=t.value;return}if(t.classList.contains('m-bpm')){setBpm(t.value);mUI();tempoStop()}
  else if(d.bname!==undefined){const b=gigS().bands[+d.bname];if(b){b.name=t.value.slice(0,40)||'Band '+(+d.bname+1);save();renderRun()}}
  else if(d.bm){const [bi,r]=d.bm.split(':'),b=gigS().bands[+bi];if(b){const v=t.value.slice(0,40);if(v.trim())b.m[r]=v;else delete b.m[r];save();renderRun()}}});
 function tempoStop(){if(playing){stopAll();toast('Tempo changed: press Play again to hear the band at '+bpm()+' bpm.');return true}return false}
 function mUI(){const p=curPat();const bp=bpm();document.querySelectorAll('.m-out').forEach(o=>o.textContent=bp);document.querySelectorAll('.m-bpm').forEach(o=>{if(+o.value!==bp)o.value=bp});document.querySelectorAll('.m-toggle').forEach(b=>b.setAttribute('aria-pressed',!!metro));document.querySelectorAll('.m-name').forEach(n=>n.textContent=p.n);document.querySelectorAll('.m-unit').forEach(n=>n.textContent=unit(p))}
 document.addEventListener('change',e=>{const d=e.target.dataset;
+ if(e.target.id==='bkFile'){const f=e.target.files&&e.target.files[0];if(!f)return;if(f.size>4e6){bk.pend=null;const a=$('bkAsk');if(a)a.innerHTML='';bkSay('That file is too big to be a Guitar Lab backup.'+NOCHG,1);return}const rd=new FileReader();rd.onload=()=>bkOffer(String(rd.result||''));rd.onerror=()=>bkSay('That file couldn\'t be read.'+NOCHG,1);rd.readAsText(f);return}
  if(d.gsong){const G=gigS(),id=d.gsong;if(e.target.checked){if(G.songs.length>=4){e.target.checked=false;toast('Four songs per gig: untick one first.');return}G.songs.push(id)}else G.songs=G.songs.filter(x=>x!==id);save();renderGig();refocus(`[data-gsong="${id}"]`);return}
  if(d.bname!==undefined){const b=gigS().bands[+d.bname];if(b){b.name=e.target.value.trim().slice(0,40)||'Band '+(+d.bname+1);e.target.value=b.name;save();renderRun()}return}
  if(d.bm){const [bi,r]=d.bm.split(':'),b=gigS().bands[+bi];if(b){const v=e.target.value.trim().slice(0,40);if(v)b.m[r]=v;else delete b.m[r];e.target.value=v;save();renderRun()}return}
@@ -606,7 +658,7 @@ document.addEventListener('change',e=>{const d=e.target.dataset;
  else if(d.best){const v=parseInt(e.target.value,10);if(v>=30&&v<=300){S.best[d.best]=v;save();toast('Best tempo saved: '+v+' bpm')}else{e.target.value=S.best[d.best]||'';toast('Enter a tempo from 30 to 300')}}});
 window.addEventListener('hashchange',route);let wasNarrow=window.innerWidth<700;window.addEventListener('resize',()=>{const nw=window.innerWidth<700;if(nw!==wasNarrow){wasNarrow=nw;if(view==='path')renderStage();else if(view==='gig')renderGig()}});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if(metro)stopMetro();if(playing)stopAll()}});
-gigS();checkGates();route();
+gigS();checkGates();route();dlFind();
 }
 </script>
 </body>
