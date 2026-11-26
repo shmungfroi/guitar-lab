@@ -1,0 +1,842 @@
+{
+"bass/new/invent": [
+"8538f38e2d3551b2ee7b",
+295
+],
+"bass/new/invent/rolled": [
+"3dc8acf57a42c03fe7e2",
+11090
+],
+"bass/new/invent/rolled-c": [
+"69e0c77f175dd5704a41",
+11005
+],
+"bass/new/rudiments": [
+"c57702e6f2f0aa82bc53",
+11281
+],
+"bass/new/side/a-e": [
+"58dace401fdddea97c30",
+2373
+],
+"bass/new/side/am-e7": [
+"76424c590cbe4cc68a57",
+2125
+],
+"bass/new/side/beyond": [
+"8f13e60218a89348205f",
+2127
+],
+"bass/new/side/c-g-f": [
+"9709f3554f66ab3fef7a",
+1881
+],
+"bass/new/side/four-chords": [
+"92ae109879c7933ee0b3",
+1967
+],
+"bass/new/side/hallelujah": [
+"66cd41edc054fd202b19",
+2047
+],
+"bass/new/side/six-eight": [
+"ba98822fcf8d504f4bcc",
+2208
+],
+"bass/new/side/twelve-bar": [
+"daee1542f7c6be7f5d9b",
+1997
+],
+"bass/new/songtab/a-e": [
+"e3b0c44298fc1c149afb",
+0
+],
+"bass/new/songtab/am-e7": [
+"e3b0c44298fc1c149afb",
+0
+],
+"bass/new/songtab/beyond": [
+"e3b0c44298fc1c149afb",
+0
+],
+"bass/new/songtab/c-g-f": [
+"e3b0c44298fc1c149afb",
+0
+],
+"bass/new/songtab/four-chords": [
+"e3b0c44298fc1c149afb",
+0
+],
+"bass/new/songtab/hallelujah": [
+"e3b0c44298fc1c149afb",
+0
+],
+"bass/new/songtab/six-eight": [
+"e3b0c44298fc1c149afb",
+0
+],
+"bass/new/songtab/twelve-bar": [
+"8d6638162b294b5dc81a",
+148
+],
+"bass/new/technique": [
+"4583b99c5dfefe7c97c9",
+61770
+],
+"bass/rich/invent": [
+"8538f38e2d3551b2ee7b",
+295
+],
+"bass/rich/invent/rolled": [
+"3dc8acf57a42c03fe7e2",
+11090
+],
+"bass/rich/invent/rolled-c": [
+"69e0c77f175dd5704a41",
+11005
+],
+"bass/rich/rudiments": [
+"1f949da13ffb6c2e81d9",
+11095
+],
+"bass/rich/side/a-e": [
+"e3c0ff08299520853bc6",
+2463
+],
+"bass/rich/side/am-e7": [
+"f00ada16fc1b10d3e7f4",
+2133
+],
+"bass/rich/side/beyond": [
+"628c0e3c9cf9b0a3ac2b",
+2135
+],
+"bass/rich/side/c-g-f": [
+"d08a444ecb5d6eca3643",
+1889
+],
+"bass/rich/side/four-chords": [
+"3c359e710915fb20ea44",
+1975
+],
+"bass/rich/side/hallelujah": [
+"c5ca8d8da7e66ed5092d",
+2055
+],
+"bass/rich/side/six-eight": [
+"ffd3d38a0ee437134cc3",
+2216
+],
+"bass/rich/side/twelve-bar": [
+"09f55f33f292926b6551",
+2005
+],
+"bass/rich/songtab/a-e": [
+"e3b0c44298fc1c149afb",
+0
+],
+"bass/rich/songtab/am-e7": [
+"e3b0c44298fc1c149afb",
+0
+],
+"bass/rich/songtab/beyond": [
+"e3b0c44298fc1c149afb",
+0
+],
+"bass/rich/songtab/c-g-f": [
+"e3b0c44298fc1c149afb",
+0
+],
+"bass/rich/songtab/four-chords": [
+"e3b0c44298fc1c149afb",
+0
+],
+"bass/rich/songtab/hallelujah": [
+"e3b0c44298fc1c149afb",
+0
+],
+"bass/rich/songtab/six-eight": [
+"e3b0c44298fc1c149afb",
+0
+],
+"bass/rich/songtab/twelve-bar": [
+"8d6638162b294b5dc81a",
+148
+],
+"bass/rich/technique": [
+"6dda5d5d03ce23f590b9",
+61311
+],
+"drums/new/invent": [
+"8538f38e2d3551b2ee7b",
+295
+],
+"drums/new/invent/rolled": [
+"3dc8acf57a42c03fe7e2",
+11090
+],
+"drums/new/invent/rolled-c": [
+"69e0c77f175dd5704a41",
+11005
+],
+"drums/new/rudiments": [
+"f1e26b9d2c38e46381fe",
+11312
+],
+"drums/new/side/a-e": [
+"2ff90bb3eb3bf74532e4",
+1953
+],
+"drums/new/side/am-e7": [
+"e710117b4502d53c0a12",
+1710
+],
+"drums/new/side/beyond": [
+"3a63270b5a2dadfa6c21",
+1716
+],
+"drums/new/side/c-g-f": [
+"571b745e7e461799d412",
+1451
+],
+"drums/new/side/four-chords": [
+"8f890c4d836b67c3eb94",
+1557
+],
+"drums/new/side/hallelujah": [
+"0ac74408b9ddfd997e0d",
+1615
+],
+"drums/new/side/six-eight": [
+"954b8e8a7fdf16e7b96d",
+1776
+],
+"drums/new/side/twelve-bar": [
+"22687a8c355d3d2b15f1",
+1585
+],
+"drums/new/songtab/a-e": [
+"e3b0c44298fc1c149afb",
+0
+],
+"drums/new/songtab/am-e7": [
+"e3b0c44298fc1c149afb",
+0
+],
+"drums/new/songtab/beyond": [
+"e3b0c44298fc1c149afb",
+0
+],
+"drums/new/songtab/c-g-f": [
+"e3b0c44298fc1c149afb",
+0
+],
+"drums/new/songtab/four-chords": [
+"e3b0c44298fc1c149afb",
+0
+],
+"drums/new/songtab/hallelujah": [
+"e3b0c44298fc1c149afb",
+0
+],
+"drums/new/songtab/six-eight": [
+"e3b0c44298fc1c149afb",
+0
+],
+"drums/new/songtab/twelve-bar": [
+"8d6638162b294b5dc81a",
+148
+],
+"drums/new/technique": [
+"ea52fe55bcf031a2a4e1",
+61796
+],
+"drums/rich/invent": [
+"8538f38e2d3551b2ee7b",
+295
+],
+"drums/rich/invent/rolled": [
+"3dc8acf57a42c03fe7e2",
+11090
+],
+"drums/rich/invent/rolled-c": [
+"69e0c77f175dd5704a41",
+11005
+],
+"drums/rich/rudiments": [
+"114173243416ff048ae5",
+11126
+],
+"drums/rich/side/a-e": [
+"a312362fa0c1bf95366f",
+1961
+],
+"drums/rich/side/am-e7": [
+"1fdf42e1c3087d546c25",
+1718
+],
+"drums/rich/side/beyond": [
+"09b988b37fbcbcfbdd26",
+1724
+],
+"drums/rich/side/c-g-f": [
+"d1226c1674bbc7cdbe02",
+1459
+],
+"drums/rich/side/four-chords": [
+"ece0641809d173170188",
+1565
+],
+"drums/rich/side/hallelujah": [
+"dae800f197bfd24b4146",
+1623
+],
+"drums/rich/side/six-eight": [
+"062182154f5cc41a5f95",
+1784
+],
+"drums/rich/side/twelve-bar": [
+"504f93c41cc9bea75cb7",
+1593
+],
+"drums/rich/songtab/a-e": [
+"e3b0c44298fc1c149afb",
+0
+],
+"drums/rich/songtab/am-e7": [
+"e3b0c44298fc1c149afb",
+0
+],
+"drums/rich/songtab/beyond": [
+"e3b0c44298fc1c149afb",
+0
+],
+"drums/rich/songtab/c-g-f": [
+"e3b0c44298fc1c149afb",
+0
+],
+"drums/rich/songtab/four-chords": [
+"e3b0c44298fc1c149afb",
+0
+],
+"drums/rich/songtab/hallelujah": [
+"e3b0c44298fc1c149afb",
+0
+],
+"drums/rich/songtab/six-eight": [
+"e3b0c44298fc1c149afb",
+0
+],
+"drums/rich/songtab/twelve-bar": [
+"8d6638162b294b5dc81a",
+148
+],
+"drums/rich/technique": [
+"f5711cb3be683a478100",
+61337
+],
+"guitar/new/invent": [
+"8538f38e2d3551b2ee7b",
+295
+],
+"guitar/new/invent/rolled": [
+"3dc8acf57a42c03fe7e2",
+11090
+],
+"guitar/new/invent/rolled-c": [
+"69e0c77f175dd5704a41",
+11005
+],
+"guitar/new/rudiments": [
+"8f33aea936c416abaae9",
+11033
+],
+"guitar/new/side/a-e": [
+"a8f69c843d58088820f1",
+2272
+],
+"guitar/new/side/am-e7": [
+"9f98a0bd57c72ed92311",
+2024
+],
+"guitar/new/side/beyond": [
+"66e6f5f35b8cd4961c0f",
+2026
+],
+"guitar/new/side/c-g-f": [
+"88d9166e49fce9c5e71b",
+1780
+],
+"guitar/new/side/four-chords": [
+"fcea60b8936b4a2e8c04",
+1866
+],
+"guitar/new/side/hallelujah": [
+"668033ddf2c7881a6cc9",
+1946
+],
+"guitar/new/side/six-eight": [
+"d589a287077f01e29409",
+2107
+],
+"guitar/new/side/twelve-bar": [
+"80c958c52f072c5cbe2b",
+1896
+],
+"guitar/new/songtab/a-e": [
+"e3b0c44298fc1c149afb",
+0
+],
+"guitar/new/songtab/am-e7": [
+"e3b0c44298fc1c149afb",
+0
+],
+"guitar/new/songtab/beyond": [
+"e3b0c44298fc1c149afb",
+0
+],
+"guitar/new/songtab/c-g-f": [
+"e3b0c44298fc1c149afb",
+0
+],
+"guitar/new/songtab/four-chords": [
+"e3b0c44298fc1c149afb",
+0
+],
+"guitar/new/songtab/hallelujah": [
+"e3b0c44298fc1c149afb",
+0
+],
+"guitar/new/songtab/six-eight": [
+"e3b0c44298fc1c149afb",
+0
+],
+"guitar/new/songtab/twelve-bar": [
+"8d6638162b294b5dc81a",
+148
+],
+"guitar/new/technique": [
+"67a0b9178812baef80a0",
+61556
+],
+"guitar/rich/invent": [
+"8538f38e2d3551b2ee7b",
+295
+],
+"guitar/rich/invent/rolled": [
+"3dc8acf57a42c03fe7e2",
+11090
+],
+"guitar/rich/invent/rolled-c": [
+"69e0c77f175dd5704a41",
+11005
+],
+"guitar/rich/rudiments": [
+"83d5ebc4cdd434a3f653",
+10847
+],
+"guitar/rich/side/a-e": [
+"93a6b14b02dca88efaa5",
+2362
+],
+"guitar/rich/side/am-e7": [
+"b9c889ca4519ed4104b7",
+2032
+],
+"guitar/rich/side/beyond": [
+"aeef6302c3a0027d8039",
+2034
+],
+"guitar/rich/side/c-g-f": [
+"61f53388d04f572cb92e",
+1788
+],
+"guitar/rich/side/four-chords": [
+"7be3b6ed44f5c85b4b2f",
+1874
+],
+"guitar/rich/side/hallelujah": [
+"00c8d48d970848c17f8e",
+1954
+],
+"guitar/rich/side/six-eight": [
+"af8f88e9316d1e9daf72",
+2115
+],
+"guitar/rich/side/twelve-bar": [
+"e2bbb812c1af2e023afa",
+1904
+],
+"guitar/rich/songtab/a-e": [
+"e3b0c44298fc1c149afb",
+0
+],
+"guitar/rich/songtab/am-e7": [
+"e3b0c44298fc1c149afb",
+0
+],
+"guitar/rich/songtab/beyond": [
+"e3b0c44298fc1c149afb",
+0
+],
+"guitar/rich/songtab/c-g-f": [
+"e3b0c44298fc1c149afb",
+0
+],
+"guitar/rich/songtab/four-chords": [
+"e3b0c44298fc1c149afb",
+0
+],
+"guitar/rich/songtab/hallelujah": [
+"e3b0c44298fc1c149afb",
+0
+],
+"guitar/rich/songtab/six-eight": [
+"e3b0c44298fc1c149afb",
+0
+],
+"guitar/rich/songtab/twelve-bar": [
+"8d6638162b294b5dc81a",
+148
+],
+"guitar/rich/technique": [
+"4df01f8649dc3ac7579c",
+61097
+],
+"keys/new/invent": [
+"8538f38e2d3551b2ee7b",
+295
+],
+"keys/new/invent/rolled": [
+"3dc8acf57a42c03fe7e2",
+11090
+],
+"keys/new/invent/rolled-c": [
+"69e0c77f175dd5704a41",
+11005
+],
+"keys/new/rudiments": [
+"5f2a42d0f257949ae32a",
+11281
+],
+"keys/new/side/a-e": [
+"b017ad75d78ad48d0ea9",
+2373
+],
+"keys/new/side/am-e7": [
+"c421c5a570015779cf4e",
+2125
+],
+"keys/new/side/beyond": [
+"23c5901d1eb6533c4ab4",
+2127
+],
+"keys/new/side/c-g-f": [
+"b27fa1722abddbcaa06f",
+1881
+],
+"keys/new/side/four-chords": [
+"60af18f653413c267273",
+1967
+],
+"keys/new/side/hallelujah": [
+"1880214665085ad47485",
+2047
+],
+"keys/new/side/six-eight": [
+"14c91429accd1dc51de4",
+2208
+],
+"keys/new/side/twelve-bar": [
+"0188c054ce1431a14e73",
+1997
+],
+"keys/new/songtab/a-e": [
+"e3b0c44298fc1c149afb",
+0
+],
+"keys/new/songtab/am-e7": [
+"e3b0c44298fc1c149afb",
+0
+],
+"keys/new/songtab/beyond": [
+"e3b0c44298fc1c149afb",
+0
+],
+"keys/new/songtab/c-g-f": [
+"e3b0c44298fc1c149afb",
+0
+],
+"keys/new/songtab/four-chords": [
+"e3b0c44298fc1c149afb",
+0
+],
+"keys/new/songtab/hallelujah": [
+"e3b0c44298fc1c149afb",
+0
+],
+"keys/new/songtab/six-eight": [
+"e3b0c44298fc1c149afb",
+0
+],
+"keys/new/songtab/twelve-bar": [
+"8d6638162b294b5dc81a",
+148
+],
+"keys/new/technique": [
+"b37de96f3089368a5e65",
+61770
+],
+"keys/rich/invent": [
+"8538f38e2d3551b2ee7b",
+295
+],
+"keys/rich/invent/rolled": [
+"3dc8acf57a42c03fe7e2",
+11090
+],
+"keys/rich/invent/rolled-c": [
+"69e0c77f175dd5704a41",
+11005
+],
+"keys/rich/rudiments": [
+"83d9ca909b3c5555c5f6",
+11095
+],
+"keys/rich/side/a-e": [
+"d05c49c3ab54dcb4e852",
+2463
+],
+"keys/rich/side/am-e7": [
+"0a5f0eb799efb56cd52f",
+2133
+],
+"keys/rich/side/beyond": [
+"860014e87fa43a9aa75b",
+2135
+],
+"keys/rich/side/c-g-f": [
+"37d17eae79151708fb9c",
+1889
+],
+"keys/rich/side/four-chords": [
+"e093c05b102af6142652",
+1975
+],
+"keys/rich/side/hallelujah": [
+"2abf6f8879f11201b7c1",
+2055
+],
+"keys/rich/side/six-eight": [
+"45ea274be71bc443000d",
+2216
+],
+"keys/rich/side/twelve-bar": [
+"a24555404d194dc8fdaa",
+2005
+],
+"keys/rich/songtab/a-e": [
+"e3b0c44298fc1c149afb",
+0
+],
+"keys/rich/songtab/am-e7": [
+"e3b0c44298fc1c149afb",
+0
+],
+"keys/rich/songtab/beyond": [
+"e3b0c44298fc1c149afb",
+0
+],
+"keys/rich/songtab/c-g-f": [
+"e3b0c44298fc1c149afb",
+0
+],
+"keys/rich/songtab/four-chords": [
+"e3b0c44298fc1c149afb",
+0
+],
+"keys/rich/songtab/hallelujah": [
+"e3b0c44298fc1c149afb",
+0
+],
+"keys/rich/songtab/six-eight": [
+"e3b0c44298fc1c149afb",
+0
+],
+"keys/rich/songtab/twelve-bar": [
+"8d6638162b294b5dc81a",
+148
+],
+"keys/rich/technique": [
+"6e524113438a51c0409c",
+61311
+],
+"vocals/new/invent": [
+"8538f38e2d3551b2ee7b",
+295
+],
+"vocals/new/invent/rolled": [
+"3dc8acf57a42c03fe7e2",
+11090
+],
+"vocals/new/invent/rolled-c": [
+"69e0c77f175dd5704a41",
+11005
+],
+"vocals/new/rudiments": [
+"730beffd7bb7f687355b",
+11343
+],
+"vocals/new/side/a-e": [
+"8ba72944a8201d3e7391",
+1905
+],
+"vocals/new/side/am-e7": [
+"974481689f6a8eb50c14",
+1655
+],
+"vocals/new/side/beyond": [
+"abc5486f1820ead87c9e",
+1657
+],
+"vocals/new/side/c-g-f": [
+"d52913ab815fdb39a763",
+1413
+],
+"vocals/new/side/four-chords": [
+"f5d5bfa64f16998f114c",
+1498
+],
+"vocals/new/side/hallelujah": [
+"138a4b8eae99e99ad776",
+1578
+],
+"vocals/new/side/six-eight": [
+"6105d81d54c10dcf414b",
+1739
+],
+"vocals/new/side/twelve-bar": [
+"6e20ed62dc8c67f278a5",
+1529
+],
+"vocals/new/songtab/a-e": [
+"e3b0c44298fc1c149afb",
+0
+],
+"vocals/new/songtab/am-e7": [
+"e3b0c44298fc1c149afb",
+0
+],
+"vocals/new/songtab/beyond": [
+"e3b0c44298fc1c149afb",
+0
+],
+"vocals/new/songtab/c-g-f": [
+"e3b0c44298fc1c149afb",
+0
+],
+"vocals/new/songtab/four-chords": [
+"e3b0c44298fc1c149afb",
+0
+],
+"vocals/new/songtab/hallelujah": [
+"e3b0c44298fc1c149afb",
+0
+],
+"vocals/new/songtab/six-eight": [
+"e3b0c44298fc1c149afb",
+0
+],
+"vocals/new/songtab/twelve-bar": [
+"8d6638162b294b5dc81a",
+148
+],
+"vocals/new/technique": [
+"ba90e7f712ea40ce26f1",
+61822
+],
+"vocals/rich/invent": [
+"8538f38e2d3551b2ee7b",
+295
+],
+"vocals/rich/invent/rolled": [
+"3dc8acf57a42c03fe7e2",
+11090
+],
+"vocals/rich/invent/rolled-c": [
+"69e0c77f175dd5704a41",
+11005
+],
+"vocals/rich/rudiments": [
+"4e08182632c9fcf81ec7",
+11157
+],
+"vocals/rich/side/a-e": [
+"214c10fda30bd8c488c6",
+1913
+],
+"vocals/rich/side/am-e7": [
+"21491aee717ce962629f",
+1663
+],
+"vocals/rich/side/beyond": [
+"267f3bee7df6ced0046c",
+1665
+],
+"vocals/rich/side/c-g-f": [
+"22310edc75a58f8d5f33",
+1421
+],
+"vocals/rich/side/four-chords": [
+"404826dc738d1410aaec",
+1506
+],
+"vocals/rich/side/hallelujah": [
+"d4d6e490d195551abffd",
+1586
+],
+"vocals/rich/side/six-eight": [
+"10a3a91901a5d325f8e2",
+1747
+],
+"vocals/rich/side/twelve-bar": [
+"fc5c81bca3ba69564a6f",
+1537
+],
+"vocals/rich/songtab/a-e": [
+"e3b0c44298fc1c149afb",
+0
+],
+"vocals/rich/songtab/am-e7": [
+"e3b0c44298fc1c149afb",
+0
+],
+"vocals/rich/songtab/beyond": [
+"e3b0c44298fc1c149afb",
+0
+],
+"vocals/rich/songtab/c-g-f": [
+"e3b0c44298fc1c149afb",
+0
+],
+"vocals/rich/songtab/four-chords": [
+"e3b0c44298fc1c149afb",
+0
+],
+"vocals/rich/songtab/hallelujah": [
+"e3b0c44298fc1c149afb",
+0
+],
+"vocals/rich/songtab/six-eight": [
+"e3b0c44298fc1c149afb",
+0
+],
+"vocals/rich/songtab/twelve-bar": [
+"8d6638162b294b5dc81a",
+148
+],
+"vocals/rich/technique": [
+"9c1baed6b25a37e02114",
+61363
+]
+}
