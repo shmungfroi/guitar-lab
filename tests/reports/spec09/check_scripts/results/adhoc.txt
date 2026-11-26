@@ -1,0 +1,12 @@
+'import (' in source: ['===typeof d;\n/* one way in for saved data: the page load and a backup import (0.7) both come through here, so an impor']
+0.9 first visit, stored after each step: [('load', None), ('path', None), ('warm-up', None), ('rudiments', None), ('technique', None), ('invent', None), ('gig', 369), ('record', 369)]
+0.8 first visit, stored after each step: [('load', None), ('path', None), ('warm-up', None), ('rudiments', None), ('technique', None), ('invent', None), ('gig', 369), ('record', 369)]
+same stored text as 0.8 at every step: True
+storage blocked, wording about saving/keeping on any tab:
+   gig: This switch is the Gig's own: the Path keeps its setting
+   path: The guitar keeps its shapes and the band sounds in A major
+   record: Save entry
+   rudiments: ms: these drills are written for guitar, and anything you log here is kept for drums only
+   technique: re on drums: these are guitar techniques, and levels you set here are kept for drums only
+record tab controls: ['bkDown', 'bkCopy', 'bkOut', 'bkPick', 'bkFile', 'bkIn', 'bkImport', 'jh', 'jd', 'jw', 'Save entry']
+console: []

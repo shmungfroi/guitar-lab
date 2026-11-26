@@ -802,7 +802,7 @@ def test_R1_export_import_round_trip_is_lossless(app):
     txt = copy_backup(a)
     assert "copied" in text(a, "#bkMsg").lower()
     out = json.loads(txt)
-    assert out["app"] == "The Guitar Lab" and out["version"] == "0.8" and out["format"] == 1 and out["saved"]
+    assert out["app"] == "The Guitar Lab" and out["version"] == "0.9" and out["format"] == 1 and out["saved"]
     assert out["state"] == RICH, "export must carry the full saved state unchanged"
     with a.expect_download() as dl:
         a.click("#bkDown")
@@ -1007,10 +1007,10 @@ def test_R1_no_browser_popups_in_source():
     assert not re.search(r"<script[^>]+src=|<link[^>]+href=", src), "external script or stylesheet"
 
 
-def test_version_label_is_0_8(app):
+def test_version_label_is_0_9(app):
     pg = app(state={})
-    assert pg.title() == "The Guitar Lab 0.8"
-    assert "version 0.8" in text(pg, "header .sub")
+    assert pg.title() == "The Guitar Lab 0.9"
+    assert "version 0.9" in text(pg, "header .sub")
     assert "0.6" not in pg.evaluate("()=>document.body.innerText")
 
 
@@ -1656,7 +1656,7 @@ def test_T3_normal_page_messages_still_correct(app):
     m2 = text(pg, "#bkMsg")
     assert dl.value.suggested_filename in m2 and "Copy backup" in m2
     assert not MADE.search(m2.split("If no file appeared")[0]), m2
-    assert json.loads(pathlib.Path(dl.value.path()).read_text(encoding="utf-8"))["version"] == "0.8"
+    assert json.loads(pathlib.Path(dl.value.path()).read_text(encoding="utf-8"))["version"] == "0.9"
     assert not pg.errors
 
 
@@ -1720,3 +1720,231 @@ def test_T5_clipboard_still_used_when_allowed(app):
     assert json.loads(pg.evaluate("()=>window.__clip[0]"))["state"] == RICH
     pg.wait_for_function("()=>/Backup copied/.test(document.getElementById('bkMsg').textContent)")
     assert not pg.locator("#bkOut").is_visible()
+
+
+# ===================================================================== 0.9 register (SPEC_09): U1, U3
+
+# --------------------------------------------------------------------- U1 (wording where storage is blocked)
+
+U1_BROWSER = re.compile(r"saved in this browser|lives in this browser", re.I)
+U1_BACKUP = '{"app":"The Guitar Lab","format":1,"version":"0.8","state":' + json.dumps(RICH) + "}"
+U1_INTRO_08 = ("Your progress lives in this browser only. A backup holds all of it: every instrument's levels, gates and marks, the journal, "
+               "the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device.")
+U1_FOOT_08 = "Progress is saved in this browser only: keep a backup from the Record tab."
+U1_ASK_08 = re.compile(r"Everything saved in this browser now \(.+\) will be replaced, and that can't be undone\.")
+
+
+def test_U1_sandbox_wording_does_not_promise_storage(browser, tmp_path):
+    ctx, pg, fr, log = sandbox(browser, tmp_path)
+    fr.evaluate(POPUPS_JS)
+    intro = fr.inner_text("#backup > p.note")
+    foot = fr.inner_text(".foot")
+    fr.fill("#bkIn", U1_BACKUP)
+    fr.click("#bkImport")
+    ask = fr.inner_text("#bkAsk")
+    for name, t in (("Backup intro", intro), ("footer", foot), ("import question", ask)):
+        assert not U1_BROWSER.search(t), f"{name} still promises browser storage: {t!r}"
+        assert re.search(r"\bbackup\b", t, re.I), f"{name} doesn't mention a backup: {t!r}"
+    assert re.search(r"can't keep your progress here", intro) and "Download backup" in intro and "Copy backup" in intro, intro
+    assert re.search(r"can't keep your progress here", foot) and re.search(r"backup \(Download or Copy\) is the only way to keep it", foot), foot
+    assert fr.get_attribute(".foot a", "href") == "#record", "the footer still links to the Record tab"
+    assert "A backup holds all of it" in intro and "move to another device" in intro, "the rest of the intro is unchanged"
+    assert "Replace your progress with this backup?" in ask and re.search(r"The progress loaded on this page now \(.+\) will be replaced, and that can't be undone\.", ask), ask
+    fr.click("#bkNo")
+    assert fr.inner_text("#bkAsk").strip() == "" and not U1_BROWSER.search(fr.inner_text("#backup")), "the card keeps the honest wording after a re-render"
+    fr.fill("#bkIn", U1_BACKUP)
+    fr.click("#bkImport")
+    fr.click("#bkYes")
+    after = fr.inner_text("#backup") + fr.inner_text(".foot")
+    assert "Backup imported" in after and "Your path: Keys" in fr.inner_text("#v-record"), "the import itself must still work"
+    assert not U1_BROWSER.search(after), after
+    assert fr.evaluate("()=>window.__pop") == []
+    assert not [m for m in log if m.startswith("pageerror")], log
+    ctx.close()
+
+
+@pytest.mark.parametrize("seed", [None, {}, RICH], ids=["first-visit", "empty", "rich"])
+def test_U1_normal_page_wording_unchanged_from_0_8(app, seed):
+    pg = app(state=seed, hash_="record")
+    if seed is None:
+        assert raw(pg) is None, "checking for storage must not write anything on a first visit"
+    else:
+        assert json.loads(raw(pg)) == seed, "checking for storage must not change what is stored"
+    assert text(pg, "#backup > p.note") == U1_INTRO_08
+    assert U1_FOOT_08 in " ".join(text(pg, ".foot").split())
+    assert pg.get_attribute(".foot a", "href") == "#record"
+    offer(pg, U1_BACKUP)
+    ask = text(pg, "#bkAsk")
+    assert U1_ASK_08.search(ask) and "loaded on this page" not in ask, ask
+    assert "can't keep your progress here" not in pg.evaluate("()=>document.body.innerText")
+    assert pg.evaluate("()=>Object.keys(localStorage)") in ([], ["shredder"]), "only the app's own key may exist"
+    pg.click("#bkYes")
+    assert "saved in this browser" in text(pg, "#bkMsg") and state(pg) == RICH
+    assert not pg.errors
+
+
+def test_U1_sandbox_footer_is_honest_on_another_tab(browser, tmp_path):
+    ctx, pg, fr, log = sandbox(browser, tmp_path, hash_="gig", sel="#present")
+    foot = fr.inner_text(".foot")
+    assert not U1_BROWSER.search(foot) and "can't keep your progress here" in foot, foot
+    assert "Lyrics and scores are not reproduced".lower() in foot.lower() and "SIL Open Font License" in foot, "the rest of the footer is unchanged"
+    ctx.close()
+
+
+# --------------------------------------------------------------------- U3 (every drum grid fits its card on narrow phones)
+
+U3_JS = r"""()=>{const w=[...document.querySelectorAll('.dgw')].filter(e=>e.getClientRects().length);if(w.length!==1)return {count:w.length};
+ const t=w[0].querySelector('table'),td=t.querySelector('td'),cs=getComputedStyle(td),r=t.getBoundingClientRect();
+ return {count:1,sw:w[0].scrollWidth,cw:w[0].clientWidth,tw:Math.round(r.width*10)/10,fs:parseFloat(cs.fontSize),minw:cs.minWidth,cell:td.getBoundingClientRect().width,n:t.rows[0].cells.length-1,
+   heads:[...t.rows[0].cells].map(c=>c.textContent.trim()),rows:[...t.rows].slice(1).map(x=>x.cells[0].textContent.trim()),
+   lines:[...t.rows].map(x=>{const c=x.cells[0],g=document.createRange();g.selectNodeContents(c);return g.getClientRects().length})}}"""
+U3_FEELS = [None] + [f["k"] for f in D["FIN"]]          # the stage's or song's own pattern (straight, quaver, shuffle, 3/4, 6/8), then each Finish feel
+U3_PATH_1280 = {3: 208.0, 4: 238.7, 6: 300.2, 8: 361.6}   # table widths by cells in the bar, measured on 0.8 (a51db99) at 1280 px, 15 px text
+U3_GIG_1280 = {4: 238.7, 8: 361.6}
+U3_PRESENT_1280 = {4: 432.1, 8: 624.4}                  # 34 px text
+
+
+def u3_state(feel, **kw):
+    return dict({"inst": "drums", "useFin": bool(feel), "finish": feel or "bossa"}, **kw)
+
+
+def u3_grid(pg):
+    pg.wait_for_function("()=>[...document.querySelectorAll('.dgw')].some(e=>e.getClientRects().length)")
+    g = pg.evaluate(U3_JS)
+    assert g["count"] == 1, f"expected one visible drum grid, found {g['count']}"
+    return g
+
+
+def u3_fits(g, where):
+    assert g["sw"] <= g["cw"] + 1, f"{where}: drum grid scrolls inside its card ({g['sw']} > {g['cw']})"
+    assert g["tw"] <= g["cw"] + 1, f"{where}: drum grid is wider than its card ({g['tw']} > {g['cw']})"
+    assert g["fs"] >= 12 and g["cell"] >= 16, f"{where}: grid too small to read (text {g['fs']}px, cell {g['cell']}px)"
+    assert max(g["lines"]) <= 1, f"{where}: a row label wraps"
+    assert g["heads"][0] == "Count" and len(g["heads"]) == g["n"] + 1 and "Kick" in g["rows"] and g["rows"][0].startswith("Hi-hat"), f"{where}: grid lost a row or column"
+
+
+@pytest.mark.parametrize("feel", U3_FEELS, ids=lambda f: f or "own")
+@pytest.mark.parametrize("width", [320, 360])
+def test_U3_path_drum_grids_fit_their_card(app, width, feel):
+    pg = app(width=width, state=u3_state(feel))
+    seen = set()
+    for s in D["ST"]:
+        go(pg, s["id"])
+        g = u3_grid(pg)
+        u3_fits(g, f"{width}px Path {s['id']} ({feel or 'own'} feel)")
+        assert not pg.evaluate(OVERFLOW_JS), f"page overflows on {s['id']}"
+        if feel is None:
+            assert g["n"] == D["PAT"][s["pat"]]["b"] * D["PAT"][s["pat"]]["s"], f"{s['id']}: the grid shown is not this stage's bar"
+        seen.add(g["n"])
+    if feel is None:
+        assert seen == {3, 4, 6, 8}, f"expected straight, quaver, 3/4 and 6/8 bars across the Path, got {sorted(seen)}"
+    assert not pg.errors
+
+
+@pytest.mark.parametrize("feel", U3_FEELS, ids=lambda f: f or "own")
+@pytest.mark.parametrize("width", [320, 360])
+def test_U3_gig_drum_grids_fit_their_card_present_off_and_on(app, width, feel):
+    seen = set()
+    for song in D["GIG"]:
+        pg = app(width=width, state=u3_state(feel, gig={"songs": [song["id"]], "useFin": bool(feel)}), hash_="gig")
+        off = u3_grid(pg)
+        u3_fits(off, f"{width}px Gig {song['id']} ({feel or 'own'} feel)")
+        assert not pg.evaluate(OVERFLOW_JS), f"page overflows on {song['id']}"
+        pg.click("#present")
+        on = u3_grid(pg)
+        u3_fits(on, f"{width}px Gig {song['id']} ({feel or 'own'} feel), Present")
+        assert not pg.evaluate(OVERFLOW_JS), f"page overflows on {song['id']} in Present"
+        assert on["heads"] == off["heads"] and on["rows"] == off["rows"]
+        seen.add(off["n"])
+        assert not pg.errors
+        pg.context.close()
+    assert seen == ({4} if feel == "flam" else {8}), f"unexpected bar lengths on the Gig tab: {sorted(seen)}"
+
+
+def test_U3_narrow_gig_grid_shrinks_only_as_far_as_it_must(app):
+    """The 0.8 finding: a quaver groove at 320 px was ~269 px in a ~250 px card. It now fills the card exactly; a grid that already fits keeps its size."""
+    pg = app(width=320, state=u3_state(None, gig={"songs": ["g-bamba"]}), hash_="gig")
+    g = u3_grid(pg)
+    assert g["n"] == 8 and abs(g["tw"] - g["cw"]) <= 1 and g["fs"] == 13, g
+    pg = app(width=320, state=u3_state("flam", gig={"songs": ["g-bamba"], "useFin": True}), hash_="gig")
+    g4 = u3_grid(pg)
+    assert g4["n"] == 4 and abs(g4["tw"] - 180.8) <= 0.6, f"a four-cell grid has room, so it stays at its 0.8 width: {g4}"
+    pg = app(width=320, state=u3_state(None, stage="am-e7"), hash_="am-e7")
+    g8 = u3_grid(pg)
+    assert g8["n"] == 8 and abs(g8["tw"] - 268.8) <= 0.6, f"the Path card is wide enough, so its grid stays at its 0.8 width: {g8}"
+
+
+@pytest.mark.parametrize("width,minw", [(320, "0px"), (340, "0px"), (341, "22px"), (360, "22px"), (481, "30px"), (1280, "30px")])
+def test_U3_rule_applies_only_below_about_340(app, width, minw):
+    pg = app(width=width, state=u3_state(None, gig={"songs": ["g-bamba"]}), hash_="gig")
+    g = u3_grid(pg)
+    assert g["minw"] == minw, f"{width}px: cell min-width {g['minw']}, expected {minw}"
+    u3_fits(g, f"{width}px Gig")
+    if width > 340:
+        assert abs(g["tw"] - (268.8 if width <= 480 else 361.6)) <= 0.6, f"{width}px: grid width changed from 0.8 ({g['tw']})"
+
+
+def test_U3_sizes_at_1280_unchanged_from_0_8(app):
+    for feel in U3_FEELS:
+        pg = app(width=1280, state=u3_state(feel))
+        for s in D["ST"]:
+            go(pg, s["id"])
+            g = u3_grid(pg)
+            assert g["fs"] == 15 and g["minw"] == "30px" and abs(g["tw"] - U3_PATH_1280[g["n"]]) <= 0.6, (feel, s["id"], g)
+        pg.context.close()
+        for song in D["GIG"]:
+            pg = app(width=1280, state=u3_state(feel, gig={"songs": [song["id"]], "useFin": bool(feel)}), hash_="gig")
+            g = u3_grid(pg)
+            assert g["fs"] == 15 and abs(g["tw"] - U3_GIG_1280[g["n"]]) <= 0.6, (feel, song["id"], g)
+            pg.click("#present")
+            p = u3_grid(pg)
+            assert p["fs"] == 34 and abs(p["tw"] - U3_PRESENT_1280[p["n"]]) <= 0.6, (feel, song["id"], p)
+            pg.context.close()
+
+
+# --------------------------------------------------------------------- 0.9 version label and older backups
+
+@pytest.mark.parametrize("wrap", ["0.7", "0.8", "0.9", None], ids=["0.7", "0.8", "0.9", "bare-state"])
+def test_version_0_9_still_imports_older_backups_and_bare_state(app, wrap):
+    pg = app(state={}, hash_="record")
+    offer(pg, json.dumps(RICH if wrap is None else {"app": "The Guitar Lab", "format": 1, "version": wrap, "saved": "2026-11-20T03:00:00.000Z", "state": RICH}))
+    pg.click("#bkYes")
+    assert "Backup imported" in text(pg, "#bkMsg") and state(pg) == RICH
+    assert json.loads(copy_backup(pg))["version"] == "0.9", "a new backup is stamped 0.9"
+    assert not pg.errors
+
+
+def test_version_0_9_newer_backup_message_names_this_version(app):
+    pg = app(state=RICH, hash_="record")
+    before = raw(pg)
+    offer(pg, json.dumps({"app": "The Guitar Lab", "format": 2, "version": "1.0", "state": RICH}))
+    msg = text(pg, "#bkMsg")
+    assert "newer version of The Guitar Lab than this one (0.9)" in msg and "Nothing has been changed" in msg and "0.8" not in msg, msg
+    assert raw(pg) == before and not pg.errors
+
+
+# 0.9 independent check C3: the start-up storage check must not rewrite an existing save
+# (with two tabs open, a rewrite of older text could overwrite newer progress).
+_C3_INIT = """
+localStorage.setItem('shredder', JSON.stringify({inst:'bass'}));
+window.__writes = 0;
+const _set = Storage.prototype.setItem;
+Storage.prototype.setItem = function(k, v){ window.__writes++; return _set.call(this, k, v); };
+"""
+
+
+def test_C3_startup_check_never_rewrites_existing_save(browser):
+    import uihelp
+    ctx = browser.new_context()
+    try:
+        ctx.add_init_script(_C3_INIT)
+        pg = ctx.new_page()
+        pg.goto(uihelp.URL)
+        pg.wait_for_timeout(300)
+        before_any_action = pg.evaluate("()=>window.__writes")
+        stored = pg.evaluate("()=>localStorage.getItem('shredder')")
+    finally:
+        ctx.close()
+    # the seeding write in the init script is counted before the wrapper exists, so it isn't counted
+    assert before_any_action == 0, f"page wrote to storage {before_any_action} time(s) on load with a save present"
+    assert stored is not None
