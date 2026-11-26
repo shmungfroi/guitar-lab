@@ -1475,3 +1475,122 @@ def test_T1_lit_black_key_follows_a_forced_theme(app):
     pg.evaluate("()=>{document.documentElement.dataset.theme='dark'}")
     lb, k = lit_black(pg, "A")
     assert contrast(lb["key"], k["unlitWhite"]) >= 3
+
+
+# --------------------------------------------------------------------- T2
+
+DG_JS = r"""()=>{const w=document.querySelector('#v-gig .dgw'),t=w&&w.querySelector('table');if(!t||!t.getClientRects().length)return null;
+ const td=t.querySelector('td'),r=t.getBoundingClientRect();
+ return {sw:w.scrollWidth,cw:w.clientWidth,tw:r.width,th:r.height,fs:parseFloat(getComputedStyle(td).fontSize),cell:td.getBoundingClientRect().width,
+   heads:[...t.rows[0].cells].map(c=>c.textContent.trim()),rows:[...t.rows].slice(1).map(x=>x.cells[0].textContent.trim()),
+   lines:[...t.rows].map(x=>{const c=x.cells[0],r=document.createRange();r.selectNodeContents(c);return r.getClientRects().length})}}"""
+
+
+@pytest.mark.parametrize("width", [320, 360, 390, 480, 481, 500, 600, 601, 768, 1280])
+def test_T2_present_drum_grid_fits_without_sideways_scroll(app, width):
+    pg = app(width=width, state={"inst": "drums"}, hash_="gig")
+    before = pg.evaluate(DG_JS)
+    assert before, "no drum grid on the Gig tab"
+    pg.click("#present")
+    g = pg.evaluate(DG_JS)
+    assert g["sw"] <= g["cw"] + 1, f"{width}px Present: drum grid scrolls sideways in its card ({g['sw']} > {g['cw']})"
+    assert not pg.evaluate(OVERFLOW_JS), "page overflows"
+    assert g["heads"] == before["heads"] and g["rows"] == before["rows"] and "Kick" in g["rows"], "grid lost a column or row"
+    assert max(g["lines"]) <= 1, "row labels should stay on one line"
+    assert g["fs"] >= 12, f"grid text too small to read ({g['fs']}px)"
+    assert g["tw"] >= min(before["tw"], g["cw"]) - 1, "Present mode should only shrink the grid as far as it must to fit"
+    if width >= 768:
+        assert g["fs"] >= before["fs"] * 1.3 and g["tw"] >= before["tw"] * 1.3, "larger screens keep the enlarged look"
+    assert not pg.errors
+
+
+def test_T2_present_drum_grid_still_enlarged_at_1280(app):
+    pg = app(width=1280, state={"inst": "drums"}, hash_="gig")
+    before = pg.evaluate(DG_JS)
+    pg.click("#present")
+    g = pg.evaluate(DG_JS)
+    assert g["fs"] > before["fs"] * 1.5 and g["cell"] > before["cell"] * 1.3 and g["th"] > before["th"] * 1.3, (before, g)
+    pg.click("#present")
+    assert pg.evaluate(DG_JS)["fs"] == before["fs"], "leaving Present restores the normal grid"
+
+
+# --------------------------------------------------------------------- T4
+
+STRUM_WORDS = re.compile(r"\bdowns\b|down-up|strum|\bD down\b|\bU up\b", re.I)
+SIDE_JS = "()=>[...document.querySelectorAll('#side .card')].map(c=>[(c.querySelector('h3')||{textContent:''}).textContent.trim(),c.innerText])"
+
+
+def metro_card(pg):
+    return next(t for h, t in pg.evaluate(SIDE_JS) if h == "Metronome")
+
+
+def fn_card(pg):
+    return next(t for h, t in pg.evaluate(SIDE_JS) if h == "Function in this stage")
+
+
+@pytest.mark.parametrize("use_fin", [False, True])
+def test_T4_drums_never_see_strum_names(app, use_fin):
+    pg = app(state={"inst": "drums", "useFin": use_fin})
+    bad = []
+    for s in ST:
+        go(pg, s["id"])
+        bar, card = pg.inner_text(".mbar"), metro_card(pg)
+        for where, t in (("metronome bar", bar), ("metronome card", card)):
+            m = STRUM_WORDS.search(t)
+            if m:
+                bad.append(f"{s['id']} {where}: {m.group(0)!r}")
+        name = pg.inner_text(".mbar .m-name")
+        if not re.search(r"groove", name, re.I) or not re.search(r"hats", name) or not re.search(r"kick", name):
+            bad.append(f"{s['id']}: bar should name the groove, got {name!r}")
+        if name not in card:
+            bad.append(f"{s['id']}: card and bar disagree")
+        for n in {PAT[s["pat"]]["n"]}:
+            if n in bar or n in card:
+                bad.append(f"{s['id']}: still shows {n!r}")
+        cells = pg.evaluate("()=>[...document.querySelectorAll('#side .grid .cell')].map(c=>c.textContent.trim())")
+        if not cells or any(not re.fullmatch(r"\d+|&", c) for c in cells):
+            bad.append(f"{s['id']}: metronome cells should be counts, got {cells}")
+    go(pg, "gig")
+    if STRUM_WORDS.search(pg.inner_text(".mbar")) or "Groove" not in pg.inner_text(".mbar .m-name"):
+        bad.append("gig bar: " + pg.inner_text(".mbar .m-name"))
+    assert not bad, bad
+    assert not pg.errors
+
+
+def test_T4_drum_wording_matches_the_grid_and_follows_the_instrument(app):
+    pg = app(state={"inst": "guitar", "stage": "a-e"}, hash_="a-e")
+    assert pg.inner_text(".mbar .m-name") == PAT[ST[0]["pat"]]["n"], "guitar keeps its strum name"
+    assert "D down" in metro_card(pg)
+    pg.click('#stage [data-inst="drums"]')
+    pg.wait_for_function("()=>/Groove/.test(document.querySelector('.mbar .m-name').textContent)")
+    name = pg.inner_text(".mbar .m-name")
+    label = pg.get_attribute("#stage table.dg", "aria-label")
+    assert name.split(": ", 1)[1] in label, f"bar {name!r} should use the same words as the drum grid ({label!r})"
+    go(pg, "rudiments")
+    assert pg.inner_text(".mbar .m-name") == "Plain click"
+    go(pg, "a-e")
+    pg.click('#stage [data-inst="guitar"]')
+    assert pg.inner_text(".mbar .m-name") == PAT[ST[0]["pat"]]["n"]
+
+
+@pytest.mark.parametrize("inst", ["bass", "keys"])
+def test_T4_function_card_shows_sounding_names_with_a_capo(app, inst):
+    pg = app(state={"inst": inst, "stage": "a-e", "capo": {"a-e": 2}}, hash_="a-e")
+    card = fn_card(pg)
+    rows = pg.evaluate("()=>[...document.querySelectorAll('#side .fk > div')].map(d=>{const c=d.cloneNode(true);c.querySelectorAll('.note').forEach(n=>n.remove());return [c.textContent.trim(),(d.querySelector('.note')||{}).textContent||'']})")
+    main = " | ".join(r[0] for r in rows)
+    assert re.search(r"Tonic: B\b", main) and re.search(r"Dominant: F♯", main), f"{inst} capo 2 should read B and F♯, got {main!r}"
+    assert not re.search(r":\s*(A|E)\b", main), f"guitar shape names still lead the rows: {main!r}"
+    notes = [r[1] for r in rows]
+    assert notes == ["Chart shows A", "Chart shows E"], notes
+    assert "Chart shows" in card
+    pg.click('#stage [data-inst="guitar"]')
+    g = fn_card(pg)
+    assert re.search(r"Tonic: A\b", g) and re.search(r"Dominant: E\b", g) and "Chart shows" not in g, "guitar keeps its shapes: " + g
+
+
+@pytest.mark.parametrize("inst", ["bass", "keys", "guitar", "drums"])
+def test_T4_function_card_unchanged_without_a_capo(app, inst):
+    pg = app(state={"inst": inst, "stage": "a-e"}, hash_="a-e")
+    card = fn_card(pg)
+    assert re.search(r"Tonic: A\b", card) and re.search(r"Dominant: E\b", card) and "Chart shows" not in card, card
