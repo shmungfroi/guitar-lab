@@ -304,8 +304,7 @@ const lsGet=()=>localStorage.getItem('shredder'),lsSet=v=>localStorage.setItem('
 {let L=null;try{L=JSON.parse(lsGet()||'{}')}catch(e){}loadState(L)}
 /* true when the browser kept it; false where storage is blocked (a sandboxed frame, private mode), so the page can say so (0.8) */
 const save=()=>{try{lsSet(JSON.stringify(S));return true}catch(e){return false}};
-/* can this page keep anything? (0.9) Checked once, by writing back what storage already holds for this app: no other key is made, and nothing stored is changed. Where it can't, the Backup card, the import question and the footer say so. */
-/* 0.9 (check C3): an existing save is never rewritten at start-up, so a second open tab can't overwrite newer progress; only a first visit probes with a write */
+/* can this page keep anything? (0.9) Checked once at start-up. If a save is already there, storage works and the save is left untouched (check C3: never rewritten, so a second open tab can't overwrite newer progress). On a first visit it probes with a write-then-remove of the app's own key; no other key is made. Where it can't, the Backup card, the import question and the footer say so. */
 const canStore=(()=>{try{if(lsGet()!==null)return true;lsSet('{}');localStorage.removeItem('shredder');return true}catch(e){return false}})();
 if(!canStore){const f=document.getElementById('footKeep');if(f)f.innerHTML='This page can\'t keep your progress here, so a backup (Download or Copy) is the only way to keep it: <a href="#record">make one from the Record tab</a> before you leave.'}
 const $=id=>document.getElementById(id);
