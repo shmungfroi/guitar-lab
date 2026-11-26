@@ -1,0 +1,1156 @@
+{
+ "backup files made": {
+  "0.7": [
+   "version 0.7 · a Shmungfroi instrument",
+   "0.7",
+   1
+  ],
+  "0.8": [
+   "version 0.8 · a Shmungfroi instrument",
+   "0.8",
+   1
+  ]
+ },
+ "real 0.7 and 0.8 backup files made by those versions": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 normal page: foot identical to 0.8": {
+  "ok": true,
+  "detail": {
+   "0.9": "Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. Progress is saved in this browser only: keep a backup from the Record tab. Fonts: Outfit and Poiret One, SIL Open Font License.",
+   "0.8": "Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. Progress is saved in this browser only: keep a backup from the Record tab. Fonts: Outfit and Poiret One, SIL Open Font License."
+  }
+ },
+ "U1 normal page: footText identical to 0.8": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 normal page: footLinks identical to 0.8": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 normal page: intro identical to 0.8": {
+  "ok": true,
+  "detail": {
+   "0.9": "Your progress lives in this browser only. A backup holds all of it: every instrument's levels, gates and marks, the journal, the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device.",
+   "0.8": "Your progress lives in this browser only. A backup holds all of it: every instrument's levels, gates and marks, the journal, the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device."
+  }
+ },
+ "U1 normal page: card identical to 0.8": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 normal page: ask identical to 0.8": {
+  "ok": true,
+  "detail": {
+   "0.9": "Replace your progress with this backup?\n\nBackup made 27 Nov 2026: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Everything saved in this browser now (3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel",
+   "0.8": "Replace your progress with this backup?\n\nBackup made 27 Nov 2026: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Everything saved in this browser now (3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel"
+  }
+ },
+ "U1 normal page: ask bare identical to 0.8": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 normal page: after import identical to 0.8": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 normal page: footStyle identical to 0.8": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 normal page, first visit: footer and Backup card identical to 0.8": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 sandbox(allow-scripts) 1280: foot has no 'saved in this browser' / 'lives in this browser'": {
+  "ok": true,
+  "detail": "Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. This page can't keep your progress here, so a backup (Download or Copy) is the only way to keep it: make one from the Record tab before you leave. Fonts: Outfit and Poiret One, SIL Open Font License."
+ },
+ "U1 sandbox(allow-scripts) 1280: foot mentions a backup": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 sandbox(allow-scripts) 1280: intro has no 'saved in this browser' / 'lives in this browser'": {
+  "ok": true,
+  "detail": "This page can't keep your progress here, so a backup is the only way to keep it: use Download backup or Copy backup before you leave. A backup holds all of it: every instrument's levels, gates and marks, the journal, the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device."
+ },
+ "U1 sandbox(allow-scripts) 1280: intro mentions a backup": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 sandbox(allow-scripts) 1280: ask has no 'saved in this browser' / 'lives in this browser'": {
+  "ok": true,
+  "detail": "Replace your progress with this backup?\n\nBackup made 27 Nov 2026: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. The progress loaded on this page now (0 levels set, 0 journal entries, 0 one-minute logs, 0 warm-up days) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel"
+ },
+ "U1 sandbox(allow-scripts) 1280: ask says the progress loaded on this page": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 sandbox(allow-scripts) 1280: footer and intro name Download and Copy": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 sandbox(allow-scripts) 1280: footer still links to the Record tab": {
+  "ok": true,
+  "detail": [
+   "#record|make one from the Record tab"
+  ]
+ },
+ "U1 sandbox(allow-scripts) 1280: message after import is the 0.8 honest one": {
+  "ok": true,
+  "detail": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. It is loaded for this visit only: this page isn't allowed to store anything here, so it will be gone when the page closes. Keep your backup file, and use Download backup or Copy backup before you leave to keep anything new."
+ },
+ "U1 sandbox(allow-scripts) 1280: no 'this browser' on any tab": {
+  "ok": true,
+  "detail": []
+ },
+ "U1 sandbox(allow-scripts) 1280: no console errors/warnings, no dialogs": {
+  "ok": true,
+  "detail": [
+   [],
+   []
+  ]
+ },
+ "U1 sandbox(allow-scripts) 1280: no page overflow": {
+  "ok": true,
+  "detail": [
+   1280,
+   1280,
+   1280
+  ]
+ },
+ "sandbox(allow-scripts) 1280 wording": {
+  "foot": "Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. This page can't keep your progress here, so a backup (Download or Copy) is the only way to keep it: make one from the Record tab before you leave. Fonts: Outfit and Poiret One, SIL Open Font License.",
+  "footText": "Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. This page can't keep your progress here, so a backup (Download or Copy) is the only way to keep it: make one from the Record tab before you leave. Fonts: Outfit and Poiret One, SIL Open Font License.",
+  "footLinks": [
+   "#record|make one from the Record tab"
+  ],
+  "intro": "This page can't keep your progress here, so a backup is the only way to keep it: use Download backup or Copy backup before you leave. A backup holds all of it: every instrument's levels, gates and marks, the journal, the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device.",
+  "card": "Backup\n\nThis page can't keep your progress here, so a backup is the only way to keep it: use Download backup or Copy backup before you leave. A backup holds all of it: every instrument's levels, gates and marks, the journal, the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device.\n\nDownload backup\nCopy backup\nBring a backup back\nChoose a backup file\nor paste the backup text here:\nImport pasted backup\nYou'll be asked before anything is replaced.",
+  "ask": "Replace your progress with this backup?\n\nBackup made 27 Nov 2026: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. The progress loaded on this page now (0 levels set, 0 journal entries, 0 one-minute logs, 0 warm-up days) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel",
+  "console at this point": [],
+  "after import": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. It is loaded for this visit only: this page isn't allowed to store anything here, so it will be gone when the page closes. Keep your backup file, and use Download backup or Copy backup before you leave to keep anything new.",
+  "'this browser' anywhere on any tab": [],
+  "storage": "blocked: SecurityError",
+  "overflow": [
+   1280,
+   1280,
+   1280
+  ]
+ },
+ "U1 sandbox(allow-scripts) 360: foot has no 'saved in this browser' / 'lives in this browser'": {
+  "ok": true,
+  "detail": "Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. This page can't keep your progress here, so a backup (Download or Copy) is the only way to keep it: make one from the Record tab before you leave. Fonts: Outfit and Poiret One, SIL Open Font License."
+ },
+ "U1 sandbox(allow-scripts) 360: foot mentions a backup": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 sandbox(allow-scripts) 360: intro has no 'saved in this browser' / 'lives in this browser'": {
+  "ok": true,
+  "detail": "This page can't keep your progress here, so a backup is the only way to keep it: use Download backup or Copy backup before you leave. A backup holds all of it: every instrument's levels, gates and marks, the journal, the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device."
+ },
+ "U1 sandbox(allow-scripts) 360: intro mentions a backup": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 sandbox(allow-scripts) 360: ask has no 'saved in this browser' / 'lives in this browser'": {
+  "ok": true,
+  "detail": "Replace your progress with this backup?\n\nBackup made 27 Nov 2026: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. The progress loaded on this page now (0 levels set, 0 journal entries, 0 one-minute logs, 0 warm-up days) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel"
+ },
+ "U1 sandbox(allow-scripts) 360: ask says the progress loaded on this page": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 sandbox(allow-scripts) 360: footer and intro name Download and Copy": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 sandbox(allow-scripts) 360: footer still links to the Record tab": {
+  "ok": true,
+  "detail": [
+   "#record|make one from the Record tab"
+  ]
+ },
+ "U1 sandbox(allow-scripts) 360: message after import is the 0.8 honest one": {
+  "ok": true,
+  "detail": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. It is loaded for this visit only: this page isn't allowed to store anything here, so it will be gone when the page closes. Keep your backup file, and use Download backup or Copy backup before you leave to keep anything new."
+ },
+ "U1 sandbox(allow-scripts) 360: no 'this browser' on any tab": {
+  "ok": true,
+  "detail": []
+ },
+ "U1 sandbox(allow-scripts) 360: no console errors/warnings, no dialogs": {
+  "ok": true,
+  "detail": [
+   [],
+   []
+  ]
+ },
+ "U1 sandbox(allow-scripts) 360: no page overflow": {
+  "ok": true,
+  "detail": [
+   360,
+   360,
+   360
+  ]
+ },
+ "sandbox(allow-scripts) 360 wording": {
+  "foot": "Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. This page can't keep your progress here, so a backup (Download or Copy) is the only way to keep it: make one from the Record tab before you leave. Fonts: Outfit and Poiret One, SIL Open Font License.",
+  "footText": "Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. This page can't keep your progress here, so a backup (Download or Copy) is the only way to keep it: make one from the Record tab before you leave. Fonts: Outfit and Poiret One, SIL Open Font License.",
+  "footLinks": [
+   "#record|make one from the Record tab"
+  ],
+  "intro": "This page can't keep your progress here, so a backup is the only way to keep it: use Download backup or Copy backup before you leave. A backup holds all of it: every instrument's levels, gates and marks, the journal, the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device.",
+  "card": "Backup\n\nThis page can't keep your progress here, so a backup is the only way to keep it: use Download backup or Copy backup before you leave. A backup holds all of it: every instrument's levels, gates and marks, the journal, the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device.\n\nDownload backup\nCopy backup\nBring a backup back\nChoose a backup file\nor paste the backup text here:\nImport pasted backup\nYou'll be asked before anything is replaced.",
+  "ask": "Replace your progress with this backup?\n\nBackup made 27 Nov 2026: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. The progress loaded on this page now (0 levels set, 0 journal entries, 0 one-minute logs, 0 warm-up days) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel",
+  "console at this point": [],
+  "after import": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. It is loaded for this visit only: this page isn't allowed to store anything here, so it will be gone when the page closes. Keep your backup file, and use Download backup or Copy backup before you leave to keep anything new.",
+  "'this browser' anywhere on any tab": [],
+  "storage": "blocked: SecurityError",
+  "overflow": [
+   360,
+   360,
+   360
+  ]
+ },
+ "U1 sandbox(allow-scripts allow-downloads) 1280: foot has no 'saved in this browser' / 'lives in this browser'": {
+  "ok": true,
+  "detail": "Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. This page can't keep your progress here, so a backup (Download or Copy) is the only way to keep it: make one from the Record tab before you leave. Fonts: Outfit and Poiret One, SIL Open Font License."
+ },
+ "U1 sandbox(allow-scripts allow-downloads) 1280: foot mentions a backup": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 sandbox(allow-scripts allow-downloads) 1280: intro has no 'saved in this browser' / 'lives in this browser'": {
+  "ok": true,
+  "detail": "This page can't keep your progress here, so a backup is the only way to keep it: use Download backup or Copy backup before you leave. A backup holds all of it: every instrument's levels, gates and marks, the journal, the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device."
+ },
+ "U1 sandbox(allow-scripts allow-downloads) 1280: intro mentions a backup": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 sandbox(allow-scripts allow-downloads) 1280: ask has no 'saved in this browser' / 'lives in this browser'": {
+  "ok": true,
+  "detail": "Replace your progress with this backup?\n\nBackup made 27 Nov 2026: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. The progress loaded on this page now (0 levels set, 0 journal entries, 0 one-minute logs, 0 warm-up days) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel"
+ },
+ "U1 sandbox(allow-scripts allow-downloads) 1280: ask says the progress loaded on this page": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 sandbox(allow-scripts allow-downloads) 1280: footer and intro name Download and Copy": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 sandbox(allow-scripts allow-downloads) 1280: footer still links to the Record tab": {
+  "ok": true,
+  "detail": [
+   "#record|make one from the Record tab"
+  ]
+ },
+ "U1 sandbox(allow-scripts allow-downloads) 1280: message after import is the 0.8 honest one": {
+  "ok": true,
+  "detail": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. It is loaded for this visit only: this page isn't allowed to store anything here, so it will be gone when the page closes. Keep your backup file, and use Download backup or Copy backup before you leave to keep anything new."
+ },
+ "U1 sandbox(allow-scripts allow-downloads) 1280: no 'this browser' on any tab": {
+  "ok": true,
+  "detail": []
+ },
+ "U1 sandbox(allow-scripts allow-downloads) 1280: no console errors/warnings, no dialogs": {
+  "ok": true,
+  "detail": [
+   [],
+   []
+  ]
+ },
+ "U1 sandbox(allow-scripts allow-downloads) 1280: no page overflow": {
+  "ok": true,
+  "detail": [
+   1280,
+   1280,
+   1280
+  ]
+ },
+ "sandbox(allow-scripts allow-downloads) 1280 wording": {
+  "foot": "Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. This page can't keep your progress here, so a backup (Download or Copy) is the only way to keep it: make one from the Record tab before you leave. Fonts: Outfit and Poiret One, SIL Open Font License.",
+  "footText": "Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. This page can't keep your progress here, so a backup (Download or Copy) is the only way to keep it: make one from the Record tab before you leave. Fonts: Outfit and Poiret One, SIL Open Font License.",
+  "footLinks": [
+   "#record|make one from the Record tab"
+  ],
+  "intro": "This page can't keep your progress here, so a backup is the only way to keep it: use Download backup or Copy backup before you leave. A backup holds all of it: every instrument's levels, gates and marks, the journal, the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device.",
+  "card": "Backup\n\nThis page can't keep your progress here, so a backup is the only way to keep it: use Download backup or Copy backup before you leave. A backup holds all of it: every instrument's levels, gates and marks, the journal, the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device.\n\nDownload backup\nCopy backup\nBring a backup back\nChoose a backup file\nor paste the backup text here:\nImport pasted backup\nYou'll be asked before anything is replaced.",
+  "ask": "Replace your progress with this backup?\n\nBackup made 27 Nov 2026: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. The progress loaded on this page now (0 levels set, 0 journal entries, 0 one-minute logs, 0 warm-up days) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel",
+  "console at this point": [],
+  "after import": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. It is loaded for this visit only: this page isn't allowed to store anything here, so it will be gone when the page closes. Keep your backup file, and use Download backup or Copy backup before you leave to keep anything new.",
+  "'this browser' anywhere on any tab": [],
+  "storage": "blocked: SecurityError",
+  "overflow": [
+   1280,
+   1280,
+   1280
+  ]
+ },
+ "U1 sandbox(allow-scripts allow-downloads) 360: foot has no 'saved in this browser' / 'lives in this browser'": {
+  "ok": true,
+  "detail": "Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. This page can't keep your progress here, so a backup (Download or Copy) is the only way to keep it: make one from the Record tab before you leave. Fonts: Outfit and Poiret One, SIL Open Font License."
+ },
+ "U1 sandbox(allow-scripts allow-downloads) 360: foot mentions a backup": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 sandbox(allow-scripts allow-downloads) 360: intro has no 'saved in this browser' / 'lives in this browser'": {
+  "ok": true,
+  "detail": "This page can't keep your progress here, so a backup is the only way to keep it: use Download backup or Copy backup before you leave. A backup holds all of it: every instrument's levels, gates and marks, the journal, the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device."
+ },
+ "U1 sandbox(allow-scripts allow-downloads) 360: intro mentions a backup": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 sandbox(allow-scripts allow-downloads) 360: ask has no 'saved in this browser' / 'lives in this browser'": {
+  "ok": true,
+  "detail": "Replace your progress with this backup?\n\nBackup made 27 Nov 2026: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. The progress loaded on this page now (0 levels set, 0 journal entries, 0 one-minute logs, 0 warm-up days) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel"
+ },
+ "U1 sandbox(allow-scripts allow-downloads) 360: ask says the progress loaded on this page": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 sandbox(allow-scripts allow-downloads) 360: footer and intro name Download and Copy": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 sandbox(allow-scripts allow-downloads) 360: footer still links to the Record tab": {
+  "ok": true,
+  "detail": [
+   "#record|make one from the Record tab"
+  ]
+ },
+ "U1 sandbox(allow-scripts allow-downloads) 360: message after import is the 0.8 honest one": {
+  "ok": true,
+  "detail": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. It is loaded for this visit only: this page isn't allowed to store anything here, so it will be gone when the page closes. Keep your backup file, and use Download backup or Copy backup before you leave to keep anything new."
+ },
+ "U1 sandbox(allow-scripts allow-downloads) 360: no 'this browser' on any tab": {
+  "ok": true,
+  "detail": []
+ },
+ "U1 sandbox(allow-scripts allow-downloads) 360: no console errors/warnings, no dialogs": {
+  "ok": true,
+  "detail": [
+   [],
+   []
+  ]
+ },
+ "U1 sandbox(allow-scripts allow-downloads) 360: no page overflow": {
+  "ok": true,
+  "detail": [
+   360,
+   360,
+   360
+  ]
+ },
+ "sandbox(allow-scripts allow-downloads) 360 wording": {
+  "foot": "Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. This page can't keep your progress here, so a backup (Download or Copy) is the only way to keep it: make one from the Record tab before you leave. Fonts: Outfit and Poiret One, SIL Open Font License.",
+  "footText": "Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. This page can't keep your progress here, so a backup (Download or Copy) is the only way to keep it: make one from the Record tab before you leave. Fonts: Outfit and Poiret One, SIL Open Font License.",
+  "footLinks": [
+   "#record|make one from the Record tab"
+  ],
+  "intro": "This page can't keep your progress here, so a backup is the only way to keep it: use Download backup or Copy backup before you leave. A backup holds all of it: every instrument's levels, gates and marks, the journal, the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device.",
+  "card": "Backup\n\nThis page can't keep your progress here, so a backup is the only way to keep it: use Download backup or Copy backup before you leave. A backup holds all of it: every instrument's levels, gates and marks, the journal, the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device.\n\nDownload backup\nCopy backup\nBring a backup back\nChoose a backup file\nor paste the backup text here:\nImport pasted backup\nYou'll be asked before anything is replaced.",
+  "ask": "Replace your progress with this backup?\n\nBackup made 27 Nov 2026: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. The progress loaded on this page now (0 levels set, 0 journal entries, 0 one-minute logs, 0 warm-up days) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel",
+  "console at this point": [],
+  "after import": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. It is loaded for this visit only: this page isn't allowed to store anything here, so it will be gone when the page closes. Keep your backup file, and use Download backup or Copy backup before you leave to keep anything new.",
+  "'this browser' anywhere on any tab": [],
+  "storage": "blocked: SecurityError",
+  "overflow": [
+   360,
+   360,
+   360
+  ]
+ },
+ "U1 sandbox with allow-same-origin (storage works): normal wording": {
+  "ok": true,
+  "detail": "Your progress lives in this browser only. A backup holds all"
+ },
+ "U1 top-level, setItem throws (quota / private mode): foot has no 'saved in this browser' / 'lives in this browser'": {
+  "ok": true,
+  "detail": "Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. This page can't keep your progress here, so a backup (Download or Copy) is the only way to keep it: make one from the Record tab before you leave. Fonts: Outfit and Poiret One, SIL Open Font License."
+ },
+ "U1 top-level, setItem throws (quota / private mode): foot mentions a backup": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 top-level, setItem throws (quota / private mode): intro has no 'saved in this browser' / 'lives in this browser'": {
+  "ok": true,
+  "detail": "This page can't keep your progress here, so a backup is the only way to keep it: use Download backup or Copy backup before you leave. A backup holds all of it: every instrument's levels, gates and marks, the journal, the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device."
+ },
+ "U1 top-level, setItem throws (quota / private mode): intro mentions a backup": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 top-level, setItem throws (quota / private mode): ask has no 'saved in this browser' / 'lives in this browser'": {
+  "ok": true,
+  "detail": "Replace your progress with this backup?\n\nBackup made 27 Nov 2026: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. The progress loaded on this page now (0 levels set, 0 journal entries, 0 one-minute logs, 0 warm-up days) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel"
+ },
+ "U1 top-level, setItem throws (quota / private mode): ask says the progress loaded on this page": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 top-level, setItem throws (quota / private mode): footer and intro name Download and Copy": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 top-level, setItem throws (quota / private mode): footer still links to the Record tab": {
+  "ok": true,
+  "detail": [
+   "#record|make one from the Record tab"
+  ]
+ },
+ "U1 top-level, setItem throws (quota / private mode): message after import is the 0.8 honest one": {
+  "ok": true,
+  "detail": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. It is loaded for this visit only: this page isn't allowed to store anything here, so it will be gone when the page closes. Keep your backup file, and use Download backup or Copy backup before you leave to keep anything new."
+ },
+ "U1 top-level, setItem throws (quota / private mode): no 'this browser' on any tab": {
+  "ok": true,
+  "detail": []
+ },
+ "U1 top-level, setItem throws (quota / private mode): no console errors/warnings, no dialogs": {
+  "ok": true,
+  "detail": [
+   [],
+   []
+  ]
+ },
+ "top-level, setItem throws (quota / private mode)": {
+  "foot": "Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. This page can't keep your progress here, so a backup (Download or Copy) is the only way to keep it: make one from the Record tab before you leave. Fonts: Outfit and Poiret One, SIL Open Font License.",
+  "footText": "Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. This page can't keep your progress here, so a backup (Download or Copy) is the only way to keep it: make one from the Record tab before you leave. Fonts: Outfit and Poiret One, SIL Open Font License.",
+  "footLinks": [
+   "#record|make one from the Record tab"
+  ],
+  "intro": "This page can't keep your progress here, so a backup is the only way to keep it: use Download backup or Copy backup before you leave. A backup holds all of it: every instrument's levels, gates and marks, the journal, the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device.",
+  "card": "Backup\n\nThis page can't keep your progress here, so a backup is the only way to keep it: use Download backup or Copy backup before you leave. A backup holds all of it: every instrument's levels, gates and marks, the journal, the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device.\n\nDownload backup\nCopy backup\nBring a backup back\nChoose a backup file\nor paste the backup text here:\nImport pasted backup\nYou'll be asked before anything is replaced.",
+  "ask": "Replace your progress with this backup?\n\nBackup made 27 Nov 2026: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. The progress loaded on this page now (0 levels set, 0 journal entries, 0 one-minute logs, 0 warm-up days) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel",
+  "console at this point": [],
+  "after import": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. It is loaded for this visit only: this page isn't allowed to store anything here, so it will be gone when the page closes. Keep your backup file, and use Download backup or Copy backup before you leave to keep anything new.",
+  "'this browser' anywhere on any tab": []
+ },
+ "U1 top-level, localStorage access throws: foot has no 'saved in this browser' / 'lives in this browser'": {
+  "ok": true,
+  "detail": "Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. This page can't keep your progress here, so a backup (Download or Copy) is the only way to keep it: make one from the Record tab before you leave. Fonts: Outfit and Poiret One, SIL Open Font License."
+ },
+ "U1 top-level, localStorage access throws: foot mentions a backup": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 top-level, localStorage access throws: intro has no 'saved in this browser' / 'lives in this browser'": {
+  "ok": true,
+  "detail": "This page can't keep your progress here, so a backup is the only way to keep it: use Download backup or Copy backup before you leave. A backup holds all of it: every instrument's levels, gates and marks, the journal, the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device."
+ },
+ "U1 top-level, localStorage access throws: intro mentions a backup": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 top-level, localStorage access throws: ask has no 'saved in this browser' / 'lives in this browser'": {
+  "ok": true,
+  "detail": "Replace your progress with this backup?\n\nBackup made 27 Nov 2026: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. The progress loaded on this page now (0 levels set, 0 journal entries, 0 one-minute logs, 0 warm-up days) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel"
+ },
+ "U1 top-level, localStorage access throws: ask says the progress loaded on this page": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 top-level, localStorage access throws: footer and intro name Download and Copy": {
+  "ok": true,
+  "detail": null
+ },
+ "U1 top-level, localStorage access throws: footer still links to the Record tab": {
+  "ok": true,
+  "detail": [
+   "#record|make one from the Record tab"
+  ]
+ },
+ "U1 top-level, localStorage access throws: message after import is the 0.8 honest one": {
+  "ok": true,
+  "detail": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. It is loaded for this visit only: this page isn't allowed to store anything here, so it will be gone when the page closes. Keep your backup file, and use Download backup or Copy backup before you leave to keep anything new."
+ },
+ "U1 top-level, localStorage access throws: no 'this browser' on any tab": {
+  "ok": true,
+  "detail": []
+ },
+ "U1 top-level, localStorage access throws: no console errors/warnings, no dialogs": {
+  "ok": true,
+  "detail": [
+   [],
+   []
+  ]
+ },
+ "top-level, localStorage access throws": {
+  "foot": "Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. This page can't keep your progress here, so a backup (Download or Copy) is the only way to keep it: make one from the Record tab before you leave. Fonts: Outfit and Poiret One, SIL Open Font License.",
+  "footText": "Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. This page can't keep your progress here, so a backup (Download or Copy) is the only way to keep it: make one from the Record tab before you leave. Fonts: Outfit and Poiret One, SIL Open Font License.",
+  "footLinks": [
+   "#record|make one from the Record tab"
+  ],
+  "intro": "This page can't keep your progress here, so a backup is the only way to keep it: use Download backup or Copy backup before you leave. A backup holds all of it: every instrument's levels, gates and marks, the journal, the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device.",
+  "card": "Backup\n\nThis page can't keep your progress here, so a backup is the only way to keep it: use Download backup or Copy backup before you leave. A backup holds all of it: every instrument's levels, gates and marks, the journal, the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device.\n\nDownload backup\nCopy backup\nBring a backup back\nChoose a backup file\nor paste the backup text here:\nImport pasted backup\nYou'll be asked before anything is replaced.",
+  "ask": "Replace your progress with this backup?\n\nBackup made 27 Nov 2026: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. The progress loaded on this page now (0 levels set, 0 journal entries, 0 one-minute logs, 0 warm-up days) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel",
+  "console at this point": [],
+  "after import": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. It is loaded for this visit only: this page isn't allowed to store anything here, so it will be gone when the page closes. Keep your backup file, and use Download backup or Copy backup before you leave to keep anything new.",
+  "'this browser' anywhere on any tab": []
+ },
+ "storage check leaves saved data byte-identical: pretty JSON, odd spacing, unknown key, non-ASCII": {
+  "ok": true,
+  "detail": {
+   "identical after load, reload, third load": true,
+   "bytes": 131,
+   "storage calls on load": [
+    [
+     "local",
+     "setItem",
+     "shredder",
+     "(same value)"
+    ]
+   ],
+   "wording": "Your progress lives in this browser only. ",
+   "console": []
+  }
+ },
+ "storage check leaves saved data byte-identical: 0.7-shaped save (compact)": {
+  "ok": true,
+  "detail": {
+   "identical after load, reload, third load": true,
+   "bytes": 605,
+   "storage calls on load": [
+    [
+     "local",
+     "setItem",
+     "shredder",
+     "(same value)"
+    ]
+   ],
+   "wording": "Your progress lives in this browser only. ",
+   "console": []
+  }
+ },
+ "storage check leaves saved data byte-identical: 0.8-shaped save (spaced)": {
+  "ok": true,
+  "detail": {
+   "identical after load, reload, third load": true,
+   "bytes": 1097,
+   "storage calls on load": [
+    [
+     "local",
+     "setItem",
+     "shredder",
+     "(same value)"
+    ]
+   ],
+   "wording": "Your progress lives in this browser only. ",
+   "console": []
+  }
+ },
+ "storage check leaves saved data byte-identical: not JSON": {
+  "ok": true,
+  "detail": {
+   "identical after load, reload, third load": true,
+   "bytes": 9,
+   "storage calls on load": [
+    [
+     "local",
+     "setItem",
+     "shredder",
+     "(same value)"
+    ]
+   ],
+   "wording": "Your progress lives in this browser only. ",
+   "console": []
+  }
+ },
+ "storage check leaves saved data byte-identical: empty string": {
+  "ok": true,
+  "detail": {
+   "identical after load, reload, third load": true,
+   "bytes": 0,
+   "storage calls on load": [
+    [
+     "local",
+     "setItem",
+     "shredder",
+     "(same value)"
+    ]
+   ],
+   "wording": "Your progress lives in this browser only. ",
+   "console": []
+  }
+ },
+ "storage check leaves saved data byte-identical: empty object": {
+  "ok": true,
+  "detail": {
+   "identical after load, reload, third load": true,
+   "bytes": 2,
+   "storage calls on load": [
+    [
+     "local",
+     "setItem",
+     "shredder",
+     "(same value)"
+    ]
+   ],
+   "wording": "Your progress lives in this browser only. ",
+   "console": []
+  }
+ },
+ "storage check leaves saved data byte-identical: the word null": {
+  "ok": true,
+  "detail": {
+   "identical after load, reload, third load": true,
+   "bytes": 4,
+   "storage calls on load": [
+    [
+     "local",
+     "setItem",
+     "shredder",
+     "(same value)"
+    ]
+   ],
+   "wording": "Your progress lives in this browser only. ",
+   "console": []
+  }
+ },
+ "storage check leaves saved data byte-identical: an array": {
+  "ok": true,
+  "detail": {
+   "identical after load, reload, third load": true,
+   "bytes": 7,
+   "storage calls on load": [
+    [
+     "local",
+     "setItem",
+     "shredder",
+     "(same value)"
+    ]
+   ],
+   "wording": "Your progress lives in this browser only. ",
+   "console": []
+  }
+ },
+ "storage check leaves saved data byte-identical: wrong types": {
+  "ok": true,
+  "detail": {
+   "identical after load, reload, third load": true,
+   "bytes": 31,
+   "storage calls on load": [
+    [
+     "local",
+     "setItem",
+     "shredder",
+     "(same value)"
+    ]
+   ],
+   "wording": "Your progress lives in this browser only. ",
+   "console": []
+  }
+ },
+ "storage check, seeded": {
+  "pretty JSON, odd spacing, unknown key, non-ASCII": {
+   "identical after load, reload, third load": true,
+   "bytes": 131,
+   "storage calls on load": [
+    [
+     "local",
+     "setItem",
+     "shredder",
+     "(same value)"
+    ]
+   ],
+   "wording": "Your progress lives in this browser only. ",
+   "console": []
+  },
+  "0.7-shaped save (compact)": {
+   "identical after load, reload, third load": true,
+   "bytes": 605,
+   "storage calls on load": [
+    [
+     "local",
+     "setItem",
+     "shredder",
+     "(same value)"
+    ]
+   ],
+   "wording": "Your progress lives in this browser only. ",
+   "console": []
+  },
+  "0.8-shaped save (spaced)": {
+   "identical after load, reload, third load": true,
+   "bytes": 1097,
+   "storage calls on load": [
+    [
+     "local",
+     "setItem",
+     "shredder",
+     "(same value)"
+    ]
+   ],
+   "wording": "Your progress lives in this browser only. ",
+   "console": []
+  },
+  "not JSON": {
+   "identical after load, reload, third load": true,
+   "bytes": 9,
+   "storage calls on load": [
+    [
+     "local",
+     "setItem",
+     "shredder",
+     "(same value)"
+    ]
+   ],
+   "wording": "Your progress lives in this browser only. ",
+   "console": []
+  },
+  "empty string": {
+   "identical after load, reload, third load": true,
+   "bytes": 0,
+   "storage calls on load": [
+    [
+     "local",
+     "setItem",
+     "shredder",
+     "(same value)"
+    ]
+   ],
+   "wording": "Your progress lives in this browser only. ",
+   "console": []
+  },
+  "empty object": {
+   "identical after load, reload, third load": true,
+   "bytes": 2,
+   "storage calls on load": [
+    [
+     "local",
+     "setItem",
+     "shredder",
+     "(same value)"
+    ]
+   ],
+   "wording": "Your progress lives in this browser only. ",
+   "console": []
+  },
+  "the word null": {
+   "identical after load, reload, third load": true,
+   "bytes": 4,
+   "storage calls on load": [
+    [
+     "local",
+     "setItem",
+     "shredder",
+     "(same value)"
+    ]
+   ],
+   "wording": "Your progress lives in this browser only. ",
+   "console": []
+  },
+  "an array": {
+   "identical after load, reload, third load": true,
+   "bytes": 7,
+   "storage calls on load": [
+    [
+     "local",
+     "setItem",
+     "shredder",
+     "(same value)"
+    ]
+   ],
+   "wording": "Your progress lives in this browser only. ",
+   "console": []
+  },
+  "wrong types": {
+   "identical after load, reload, third load": true,
+   "bytes": 31,
+   "storage calls on load": [
+    [
+     "local",
+     "setItem",
+     "shredder",
+     "(same value)"
+    ]
+   ],
+   "wording": "Your progress lives in this browser only. ",
+   "console": []
+  }
+ },
+ "first visit: nothing left behind after load (no keys, cookies, databases)": {
+  "ok": true,
+  "detail": {
+   "local": [],
+   "session": [],
+   "cookie": "",
+   "calls": [
+    [
+     "local",
+     "setItem",
+     "shredder",
+     "{}"
+    ],
+    [
+     "local",
+     "removeItem",
+     "shredder"
+    ]
+   ],
+   "idb": [],
+   "caches": []
+  }
+ },
+ "first visit, all seven tabs opened: what is stored is identical to 0.8 (only 'shredder', written when the Gig tab opens)": {
+  "ok": true,
+  "detail": {
+   "keys": [
+    "shredder"
+   ],
+   "bytes": 369
+  }
+ },
+ "after use: localStorage holds only 'shredder'": {
+  "ok": true,
+  "detail": [
+   [
+    "shredder"
+   ],
+   [],
+   ""
+  ]
+ },
+ "two tabs, first visit: first tab undisturbed, nothing stored": {
+  "ok": true,
+  "detail": null
+ },
+ "import 0.7 backup, pasted: every field restored and kept after reload": {
+  "ok": true,
+  "detail": {
+   "ask": "Replace your progress with this backup?\n\nBackup made 27 Nov 2026: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Everything saved in this browser now (0 levels set, 0 journal entries, 0 one-minute logs, 0 warm-up days) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel",
+   "msg": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Your progress has been replaced and saved in this browser.",
+   "fields differing": [],
+   "after reload": [],
+   "instrument shown": "Bass",
+   "keys": [
+    "shredder"
+   ]
+  }
+ },
+ "import 0.7 backup, file chooser: every field restored": {
+  "ok": true,
+  "detail": [
+   "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Your progress has been replaced and saved in this browser.",
+   []
+  ]
+ },
+ "import 0.8 backup, pasted: every field restored and kept after reload": {
+  "ok": true,
+  "detail": {
+   "ask": "Replace your progress with this backup?\n\nBackup made 27 Nov 2026: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Everything saved in this browser now (0 levels set, 0 journal entries, 0 one-minute logs, 0 warm-up days) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel",
+   "msg": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Your progress has been replaced and saved in this browser.",
+   "fields differing": [],
+   "after reload": [],
+   "instrument shown": "Bass",
+   "keys": [
+    "shredder"
+   ]
+  }
+ },
+ "import 0.8 backup, file chooser: every field restored": {
+  "ok": true,
+  "detail": [
+   "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Your progress has been replaced and saved in this browser.",
+   []
+  ]
+ },
+ "import bare state, pasted: every field restored and kept after reload": {
+  "ok": true,
+  "detail": {
+   "ask": "Replace your progress with this backup?\n\nThis backup has 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Everything saved in this browser now (0 levels set, 0 journal entries, 0 one-minute logs, 0 warm-up days) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel",
+   "msg": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Your progress has been replaced and saved in this browser.",
+   "fields differing": [],
+   "after reload": [],
+   "instrument shown": "Bass",
+   "keys": [
+    "shredder"
+   ]
+  }
+ },
+ "imports": {
+  "0.7 backup (pasted)": {
+   "ask": "Replace your progress with this backup?\n\nBackup made 27 Nov 2026: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Everything saved in this browser now (0 levels set, 0 journal entries, 0 one-minute logs, 0 warm-up days) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel",
+   "msg": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Your progress has been replaced and saved in this browser.",
+   "fields differing": [],
+   "after reload": [],
+   "instrument shown": "Bass",
+   "keys": [
+    "shredder"
+   ]
+  },
+  "0.8 backup (pasted)": {
+   "ask": "Replace your progress with this backup?\n\nBackup made 27 Nov 2026: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Everything saved in this browser now (0 levels set, 0 journal entries, 0 one-minute logs, 0 warm-up days) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel",
+   "msg": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Your progress has been replaced and saved in this browser.",
+   "fields differing": [],
+   "after reload": [],
+   "instrument shown": "Bass",
+   "keys": [
+    "shredder"
+   ]
+  },
+  "bare state (pasted)": {
+   "ask": "Replace your progress with this backup?\n\nThis backup has 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Everything saved in this browser now (0 levels set, 0 journal entries, 0 one-minute logs, 0 warm-up days) will be replaced, and that can't be undone.\n\nReplace my progress\nCancel",
+   "msg": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Your progress has been replaced and saved in this browser.",
+   "fields differing": [],
+   "after reload": [],
+   "instrument shown": "Bass",
+   "keys": [
+    "shredder"
+   ]
+  }
+ },
+ "version label 0.9: title, header, backup version, newer-version message; no 0.8 shown": {
+  "ok": true,
+  "detail": {
+   "title": "The Guitar Lab 0.9",
+   "header": "version 0.9 · a Shmungfroi instrument",
+   "backup": {
+    "app": "The Guitar Lab",
+    "format": 1,
+    "version": "0.9"
+   },
+   "backup state identical to the 0.8 backup of the same save": true,
+   "backup state keys == 0.8 backup's": true,
+   "newer msg": "That backup was made by a newer version of The Guitar Lab than this one (0.9), so it can't be read here. Nothing has been changed.",
+   "0.8 visible": false
+  }
+ },
+ "data shape unchanged: a 0.9 backup imports into 0.8": {
+  "ok": true,
+  "detail": "Backup imported: 3 levels set, 2 journal entries, 1 one-minute log, 1 warm-up day. Your progress has been replaced and saved in this browser."
+ },
+ "normal page: no dialogs, no console errors, no off-host requests": {
+  "ok": true,
+  "detail": [
+   [],
+   [],
+   []
+  ]
+ },
+ "requests made by the page": [
+  "/fonts/",
+  "/fonts/Outfit-Bold.ttf",
+  "/fonts/Outfit-Regular.ttf",
+  "/fonts/PoiretOne-Regular.ttf",
+  "/index.html"
+ ],
+ "colours dark: lit keys are #7a5c12 (white) and #a47510 (black), same as 0.8": {
+  "ok": true,
+  "detail": [
+   "#7a5c12",
+   "#a47510"
+  ]
+ },
+ "colours dark: dominant is #d0574b, every colour variable same as 0.8": {
+  "ok": true,
+  "detail": "#d0574b"
+ },
+ "colours light: lit keys are #7a5c12 (white) and #a47510 (black), same as 0.8": {
+  "ok": true,
+  "detail": [
+   "#7a5c12",
+   "#a47510"
+  ]
+ },
+ "colours light: dominant is #a8352b, every colour variable same as 0.8": {
+  "ok": true,
+  "detail": "#a8352b"
+ },
+ "colours": {
+  "dark 0.9": {
+   "litFills": [
+    "#7a5c12",
+    "#a47510"
+   ],
+   "litCount": 6,
+   "vars": {
+    "--kbl": "#a47510",
+    "--dom": "#d0574b",
+    "--hi": "#f0d48a",
+    "--ton": "#8fbf6a",
+    "--pre": "#c9a24a",
+    "--sec": "#a493d8",
+    "--sub": "#b3a98f",
+    "--bg": "#0b0906",
+    "--card": "#12100b",
+    "--ink": "#ece2c8",
+    "--mut": "#9c927c",
+    "--rule": "#2a2418",
+    "--wood": "#2b1a12",
+    "--fret": "#b9b4a8",
+    "--ivory": "#ece2c8",
+    "--inlay": "#c9a24a",
+    "--fin": "#2f9e9b"
+   }
+  },
+  "dark 0.8": {
+   "litFills": [
+    "#7a5c12",
+    "#a47510"
+   ],
+   "litCount": 6,
+   "vars": {
+    "--kbl": "#a47510",
+    "--dom": "#d0574b",
+    "--hi": "#f0d48a",
+    "--ton": "#8fbf6a",
+    "--pre": "#c9a24a",
+    "--sec": "#a493d8",
+    "--sub": "#b3a98f",
+    "--bg": "#0b0906",
+    "--card": "#12100b",
+    "--ink": "#ece2c8",
+    "--mut": "#9c927c",
+    "--rule": "#2a2418",
+    "--wood": "#2b1a12",
+    "--fret": "#b9b4a8",
+    "--ivory": "#ece2c8",
+    "--inlay": "#c9a24a",
+    "--fin": "#2f9e9b"
+   }
+  },
+  "light 0.9": {
+   "litFills": [
+    "#7a5c12",
+    "#a47510"
+   ],
+   "litCount": 6,
+   "vars": {
+    "--kbl": "#a47510",
+    "--dom": "#a8352b",
+    "--hi": "#7a5c12",
+    "--ton": "#4a7434",
+    "--pre": "#8a6a22",
+    "--sec": "#6b55b0",
+    "--sub": "#5e5340",
+    "--bg": "#f7f1e3",
+    "--card": "#fffaf0",
+    "--ink": "#2a2216",
+    "--mut": "#6f634c",
+    "--rule": "#d9cdb2",
+    "--wood": "#2b1a12",
+    "--fret": "#b9b4a8",
+    "--ivory": "#ece2c8",
+    "--inlay": "#c9a24a",
+    "--fin": "#1f6f6d"
+   }
+  },
+  "light 0.8": {
+   "litFills": [
+    "#7a5c12",
+    "#a47510"
+   ],
+   "litCount": 6,
+   "vars": {
+    "--kbl": "#a47510",
+    "--dom": "#a8352b",
+    "--hi": "#7a5c12",
+    "--ton": "#4a7434",
+    "--pre": "#8a6a22",
+    "--sec": "#6b55b0",
+    "--sub": "#5e5340",
+    "--bg": "#f7f1e3",
+    "--card": "#fffaf0",
+    "--ink": "#2a2216",
+    "--mut": "#6f634c",
+    "--rule": "#d9cdb2",
+    "--wood": "#2b1a12",
+    "--fret": "#b9b4a8",
+    "--ivory": "#ece2c8",
+    "--inlay": "#c9a24a",
+    "--fin": "#1f6f6d"
+   }
+  }
+ },
+ "source": {
+  "alert/confirm/prompt calls": [],
+  "fetch/XHR/WebSocket/sendBeacon/EventSource/import()": [],
+  "http(s) URLs": [
+   "https://www.youtube.com/results?search_query="
+  ],
+  "src=/url() targets": [
+   "b.m&&typeof",
+   "fonts/Outfit-Bold.ttf",
+   "fonts/Outfit-Regular.ttf",
+   "fonts/PoiretOne-Regular.ttf"
+  ],
+  "localStorage uses": [
+   "localStorage.getItem('shredder')",
+   "localStorage.setItem('shredder',v)",
+   "localStorage.removeItem('shredder')"
+  ],
+  "sessionStorage/indexedDB/cookie": [],
+  "colour counts 0.9 vs 0.8": {
+   "#a47510": [
+    1,
+    1
+   ],
+   "#7a5c12": [
+    3,
+    3
+   ],
+   "#d0574b": [
+    2,
+    2
+   ],
+   "#a8352b": [
+    1,
+    1
+   ]
+  },
+  "'0.8' left in source": [
+   " (a sandboxed frame, private mode), so the page can say so (0.8) */\nconst save=()=>{try{lsSet",
+   "e ${L}${ks.some(v=>v===undefined)?' so far':''}`}\n/* drums (0.8): the metronome names the gro",
+   "apo, bass, keys and voice read the chords where they sound (0.8); the guitar and the chart ke",
+   "n try again.',1);else viaLink()})})}\n/* copy without noise (0.8): where the page's permission"
+  ]
+ },
+ "source: no alert/confirm/prompt": {
+  "ok": true,
+  "detail": null
+ },
+ "source: no network APIs; only URL is the song-search link": {
+  "ok": true,
+  "detail": [
+   "https://www.youtube.com/results?search_query="
+  ]
+ },
+ "source: every localStorage call names 'shredder'": {
+  "ok": true,
+  "detail": [
+   "localStorage.getItem('shredder')",
+   "localStorage.setItem('shredder',v)",
+   "localStorage.removeItem('shredder')"
+  ]
+ },
+ "source: colour strings appear as often as in 0.8": {
+  "ok": true,
+  "detail": {
+   "#a47510": [
+    1,
+    1
+   ],
+   "#7a5c12": [
+    3,
+    3
+   ],
+   "#d0574b": [
+    2,
+    2
+   ],
+   "#a8352b": [
+    1,
+    1
+   ]
+  }
+ }
+}

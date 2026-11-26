@@ -1,0 +1,66 @@
+combinations per version: 1000 | grids measured: 1000
+combinations with no drum grid: 0 []
+
+width | where/present | grids | cols | 0.9 worst sw-cw | 0.9 worst past card | 0.8 worst sw-cw | 0.9 font | 0.9 min cell w | clipped cells | page overflow
+ 300 | path/off | 40 | [4, 5, 7, 9] | 0 | 0.0 | 1 | [13] | 21.9 | 0 | 0
+ 300 | gig/off | 30 | [5, 9] | 14 | 13.9 | 39 | [13] | 18.9 | 0 | 0
+ 300 | gig/on | 30 | [5, 9] | 0 | 0.0 | 0 | [12] | 18.2 | 0 | 0
+ 320 | path/off | 40 | [4, 5, 7, 9] | 0 | -19.2 | 0 | [13] | 22.0 | 0 | 0
+ 320 | gig/off | 30 | [5, 9] | 0 | 0.0 | 19 | [13] | 19.6 | 0 | 0
+ 320 | gig/on | 30 | [5, 9] | 0 | 0.0 | 0 | [12.48] | 20.3 | 0 | 0
+ 330 | path/off | 40 | [4, 5, 7, 9] | 0 | -29.2 | 0 | [13] | 22.0 | 0 | 0
+ 330 | gig/off | 30 | [5, 9] | 0 | 0.0 | 9 | [13] | 20.9 | 0 | 0
+ 330 | gig/on | 30 | [5, 9] | 0 | 0.0 | 0 | [12.87] | 21.3 | 0 | 0
+ 340 | path/off | 40 | [4, 5, 7, 9] | 0 | -39.2 | 0 | [13] | 22.0 | 0 | 0
+ 340 | gig/off | 30 | [5, 9] | 0 | -1.2 | 0 | [13] | 22.0 | 0 | 0
+ 340 | gig/on | 30 | [5, 9] | 0 | 0.0 | 0 | [13.26] | 22.1 | 0 | 0
+ 341 | path/off | 40 | [4, 5, 7, 9] | 0 | -40.2 | 0 | [13] | 22.0 | 0 | 0
+ 341 | gig/off | 30 | [5, 9] | 0 | -2.2 | 0 | [13] | 22.0 | 0 | 0
+ 341 | gig/on | 30 | [5, 9] | 0 | 0.0 | 0 | [13.299] | 20.2 | 0 | 0
+ 350 | path/off | 40 | [4, 5, 7, 9] | 0 | -49.2 | 0 | [13] | 22.0 | 0 | 0
+ 350 | gig/off | 30 | [5, 9] | 0 | -11.2 | 0 | [13] | 22.0 | 0 | 0
+ 350 | gig/on | 30 | [5, 9] | 0 | 0.0 | 0 | [13.65] | 20.8 | 0 | 0
+ 360 | path/off | 40 | [4, 5, 7, 9] | 0 | -59.2 | 0 | [13] | 22.0 | 0 | 0
+ 360 | gig/off | 30 | [5, 9] | 0 | -21.2 | 0 | [13] | 22.0 | 0 | 0
+ 360 | gig/on | 30 | [5, 9] | 0 | 0.0 | 0 | [14.04] | 21.5 | 0 | 0
+ 480 | path/off | 40 | [4, 5, 7, 9] | 0 | -172.8 | 0 | [13] | 22.0 | 0 | 0
+ 480 | gig/off | 30 | [5, 9] | 0 | -134.8 | 0 | [13] | 22.0 | 0 | 0
+ 480 | gig/on | 30 | [5, 9] | 0 | 0.0 | 0 | [18.72] | 29.3 | 0 | 0
+ 768 | path/off | 40 | [4, 5, 7, 9] | 0 | -345.0 | 0 | [15] | 30.7 | 0 | 0
+ 768 | gig/off | 30 | [5, 9] | 0 | -307.0 | 0 | [15] | 30.7 | 0 | 0
+ 768 | gig/on | 30 | [5, 9] | 0 | -100.3 | 0 | [29.952] | 44.4 | 0 | 0
+1280 | path/off | 40 | [4, 5, 7, 9] | 0 | -408.0 | 0 | [15] | 30.7 | 0 | 0
+1280 | gig/off | 30 | [5, 9] | 0 | -738.0 | 0 | [15] | 30.7 | 0 | 0
+1280 | gig/on | 30 | [5, 9] | 0 | -515.2 | 0 | [34] | 48.1 | 0 | 0
+
+width | combos whose grid measurements differ from 0.8 (any of sw, cw, table w/h, font, cell w/h, first column) | example
+ 300 | 73 of 100 | 300|gig|g-boogie|own|off: table 268.8 -> 243.9, cell 22.0 -> 18.9, font 13 -> 13, sw/cw 269/230 -> 244/230
+ 320 | 54 of 100 | 320|gig|g-boogie|own|off: table 268.8 -> 250.0, cell 22.0 -> 19.6, font 13 -> 13, sw/cw 269/250 -> 250/250
+ 330 | 54 of 100 | 330|gig|g-boogie|own|off: table 268.8 -> 260.0, cell 22.0 -> 20.9, font 13 -> 13, sw/cw 269/260 -> 260/260
+ 340 | 30 of 100 | 340|gig|g-boogie|own|on: table 270.0 -> 270.0, cell 20.2 -> 22.1, font 13.26 -> 13.26, sw/cw 270/270 -> 270/270
+ 341 | 0 of 100 | 
+ 350 | 0 of 100 | 
+ 360 | 0 of 100 | 
+ 480 | 0 of 100 | 
+ 768 | 0 of 100 | 
+1280 | 0 of 100 | 
+
+what changed from 0.8 at 340 and below, by place (table width / narrowest cell / first column / table height, 0.8 -> 0.9, ranges over the combos that changed)
+ 300 | path/off | 19 of 40 changed | cols [9] | table 268.8..268.8 -> 268..268 | cell 22..22 -> 21.9..21.9 | first col 91.8..91.8 -> 91.8..91.8 | height 125.6..125.6 -> 125.6..125.6 | sw-cw 1 -> 0
+ 300 | gig/off | 24 of 30 changed | cols [9] | table 268.8..268.8 -> 243.9..243.9 | cell 22..22 -> 18.9..18.9 | first col 91.8..91.8 -> 91.8..91.8 | height 125.6..125.6 -> 125.6..125.6 | sw-cw 39 -> 14
+ 300 | gig/on | 30 of 30 changed | cols [5, 9] | table 230..230 -> 230..230 | cell 17.3..24.8 -> 18.2..29.4 | first col 90.4..129.6 -> 83.3..111.3 | height 119.4..119.4 -> 119.4..119.4 | sw-cw 0 -> 0
+ 320 | path/off | 0 of 40 changed
+ 320 | gig/off | 24 of 30 changed | cols [9] | table 268.8..268.8 -> 250..250 | cell 22..22 -> 19.6..19.6 | first col 91.8..91.8 -> 91.8..91.8 | height 125.6..125.6 -> 125.6..125.6 | sw-cw 19 -> 0
+ 320 | gig/on | 30 of 30 changed | cols [5, 9] | table 250..250 -> 250..250 | cell 18.8..26.9 -> 20.3..31.4 | first col 98.8..141.5 -> 86.3..123.3 | height 122.4..122.4 -> 122.4..122.4 | sw-cw 0 -> 0
+ 330 | path/off | 0 of 40 changed
+ 330 | gig/off | 24 of 30 changed | cols [9] | table 268.8..268.8 -> 260..260 | cell 22..22 -> 20.9..20.9 | first col 91.8..91.8 -> 91.8..91.8 | height 125.6..125.6 -> 125.6..125.6 | sw-cw 9 -> 0
+ 330 | gig/on | 30 of 30 changed | cols [5, 9] | table 260..260 -> 260..260 | cell 19.5..27.8 -> 21.3..32.2 | first col 103.2..147.6 -> 88.9..130.1 | height 124.8..124.8 -> 124.8..124.8 | sw-cw 0 -> 0
+ 340 | path/off | 0 of 40 changed
+ 340 | gig/off | 0 of 30 changed
+ 340 | gig/on | 30 of 30 changed | cols [5, 9] | table 270..270 -> 270..270 | cell 20.2..28.8 -> 22.1..33 | first col 107.7..153.8 -> 92..137.1 | height 127.2..127.2 -> 127.2..127.2 | sw-cw 0 -> 0
+
+1280 Present font vs not: [(34, 15)]
+
+below the spec widths (300 px): 24 combos still scroll inside the card, e.g. ["grid scrolls / passes card", "300|gig|g-boogie|own|off", {"hasWrap": true, "sw": 244, "cw": 230, "tableW": 243.9, "tableH": 125.6, "over": 13.9, "cardSW": 266, "cardCW": 266, "font": 13, "cellW": 18.9, "cellH": 31.1, "headW": 91.8, "cols": 9, "rows": 4, "clipped": 0}]
+
+FAILS: 0
