@@ -108,7 +108,10 @@ table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px
 .bkmsg{border-left:3px solid var(--hi);padding:4px 0 4px 12px;margin:12px 0 0;font-size:14px}.bkmsg.bad{border-left-color:var(--dom)}.bkta{display:block;width:100%;margin-top:10px;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace}.bkask{margin-top:12px}.bkask p{margin:6px 0 10px;font-size:14px}
 .gate{border:1px solid var(--inlay);border-radius:16px;padding:14px 18px;background:color-mix(in srgb,var(--inlay) 10%,transparent)}
 @media(max-width:900px){.cols,.two{grid-template-columns:minmax(0,1fr)}}
-@media(max-width:480px){.dg{font-size:13px}.dg th,.dg td{padding:5px 3px;min-width:22px}}@media(max-width:600px){.present #v-gig .dg{width:100%}.present #v-gig .dg th,.present #v-gig .dg td{padding:5px 2px;min-width:0}}
+@media(max-width:480px){.dg{font-size:13px}.dg th,.dg td{padding:5px 3px;min-width:22px}}
+/* every drum grid shrinks to fit its card on the narrowest phones (0.9): cells keep their 22px when there is room and give way only when there isn't */
+@media(max-width:340px){.dg{max-width:100%}.dg th,.dg td{min-width:0;width:22px}}
+@media(max-width:600px){.present #v-gig .dg{width:100%}.present #v-gig .dg th,.present #v-gig .dg td{padding:5px 2px;min-width:0}}
 @media(max-width:640px){.top h1{font-size:32px}.title h2{font-size:34px}
 .neck{grid-template-columns:minmax(0,1fr);background-image:repeating-linear-gradient(90deg,transparent 0 calc(16.66% - 1px),rgba(236,226,200,.45) calc(16.66% - 1px) 16.66%)}
 .nut{height:12px}.fr{border-right:0;border-bottom:3px solid var(--fret);min-height:56px;text-align:left;padding:8px 12px 14px}

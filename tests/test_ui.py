@@ -1789,3 +1789,114 @@ def test_U1_sandbox_footer_is_honest_on_another_tab(browser, tmp_path):
     assert not U1_BROWSER.search(foot) and "can't keep your progress here" in foot, foot
     assert "Lyrics and scores are not reproduced".lower() in foot.lower() and "SIL Open Font License" in foot, "the rest of the footer is unchanged"
     ctx.close()
+
+
+# --------------------------------------------------------------------- U3 (every drum grid fits its card on narrow phones)
+
+U3_JS = r"""()=>{const w=[...document.querySelectorAll('.dgw')].filter(e=>e.getClientRects().length);if(w.length!==1)return {count:w.length};
+ const t=w[0].querySelector('table'),td=t.querySelector('td'),cs=getComputedStyle(td),r=t.getBoundingClientRect();
+ return {count:1,sw:w[0].scrollWidth,cw:w[0].clientWidth,tw:Math.round(r.width*10)/10,fs:parseFloat(cs.fontSize),minw:cs.minWidth,cell:td.getBoundingClientRect().width,n:t.rows[0].cells.length-1,
+   heads:[...t.rows[0].cells].map(c=>c.textContent.trim()),rows:[...t.rows].slice(1).map(x=>x.cells[0].textContent.trim()),
+   lines:[...t.rows].map(x=>{const c=x.cells[0],g=document.createRange();g.selectNodeContents(c);return g.getClientRects().length})}}"""
+U3_FEELS = [None] + [f["k"] for f in D["FIN"]]          # the stage's or song's own pattern (straight, quaver, shuffle, 3/4, 6/8), then each Finish feel
+U3_PATH_1280 = {3: 208.0, 4: 238.7, 6: 300.2, 8: 361.6}   # table widths by cells in the bar, measured on 0.8 (a51db99) at 1280 px, 15 px text
+U3_GIG_1280 = {4: 238.7, 8: 361.6}
+U3_PRESENT_1280 = {4: 432.1, 8: 624.4}                  # 34 px text
+
+
+def u3_state(feel, **kw):
+    return dict({"inst": "drums", "useFin": bool(feel), "finish": feel or "bossa"}, **kw)
+
+
+def u3_grid(pg):
+    pg.wait_for_function("()=>[...document.querySelectorAll('.dgw')].some(e=>e.getClientRects().length)")
+    g = pg.evaluate(U3_JS)
+    assert g["count"] == 1, f"expected one visible drum grid, found {g['count']}"
+    return g
+
+
+def u3_fits(g, where):
+    assert g["sw"] <= g["cw"] + 1, f"{where}: drum grid scrolls inside its card ({g['sw']} > {g['cw']})"
+    assert g["tw"] <= g["cw"] + 1, f"{where}: drum grid is wider than its card ({g['tw']} > {g['cw']})"
+    assert g["fs"] >= 12 and g["cell"] >= 16, f"{where}: grid too small to read (text {g['fs']}px, cell {g['cell']}px)"
+    assert max(g["lines"]) <= 1, f"{where}: a row label wraps"
+    assert g["heads"][0] == "Count" and len(g["heads"]) == g["n"] + 1 and "Kick" in g["rows"] and g["rows"][0].startswith("Hi-hat"), f"{where}: grid lost a row or column"
+
+
+@pytest.mark.parametrize("feel", U3_FEELS, ids=lambda f: f or "own")
+@pytest.mark.parametrize("width", [320, 360])
+def test_U3_path_drum_grids_fit_their_card(app, width, feel):
+    pg = app(width=width, state=u3_state(feel))
+    seen = set()
+    for s in D["ST"]:
+        go(pg, s["id"])
+        g = u3_grid(pg)
+        u3_fits(g, f"{width}px Path {s['id']} ({feel or 'own'} feel)")
+        assert not pg.evaluate(OVERFLOW_JS), f"page overflows on {s['id']}"
+        if feel is None:
+            assert g["n"] == D["PAT"][s["pat"]]["b"] * D["PAT"][s["pat"]]["s"], f"{s['id']}: the grid shown is not this stage's bar"
+        seen.add(g["n"])
+    if feel is None:
+        assert seen == {3, 4, 6, 8}, f"expected straight, quaver, 3/4 and 6/8 bars across the Path, got {sorted(seen)}"
+    assert not pg.errors
+
+
+@pytest.mark.parametrize("feel", U3_FEELS, ids=lambda f: f or "own")
+@pytest.mark.parametrize("width", [320, 360])
+def test_U3_gig_drum_grids_fit_their_card_present_off_and_on(app, width, feel):
+    seen = set()
+    for song in D["GIG"]:
+        pg = app(width=width, state=u3_state(feel, gig={"songs": [song["id"]], "useFin": bool(feel)}), hash_="gig")
+        off = u3_grid(pg)
+        u3_fits(off, f"{width}px Gig {song['id']} ({feel or 'own'} feel)")
+        assert not pg.evaluate(OVERFLOW_JS), f"page overflows on {song['id']}"
+        pg.click("#present")
+        on = u3_grid(pg)
+        u3_fits(on, f"{width}px Gig {song['id']} ({feel or 'own'} feel), Present")
+        assert not pg.evaluate(OVERFLOW_JS), f"page overflows on {song['id']} in Present"
+        assert on["heads"] == off["heads"] and on["rows"] == off["rows"]
+        seen.add(off["n"])
+        assert not pg.errors
+        pg.context.close()
+    assert seen == ({4} if feel == "flam" else {8}), f"unexpected bar lengths on the Gig tab: {sorted(seen)}"
+
+
+def test_U3_narrow_gig_grid_shrinks_only_as_far_as_it_must(app):
+    """The 0.8 finding: a quaver groove at 320 px was ~269 px in a ~250 px card. It now fills the card exactly; a grid that already fits keeps its size."""
+    pg = app(width=320, state=u3_state(None, gig={"songs": ["g-bamba"]}), hash_="gig")
+    g = u3_grid(pg)
+    assert g["n"] == 8 and abs(g["tw"] - g["cw"]) <= 1 and g["fs"] == 13, g
+    pg = app(width=320, state=u3_state("flam", gig={"songs": ["g-bamba"], "useFin": True}), hash_="gig")
+    g4 = u3_grid(pg)
+    assert g4["n"] == 4 and abs(g4["tw"] - 180.8) <= 0.6, f"a four-cell grid has room, so it stays at its 0.8 width: {g4}"
+    pg = app(width=320, state=u3_state(None, stage="am-e7"), hash_="am-e7")
+    g8 = u3_grid(pg)
+    assert g8["n"] == 8 and abs(g8["tw"] - 268.8) <= 0.6, f"the Path card is wide enough, so its grid stays at its 0.8 width: {g8}"
+
+
+@pytest.mark.parametrize("width,minw", [(320, "0px"), (340, "0px"), (341, "22px"), (360, "22px"), (481, "30px"), (1280, "30px")])
+def test_U3_rule_applies_only_below_about_340(app, width, minw):
+    pg = app(width=width, state=u3_state(None, gig={"songs": ["g-bamba"]}), hash_="gig")
+    g = u3_grid(pg)
+    assert g["minw"] == minw, f"{width}px: cell min-width {g['minw']}, expected {minw}"
+    u3_fits(g, f"{width}px Gig")
+    if width > 340:
+        assert abs(g["tw"] - (268.8 if width <= 480 else 361.6)) <= 0.6, f"{width}px: grid width changed from 0.8 ({g['tw']})"
+
+
+def test_U3_sizes_at_1280_unchanged_from_0_8(app):
+    for feel in U3_FEELS:
+        pg = app(width=1280, state=u3_state(feel))
+        for s in D["ST"]:
+            go(pg, s["id"])
+            g = u3_grid(pg)
+            assert g["fs"] == 15 and g["minw"] == "30px" and abs(g["tw"] - U3_PATH_1280[g["n"]]) <= 0.6, (feel, s["id"], g)
+        pg.context.close()
+        for song in D["GIG"]:
+            pg = app(width=1280, state=u3_state(feel, gig={"songs": [song["id"]], "useFin": bool(feel)}), hash_="gig")
+            g = u3_grid(pg)
+            assert g["fs"] == 15 and abs(g["tw"] - U3_GIG_1280[g["n"]]) <= 0.6, (feel, song["id"], g)
+            pg.click("#present")
+            p = u3_grid(pg)
+            assert p["fs"] == 34 and abs(p["tw"] - U3_PRESENT_1280[p["n"]]) <= 0.6, (feel, song["id"], p)
+            pg.context.close()
