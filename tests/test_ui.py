@@ -1516,7 +1516,7 @@ def test_T2_present_drum_grid_still_enlarged_at_1280(app):
 
 # --------------------------------------------------------------------- T4
 
-STRUM_WORDS = re.compile(r"\bdowns\b|down-up|strum|\bD down\b|\bU up\b", re.I)
+T4_STRUM = re.compile(r"\bdowns\b|down-up|strum|\bD down\b|\bU up\b", re.I)
 SIDE_JS = "()=>[...document.querySelectorAll('#side .card')].map(c=>[(c.querySelector('h3')||{textContent:''}).textContent.trim(),c.innerText])"
 
 
@@ -1536,7 +1536,7 @@ def test_T4_drums_never_see_strum_names(app, use_fin):
         go(pg, s["id"])
         bar, card = pg.inner_text(".mbar"), metro_card(pg)
         for where, t in (("metronome bar", bar), ("metronome card", card)):
-            m = STRUM_WORDS.search(t)
+            m = T4_STRUM.search(t)
             if m:
                 bad.append(f"{s['id']} {where}: {m.group(0)!r}")
         name = pg.inner_text(".mbar .m-name")
@@ -1551,7 +1551,7 @@ def test_T4_drums_never_see_strum_names(app, use_fin):
         if not cells or any(not re.fullmatch(r"\d+|&", c) for c in cells):
             bad.append(f"{s['id']}: metronome cells should be counts, got {cells}")
     go(pg, "gig")
-    if STRUM_WORDS.search(pg.inner_text(".mbar")) or "Groove" not in pg.inner_text(".mbar .m-name"):
+    if T4_STRUM.search(pg.inner_text(".mbar")) or "Groove" not in pg.inner_text(".mbar .m-name"):
         bad.append("gig bar: " + pg.inner_text(".mbar .m-name"))
     assert not bad, bad
     assert not pg.errors
