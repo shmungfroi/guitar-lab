@@ -29,7 +29,7 @@ Full run at `fd059ea` (`python3 -m pytest tests -q -p no:cacheprovider`), three 
 | `test_timing.py` | 6 | 6 |
 | Total | 311 | 311 |
 
-Baseline before the build was 247 (at the spec commit the collected count was 249). 63 of the 311 are new `test_R<n>_...` cases.
+Baseline before the build was 247 passed (one full run at the spec commit, before any edit). 63 of the 311 are new `test_R<n>_...` cases; one more is `test_version_label_is_0_7`.
 
 Earlier tiers, stated exactly:
 - `7a4933d` (Must): one full run gave 269 passed, 1 failed. The failure was my own test asserting the R2 default (`gig.useFin`) a tier early. I removed that assertion from the Must commit (it returns in the Should commit) and re-ran the R1 tests only: 23 passed. The "270 passed" in that commit message is 269 + that one re-run, not a second full run.
