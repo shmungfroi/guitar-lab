@@ -1,0 +1,702 @@
+"""Browser tests for index.html (Playwright, Chromium, file://).
+
+1. A render matrix: 8 stages x 7 tabs x 5 instruments x 3 widths x light/dark.
+2. Functional tests: gates, sign-off, grading, playback, capo, mute, gig.
+3. One test per register item M1-M5, S1-S15 of tests/reports/spec06/SPEC_06.md,
+   written against the FIXED behaviour the spec describes. On the 0.5 baseline
+   most of these fail; that is expected until the fixes land.
+
+Saved state is seeded through localStorage (the app's own storage key), and
+stages / tabs are switched through the app's own hash routing.
+"""
+import re
+import time
+
+import pytest
+
+import appdata
+from uihelp import OVERFLOW_JS, PANELS_JS, go, state, starts
+
+D = appdata.load()
+ST, PAT, GIGS = D["ST"], D["PAT"], D["GIG"]
+TABS = ["path", "warm-up", "rudiments", "technique", "invent", "gig", "record"]
+INSTS = ["guitar", "bass", "drums", "keys", "vocals"]
+NRUD, NTECH = len(D["RUD"]), len(D["TECH"])
+FAST = {"bpm": 200}
+
+
+def text(pg, sel):
+    return pg.locator(sel).first.inner_text()
+
+
+def toast(pg):
+    return pg.evaluate("()=>{const t=document.getElementById('toast');return t&&!t.classList.contains('hide')?t.textContent:''}")
+
+
+# ===================================================================== matrix
+
+@pytest.mark.parametrize("inst", INSTS)
+@pytest.mark.parametrize("scheme", ["light", "dark"])
+@pytest.mark.parametrize("width", [360, 768, 1280])
+def test_render_matrix(app, width, scheme, inst):
+    pg = app(width=width, scheme=scheme, state={"inst": inst})
+    bg = pg.evaluate("()=>getComputedStyle(document.body).backgroundColor")
+    lum = sum(int(x) for x in re.findall(r"\d+", bg)[:3])
+    assert (lum > 600) if scheme == "light" else (lum < 120), "colour scheme not applied: " + bg
+    problems = []
+    for s in ST:
+        nch = len(set(s["ch"]))
+        for tab in TABS:
+            go(pg, s["id"])
+            if tab != "path":
+                go(pg, tab)
+            where = f"{s['id']}/{tab}"
+            for p in pg.evaluate(PANELS_JS, {"view": tab, "inst": inst, "nch": nch, "nrud": NRUD, "ntech": NTECH}):
+                problems.append(where + ": " + p)
+            for p in pg.evaluate(OVERFLOW_JS):
+                problems.append(where + ": overflow " + p)
+    problems += pg.errors
+    assert not problems, "\n".join(problems[:40])
+
+
+# ===================================================================== functional
+
+def raise_step(pg, k, times=2):
+    for _ in range(times):
+        pg.click(f'[data-lv="{k}"][data-dir="1"]')
+
+
+def test_gate_opens_and_closes(app):
+    pg = app(state={})
+    for i in range(5):
+        raise_step(pg, f"a-e:{i}")
+    assert "Gate passed" in text(pg, "#stage .gate")
+    assert "gate passed" in pg.get_attribute('[data-st="a-e"]', "aria-label")
+    assert state(pg)["gates"].get("a-e")
+    assert "Stage 2" in text(pg, "#next")
+    pg.click('[data-lv="a-e:2"][data-dir="-1"]')
+    assert pg.locator("#stage .gate").count() == 0
+    assert "gate closes" in toast(pg)
+    assert "a-e" not in state(pg)["gates"]
+    assert not pg.errors
+
+
+def test_teacher_sign_off(app):
+    pg = app(state={})
+    pg.click("#tchBtn")
+    assert pg.locator('[data-sign="a-e:0"]').count() == 0, "sign-off only from Consistent"
+    raise_step(pg, "a-e:0")
+    pg.click('[data-sign="a-e:0"]')
+    assert "Teacher signed off" in text(pg, "#stage")
+    assert "a-e:0" in state(pg)["sign"]
+    pg.click('[data-lv="a-e:0"][data-dir="-1"]')
+    assert "Press − again" in toast(pg)
+    assert "a-e:0" in state(pg)["sign"], "first press only warns"
+    pg.click('[data-lv="a-e:0"][data-dir="-1"]')
+    assert "a-e:0" not in state(pg)["sign"]
+    assert state(pg)["lv"]["a-e:0"] == 1
+    assert not pg.errors
+
+
+def test_grading(app):
+    pg = app(state={})
+    pg.click("#nswBtn")
+    assert pg.locator("select[data-mark]").count() == 0
+    assert "Not yet marked" in text(pg, "#grade")
+    pg.click("#tchBtn")
+    for i, v in enumerate(["2", "2", "2", "2"]):
+        pg.select_option(f'select[data-mark="a-e:{i}"]', v)
+    assert text(pg, "#grade") == "8 / 10 · grade B so far"
+    pg.select_option('select[data-mark="a-e:4"]', "1")
+    assert text(pg, "#grade") == "9 / 10 · grade A"
+    for i in range(5):
+        pg.select_option(f'select[data-mark="a-e:{i}"]', "1")
+    assert text(pg, "#grade") == "5 / 10 · grade C"
+    go(pg, "record")
+    assert "A and E: 5 / 10" in text(pg, "#v-record")
+    assert not pg.errors
+
+
+def test_playback_start_stop(app):
+    pg = app(state=FAST)
+    pg.click("#playMap")
+    assert text(pg, "#playMap") == "Stop"
+    pg.wait_for_timeout(1800)
+    n = len(starts(pg))
+    assert n > 10, "the band scheduled nothing"
+    pg.click("#playMap")
+    assert text(pg, "#playMap") == "Play the chart"
+    m = len(starts(pg))
+    pg.wait_for_timeout(700)
+    assert len(starts(pg)) == m, "scheduler kept running after Stop"
+    assert not pg.errors
+
+
+def test_capo(app):
+    pg = app(state=FAST)
+    row = "#stage"
+    pg.click('[data-capo="1"]')
+    assert "Capo 1" in text(pg, row) and "sounds in B♭ major" in text(pg, row)
+    pg.click('[data-capo="1"]')
+    assert "Capo 2" in text(pg, row) and "sounds in B major" in text(pg, row)
+    assert state(pg)["capo"] == {"a-e": 2}
+    # the band plays in the sounding key: bass A + 2 = B1 (61.7 Hz)
+    pg.click("#playMap")
+    pg.wait_for_timeout(1800)
+    pg.click("#playMap")
+    bass = [s["freq"] for s in starts(pg) if s["type"] == "triangle"]
+    assert bass and abs(min(bass) - 61.735) < 0.5, bass[:4]
+    pg.click('[data-capo="-1"]')
+    pg.click('[data-capo="-1"]')
+    assert "No capo" in text(pg, row) and "sounds in A major" in text(pg, row)
+    pg.click('[data-capo="-1"]')
+    assert "No capo" in text(pg, row), "capo can't go below 0"
+    go(pg, "c-g-f")
+    for _ in range(3):
+        pg.click('[data-capo="1"]')
+    assert "sounds in E♭ major" in text(pg, "#stage")
+    for _ in range(6):
+        pg.click('[data-capo="1"]')
+    assert "Capo 7" in text(pg, "#stage"), "capo tops out at 7"
+    assert not pg.errors
+
+
+def audible(pg, flt):
+    return pg.evaluate("f=>window.__aud.starts.filter(e=>(new Function('e','return '+f))(e)).map(e=>window.__audible(e))", flt)
+
+
+PLUCK = "e.kind==='buf'&&e.dur>1"   # Karplus-Strong guitar notes (2.2 s buffers)
+BASS = "e.kind==='osc'&&e.type==='triangle'"
+
+
+def test_mute(app):
+    pg = app(state=FAST)
+    pg.click('[data-mute="guitar"]')
+    assert pg.get_attribute('[data-mute="guitar"]', "aria-pressed") == "false"
+    assert state(pg)["mute"]["guitar"] is True
+    pg.click("#playMap")
+    pg.wait_for_timeout(2000)
+    g, b = audible(pg, PLUCK), audible(pg, BASS)
+    pg.click("#playMap")
+    assert not g or max(g) == 0, "muted guitar is still audible"
+    assert b and min(b) > 0, "bass should still play"
+    pg.reload()
+    assert pg.get_attribute('[data-mute="guitar"]', "aria-pressed") == "false", "mute is saved"
+    pg.click('[data-mute="guitar"]')
+    assert pg.get_attribute('[data-mute="guitar"]', "aria-pressed") == "true"
+    assert not pg.errors
+
+
+def checked_songs(pg):
+    return pg.evaluate("()=>[...document.querySelectorAll('input[data-gsong]')].filter(x=>x.checked).map(x=>x.dataset.gsong)")
+
+
+def test_gig_choose_max_four(app):
+    pg = app(state={}, hash_="gig")
+    assert len(checked_songs(pg)) == 4
+    pg.click('input[data-gsong="g-hound"]')
+    assert "g-hound" not in checked_songs(pg)
+    assert "Four songs" in toast(pg)
+    pg.click('input[data-gsong="g-clock"]')
+    assert len(checked_songs(pg)) == 3
+    pg.click('input[data-gsong="g-hound"]')
+    assert set(checked_songs(pg)) == {"g-boogie", "g-johnny", "g-bamba", "g-hound"}
+    assert state(pg)["gig"]["songs"][-1] == "g-hound"
+    assert "Hound Dog" in text(pg, "#v-gig")
+    assert not pg.errors
+
+
+def test_gig_timer(app):
+    pg = app(state={}, hash_="gig", clock=True)
+    pg.click('[data-gtime="5"]')
+    assert text(pg, "#gtime") in ("5:00", "4:59")
+    pg.clock.run_for(60_000)
+    assert text(pg, "#gtime") in ("4:00", "3:59")
+    pg.clock.run_for(4 * 60_000 + 1000)
+    assert text(pg, "#gtime") == "0:00"
+    assert "change over" in toast(pg)
+    pg.click('[data-gtime="10"]')
+    pg.clock.run_for(2000)
+    pg.click("#gstop")
+    assert text(pg, "#gtime") == "0:00"
+    pg.clock.run_for(5000)
+    assert text(pg, "#gtime") == "0:00", "Stop really stops"
+    assert not pg.errors
+
+
+def run_sheet(pg):
+    """[[row text per band] per phase] from the visible run sheet."""
+    return pg.evaluate(r"""()=>{const card=[...document.querySelectorAll('#v-gig .card')].find(c=>/run sheet/i.test((c.querySelector('h3')||{}).textContent||''));
+     if(!card)return null;return [...card.querySelectorAll('table')].map(t=>[...t.querySelectorAll('tr')].filter(tr=>tr.querySelector('td')).map(tr=>[...tr.children].map(td=>td.innerText.trim())))}""")
+
+
+def roles_of(cell):
+    out = {}
+    for part in cell.split(","):
+        if ":" in part:
+            r, n = part.split(":", 1)
+            out[r.strip()] = n.strip()
+    return out
+
+
+def fill_role(pg, sel, value):
+    pg.fill(sel, value)
+    pg.dispatch_event(sel, "change")
+
+
+def test_gig_roles(app):
+    pg = app(state={}, hash_="gig")
+    pg.click("#rot")  # rotation off: roles exactly as entered
+    fill_role(pg, '[data-bm="0:guitar"]', "Ann")
+    fill_role(pg, '[data-bm="0:bass"]', "Ben")
+    sheet = run_sheet(pg)
+    assert len(sheet) == 4, "one phase per chosen song"
+    for ph in sheet:
+        assert roles_of(ph[0][-1]) == {"Guitar": "Ann", "Bass": "Ben"}
+    pg.click("#addBand")
+    sheet = run_sheet(pg)
+    assert all(len(ph) == 2 for ph in sheet)
+    assert sheet[0][0][1] != sheet[0][1][1], "two bands rehearse different songs in a phase"
+    songs = [ph[0][1] for ph in sheet]
+    assert len(set(songs)) == 4, "each band works through every song"
+    g = state(pg)["gig"]
+    assert g["bands"][0]["m"] == {"guitar": "Ann", "bass": "Ben"} and g["rotate"] is False
+    assert not pg.errors
+
+
+# ===================================================================== register: Must
+
+def gig_state(m, rotate=True):
+    return {"gig": {"songs": ["g-boogie", "g-clock", "g-johnny", "g-bamba"],
+                    "bands": [{"name": "Band 1", "m": m}], "block": 20, "rotate": rotate, "open": "g-boogie"}}
+
+
+def test_M1_rotation_only_among_filled_roles(app):
+    pg = app(state=gig_state({"guitar": "Ann"}), hash_="gig")
+    for ph in run_sheet(pg):
+        assert roles_of(ph[0][-1]) == {"Guitar": "Ann"}, "one student on guitar stays on guitar"
+    pg2 = app(state=gig_state({"guitar": "Ann", "drums": "Cat"}), hash_="gig")
+    sheet = [roles_of(ph[0][-1]) for ph in run_sheet(pg2)]
+    assert sheet[0] == {"Guitar": "Ann", "Drums": "Cat"}, "phase 1 = roles exactly as entered"
+    for ph in sheet:
+        assert set(ph) == {"Guitar", "Drums"}, "rotate only among roles with a player"
+        assert sorted(ph.values()) == ["Ann", "Cat"]
+    assert any(ph["Drums"] == "Ann" for ph in sheet), "players do rotate"
+
+
+def _lum(rgb):
+    def ch(v):
+        v /= 255
+        return v / 12.92 if v <= 0.03928 else ((v + 0.055) / 1.055) ** 2.4
+    r, g, b = rgb
+    return 0.2126 * ch(r) + 0.7152 * ch(g) + 0.0722 * ch(b)
+
+
+def contrast(a, b):
+    def rgb(s):
+        return [float(x) for x in re.findall(r"[\d.]+", s)[:3]]
+    la, lb = _lum(rgb(a)), _lum(rgb(b))
+    return (max(la, lb) + 0.05) / (min(la, lb) + 0.05)
+
+
+KBD_JS = r"""
+name=>{const btn=document.querySelector('#stage [data-strum="'+name+'"]');const svg=btn&&btn.querySelector('svg.kb, svg');if(!svg)return null;
+ const rects=[...svg.querySelectorAll('rect')].map(r=>({b:r.getBBox(),fill:getComputedStyle(r).fill}));
+ const maxH=Math.max(...rects.map(r=>r.b.height));const white=rects.filter(r=>r.b.height>=maxH*.8),black=rects.filter(r=>r.b.height<maxH*.8);
+ const mode=a=>{const c={};a.forEach(x=>c[x]=(c[x]||0)+1);const e=Object.entries(c).sort((p,q)=>q[1]-p[1]);return e.length?e[0][0]:null};
+ const blackH=black.length?Math.max(...black.map(r=>r.b.y+r.b.height)):0;
+ const at=(x,y)=>{let h=null;for(const r of rects)if(x>=r.b.x&&x<=r.b.x+r.b.width&&y>=r.b.y&&y<=r.b.y+r.b.height)h=r;return h};
+ const labels=[...svg.querySelectorAll('text')].map(t=>{const b=t.getBBox(),cx=b.x+b.width/2,cy=b.y+b.height/2,r=at(cx,cy);
+   return {s:t.textContent.trim(),fill:getComputedStyle(t).fill,key:r&&r.fill,white:cy>blackH}});
+ return {labels,unlitWhite:mode(white.map(r=>r.fill)),unlitBlack:mode(black.map(r=>r.fill))}}
+"""
+
+
+@pytest.mark.parametrize("scheme", ["light", "dark"])
+def test_M2_lit_keys_strong_and_named(app, scheme):
+    pg = app(scheme=scheme, state={"inst": "keys"})
+    for chord, notes in [("A", {"A", "C♯", "E"}), ("E", {"E", "G♯", "B"})]:
+        k = pg.evaluate(KBD_JS, chord)
+        assert k, "no keyboard for " + chord
+        names = {lb["s"].replace("#", "♯") for lb in k["labels"] if re.fullmatch(r"[A-G][♯#♭b]?", lb["s"])}
+        assert names == notes, f"{chord}: lit keys should be labelled {notes}, got {names}"
+        for lb in k["labels"]:
+            if lb["s"].replace("#", "♯") not in notes:
+                continue
+            assert lb["key"], "label not on a key"
+            unlit = k["unlitWhite"] if lb["white"] else k["unlitBlack"]
+            c = contrast(lb["key"], unlit)
+            assert c >= 3, f"{chord} {lb['s']}: lit {lb['key']} vs unlit {unlit} contrast {c:.2f} < 3"
+            t = contrast(lb["fill"], lb["key"])
+            assert t >= 4.5, f"{chord} {lb['s']}: label contrast {t:.2f} < 4.5"
+
+
+NOTE = r"([A-G][♯♭#b]?)"
+POS = r"\s*:?\s*(E|A|D|G) string,?\s*(open|fret (\d+))"
+BASS_OPEN = {"E": 28, "A": 33, "D": 38, "G": 43}
+
+
+def _pc(n):
+    from test_chords import pc
+    return pc(n)
+
+
+@pytest.mark.parametrize("stage,capo,roots", [
+    ("a-e", 1, {"B♭": "F", "F": "C"}),
+    ("a-e", 2, {"B": "F♯", "F♯": "C♯"}),
+    ("c-g-f", 3, {"E♭": "B♭", "B♭": "F", "A♭": "E♭"}),
+])
+def test_M3_bass_panel_follows_capo(app, stage, capo, roots):
+    pg = app(state={"inst": "bass", "stage": stage, "capo": {stage: capo}}, hash_=stage)
+    t = text(pg, "#stage")
+    found = {}
+    for m in re.finditer(r"Root " + NOTE + POS, t):
+        nm, s, _, fr = m.groups()
+        midi = BASS_OPEN[s] + int(fr or 0)
+        assert midi % 12 == _pc(nm), f"root {nm} is not at {s} string {fr or 'open'}"
+        found[nm.replace("#", "♯")] = None
+    for m in re.finditer(r"Fifth " + NOTE + POS, t):
+        nm, s, _, fr = m.groups()
+        assert (BASS_OPEN[s] + int(fr or 0)) % 12 == _pc(nm), f"fifth {nm} is not at {s} string {fr or 'open'}"
+    expect = {r for r in roots}
+    assert set(found) >= expect, f"capo {capo}: bass roots should be {expect}, panel shows {set(found)}"
+    for r, f in roots.items():
+        assert re.search(r"Fifth " + re.escape(f) + r"(?![♯♭#b])", t), f"fifth of {r} should read {f}"
+
+
+@pytest.mark.parametrize("stage,capo,spellings,absent", [
+    ("a-e", 1, ["B♭ D F", "F A C"], ["A C♯ E", "E G♯ B"]),
+    ("a-e", 2, ["B D♯ F♯", "F♯ A♯ C♯"], ["A C♯ E"]),
+    ("c-g-f", 3, ["E♭ G B♭", "B♭ D F", "A♭ C E♭"], ["C E G"]),
+])
+def test_M3_keys_panel_follows_capo(app, stage, capo, spellings, absent):
+    pg = app(state={"inst": "keys", "stage": stage, "capo": {stage: capo}}, hash_=stage)
+    t = text(pg, "#stage")
+    for sp in spellings:
+        assert sp in t, f"keys panel should spell {sp} with capo {capo}"
+    for sp in absent:
+        assert sp not in t, f"keys panel still shows un-capoed {sp}"
+    labels = " | ".join(pg.evaluate("()=>[...document.querySelectorAll('#stage svg.kb')].map(s=>s.getAttribute('aria-label')||'')"))
+    for sp in spellings:
+        assert sp in labels, f"keyboard drawing for {sp} missing: {labels}"
+
+
+def _transpose_name(n, frm, to):
+    """Letter-preserving transposition: the interval from key to note stays the same interval."""
+    from test_chords import LETTERS, pc, spell_note
+    li = (LETTERS.index(n[0]) + LETTERS.index(to[0]) - LETTERS.index(frm[0])) % 7
+    return spell_note(LETTERS[li], (pc(n) + pc(to) - pc(frm)) % 12)
+
+
+def test_M3_keys_spelling_every_capo(app):
+    """Every stage, capo 1-7: the keys panel spells each chord in the sounding key,
+    exactly as the un-capoed spelling moved by the same interval (no enharmonic slips)."""
+    from test_chords import MAJOR_KEYS, MINOR_KEYS, pc
+    tonic = {"A": "A", "Am": "A", "C": "C", "Am6": "A", "Bm": "B"}
+    bad = []
+    for capo in range(1, 8):
+        pg = app(state={"inst": "keys", "capo": {s["id"]: capo for s in ST}})
+        for s in ST:
+            go(pg, s["id"])
+            t = text(pg, "#stage")
+            m = re.search(r"sounds in ([A-G][♯♭]?) (major|minor)", t)
+            if not m:
+                bad.append(f"{s['id']} capo {capo}: no 'sounds in' key")
+                continue
+            to, md = m.groups()
+            allowed = (MAJOR_KEYS if md == "major" else MINOR_KEYS)[(pc(tonic[s["key"]]) + capo) % 12]
+            if to not in allowed:
+                bad.append(f"{s['id']} capo {capo}: sounds in {to} {md}, expected {allowed}")
+            labels = " | ".join(pg.evaluate("()=>[...document.querySelectorAll('#stage svg.kb')].map(s=>s.getAttribute('aria-label')||'')"))
+            for c in dict.fromkeys(s["ch"]):
+                want = " ".join(_transpose_name(n, tonic[s["key"]], to) for n in D["CH"][c]["t"].split(" "))
+                if want not in labels:
+                    bad.append(f"{s['id']} capo {capo} ({to} {md}): {c} should read {want}; panel: {labels[:120]}")
+        pg.context.close()
+    assert not bad, "\n".join(bad[:25])
+
+
+@pytest.mark.parametrize("width", [360, 390])
+def test_M4_drum_grid_reachable_on_phones(app, width):
+    pg = app(width=width, state={"inst": "drums", "stage": "four-chords"}, hash_="four-chords")
+    r = pg.evaluate(r"""()=>{const t=document.querySelector('#stage table');if(!t)return 'no grid';const W=document.documentElement.clientWidth;
+      const tr=t.getBoundingClientRect();if(tr.right<=W+1&&tr.left>=-1)return 'ok';
+      let p=t.parentElement;while(p&&p!==document.body){const o=getComputedStyle(p).overflowX;if(o==='auto'||o==='scroll'){const pr=p.getBoundingClientRect();
+        return pr.right<=W+1&&pr.left>=-1&&p.scrollWidth>=tr.width-1?'ok':'scroller off screen'}p=p.parentElement}
+      return 'grid spans '+Math.round(tr.left)+'..'+Math.round(tr.right)+' in '+W+' with no scroller'}""")
+    assert r == "ok", r
+    heads = pg.evaluate("()=>[...document.querySelector('#stage table tr').children].map(x=>x.textContent.trim())")
+    assert "3" in heads and "4" in heads
+
+
+def test_M4_drum_grid_has_headroom(app):
+    """Headless Chromium lays the 0.5 grid out at ~307px, just inside a 360px phone, so the
+    clipping seen on real phones (larger system text, artifact frame padding) doesn't
+    reproduce at 360/390 here. The fix is 'scroll wrapper and/or smaller cells': require
+    either a horizontal scroll wrapper around the grid, or a grid that fits its column on a 320px screen."""
+    pg = app(width=320, state={"inst": "drums", "stage": "four-chords"}, hash_="four-chords")
+    r = pg.evaluate(r"""()=>{const t=document.querySelector('#stage table');if(!t)return 'no grid';
+      let p=t.parentElement;while(p&&p.id!=='stage'){const o=getComputedStyle(p).overflowX;if(o==='auto'||o==='scroll')return 'ok';p=p.parentElement}
+      const W=document.getElementById('stage').getBoundingClientRect().right,tr=t.getBoundingClientRect();return tr.right<=W+1?'ok':'no scroll wrapper and grid spans to '+Math.round(tr.right)+', past its column edge at '+Math.round(W)}""")
+    assert r == "ok", r
+
+
+def test_M5_gig_inputs_keep_focus(app):
+    pg = app(state={}, hash_="gig")
+    pg.click('[data-bname="0"]')
+    pg.keyboard.press("End")
+    pg.evaluate("()=>{document.activeElement.__mark=1}")
+    same = "s=>document.activeElement.__mark===1&&document.activeElement.matches(s)"
+    for ch in " Rox":
+        pg.keyboard.type(ch)
+        assert pg.evaluate(same, '[data-bname="0"]'), "band name lost focus while typing"
+    pg.keyboard.press("Tab")
+    assert pg.evaluate("()=>document.activeElement.matches('[data-bm=\"0:guitar\"]')"), "Tab should land in the guitar field"
+    pg.evaluate("()=>{document.activeElement.__mark=1}")
+    for ch in "Ann":
+        pg.keyboard.type(ch)
+        assert pg.evaluate(same, '[data-bm="0:guitar"]'), "role field lost focus while typing"
+    pg.keyboard.press("Tab")
+    assert pg.evaluate("()=>document.activeElement.matches('[data-bm=\"0:bass\"]')"), "Tab should land in the bass field"
+    pg.keyboard.type("Ben")
+    pg.keyboard.press("Tab")
+    assert "Ann" in text(pg, "#v-gig") and "Ben" in str(run_sheet(pg))
+    g = state(pg)["gig"]
+    assert g["bands"][0]["name"] == "Band 1 Rox"
+    assert g["bands"][0]["m"].get("guitar") == "Ann" and g["bands"][0]["m"].get("bass") == "Ben"
+
+
+# ===================================================================== register: Should
+
+HAT_JS = r"""()=>{const t=document.querySelector('#stage table');if(!t)return null;const row=[...t.querySelectorAll('tr')].find(r=>/hat/i.test((r.children[0]||{}).textContent||''));
+ if(!row)return null;return [...row.children].slice(1).filter(td=>td.textContent.trim()).length}"""
+
+
+@pytest.mark.parametrize("stage,extra,hats", [
+    ("a-e", {}, 4),                                          # four downs: band plays four hats
+    ("twelve-bar", {}, 8),                                   # shuffle quavers
+    ("six-eight", {}, 6),                                    # six quavers
+    ("twelve-bar", {"finish": "flam", "useFin": True}, 4),   # band plays tangos (4 crotchets)
+])
+def test_S1_drum_grid_matches_band(app, stage, extra, hats):
+    pg = app(state=dict({"inst": "drums", "stage": stage}, **extra), hash_=stage)
+    assert pg.evaluate(HAT_JS) == hats
+
+
+def countin_clicks(st):
+    return [s for s in st if s["kind"] == "osc" and s["type"] == "sine" and s["freq"] in (1000, 1500)]
+
+
+def test_S2_double_tap_play_does_not_stack(app):
+    pg = app(state=FAST)
+    pg.evaluate("()=>{const b=document.getElementById('playMap');b.click();b.click()}")
+    pg.wait_for_timeout(1800)
+    st = starts(pg)
+    pg.evaluate("()=>{const b=document.getElementById('playMap');if(b.textContent==='Stop')b.click()}")
+    assert len(countin_clicks(st)) <= 6, f"{len(countin_clicks(st))} count-in clicks: two bands started"
+    noise = [round(s["when"], 2) for s in st if s["kind"] == "buf" and s["dur"] and s["dur"] < 0.5]
+    assert noise, "no drums scheduled"
+    assert max(noise.count(x) for x in noise) <= 2, "overlapping drum schedules (more than kick/snare + hat at one time)"
+
+
+def test_S3_bad_gig_state_is_sanitised(app):
+    bad = {"gig": {"songs": ["nope", "g-clock", "g-clock", 42, "g-johnny", "g-bamba", "g-hound", "g-shoes"],
+                   "bands": [{"name": 7, "m": {"guitar": {"x": 1}, "piano": "Zed", "bass": "Ben"}}, "bad", None],
+                   "block": 999, "rotate": "yes", "open": "zzz"}}
+    pg = app(state=bad, hash_="gig")
+    assert not pg.errors, pg.errors
+    ch = checked_songs(pg)
+    ids = {g["id"] for g in GIGS}
+    assert 1 <= len(ch) <= 4 and len(set(ch)) == len(ch) and set(ch) <= ids
+    m = re.search(r"(\d+) of 4 chosen", text(pg, "#v-gig"))
+    assert m and int(m.group(1)) == len(ch)
+    assert pg.input_value("#blk") == "20"
+    t = text(pg, "#v-gig")
+    for junk in ("undefined", "[object Object]", "null", "Zed", "NaN"):
+        assert junk not in t, junk + " leaked into the page"
+    assert len(run_sheet(pg)) == len(ch)
+    assert not pg.errors
+
+
+def test_S4_view_button_on_every_song(app):
+    pg = app(state={}, hash_="gig")
+    tagged = pg.evaluate(r"""()=>{const out={};for(const inp of document.querySelectorAll('input[data-gsong]')){let p=inp.parentElement;
+      while(p&&p.querySelectorAll('input[data-gsong]').length===1){const b=[...p.querySelectorAll('button')].find(b=>/\bview\b/i.test(b.textContent+' '+(b.getAttribute('aria-label')||'')));
+        if(b){b.setAttribute('data-testview',inp.dataset.gsong);out[inp.dataset.gsong]=1;break}p=p.parentElement}}return Object.keys(out)}""")
+    assert set(tagged) == {g["id"] for g in GIGS}, "every song needs its own View button"
+    assert "g-hound" not in checked_songs(pg)
+    pg.click('[data-testview="g-hound"]')
+    assert "Jerry Leiber" in text(pg, "#v-gig"), "Hound Dog backstory not shown"
+    assert "g-hound" not in checked_songs(pg), "View must not choose the song"
+    assert not pg.errors
+
+
+def test_S5_stage2_example_is_rock_around_the_clock(app):
+    pg = app(state={"stage": "twelve-bar"}, hash_="twelve-bar")
+    t = text(pg, "#stage")
+    for line in t.splitlines():
+        if re.search(r"Johnny B\.? Goode", line):
+            assert "in A" not in line and "B♭" in line, "Johnny B. Goode (recorded in B♭) offered as a 12-bar in A: " + line
+    links = pg.evaluate("()=>[...document.querySelectorAll('#stage .card a')].map(a=>[a.textContent,a.href])")
+    main = [l for l in links if "Rock Around the Clock" in l[0]]
+    assert main and "Rock" in main[0][1], links
+
+
+def cue_sheet(pg):
+    return pg.evaluate(r"""()=>{const h=[...document.querySelectorAll('#stage h3')].find(h=>/cue sheet/i.test(h.textContent));
+      if(!h)return null;const c=h.closest('.card')||h.parentElement;return {all:c.innerText,
+      lines:[...c.querySelectorAll('p,li,div')].map(e=>e.innerText)}}""")
+
+
+@pytest.mark.parametrize("stage,capo,syl,names", [
+    ("a-e", 0, ["do", "so"], ["A", "E"]),
+    ("am-e7", 0, ["la", "mi"], ["A", "E"]),
+    ("c-g-f", 0, ["do", "fa", "so"], ["C", "F", "G"]),
+    ("a-e", 1, ["do", "so"], ["B♭", "F"]),
+])
+def test_S6_vocal_roots_line_and_wording(app, stage, capo, syl, names):
+    st = {"inst": "vocals", "stage": stage}
+    if capo:
+        st["capo"] = {stage: capo}
+    pg = app(state=st, hash_=stage)
+    cs = cue_sheet(pg)
+    assert cs, "no cue sheet"
+    line = [l for l in cs["lines"] if all(re.search(r"\b%s\b" % s, l) for s in syl)]
+    assert line, f"no sol-fa roots line with {syl}: {cs['all']!r}"
+    for n in names:
+        assert re.search(r"(^|[\s(·,:=–-])" + re.escape(n) + r"(?![♯♭#b\w])", line[0]), f"roots line should name the root {n}: {line[0]!r}"
+    steps = pg.evaluate("()=>[...document.querySelectorAll('#stage .step')].map(s=>s.innerText)")
+    reh = [s for s in steps if "Rehearse" in s] or [steps[3]]
+    assert "play your part" not in reh[0].lower() and re.search(r"\bsing", reh[0], re.I), reh[0]
+
+
+@pytest.mark.parametrize("stage,metre", [("four-chords", 4), ("c-g-f", 3), ("six-eight", 6)])
+def test_S7_bass_wording_metre_aware(app, stage, metre):
+    pg = app(state={"inst": "bass", "stage": stage}, hash_=stage)
+    t = text(pg, "#stage")
+    if metre == 4:
+        assert "1 and 3" in t
+    else:
+        assert "1 and 3" not in t, f"{metre}-time stage still says beats 1 and 3"
+
+
+def test_S8_records_per_instrument(app):
+    ts = int(time.time() * 1000) - 86400000
+    seed = {"changes": [{"d": ts, "st": "a-e", "pair": "A-E", "n": 33}], "sign": {"a-e:0": ts},
+            "lv": {f"a-e:{i}": 2 for i in range(5)}}
+    pg = app(state=seed)
+    assert "Best: 33" in text(pg, "#side"), "old data migrates to guitar"
+    go(pg, "rudiments")
+    assert "Opens with stage 2" not in text(pg, "#v-rudiments")
+    go(pg, "record")
+    assert re.search(r"\b1 steps? signed off", text(pg, "#v-record"))
+    go(pg, "a-e")
+    pg.click('[data-inst="bass"]')
+    assert "not logged yet" in text(pg, "#side"), "bass shows the guitar's changes"
+    pg.fill("#cnt", "40")
+    pg.click("#logChg")
+    assert "Best: 40" in text(pg, "#side")
+    go(pg, "record")
+    rec = text(pg, "#v-record")
+    assert not re.search(r"\b1 steps? signed off", rec), "bass shows the guitar's sign-off count"
+    assert "33" not in rec, "bass record shows guitar changes"
+    go(pg, "rudiments")
+    assert "Opens with stage 2" in text(pg, "#v-rudiments"), "bass hasn't passed stage 1"
+    go(pg, "a-e")
+    pg.click('[data-inst="guitar"]')
+    assert "Best: 33" in text(pg, "#side")
+    go(pg, "record")
+    assert "40" not in text(pg, "#v-record"), "guitar record shows bass changes"
+
+
+def test_S9_gig_plays_full_band_despite_path_mutes(app):
+    pg = app(state=dict(FAST, mute={"guitar": True, "bass": True, "keys": True, "drums": True}), hash_="gig")
+    pg.click("#playGig")
+    pg.wait_for_timeout(5000)  # gig may play at the song's own tempo (S12), so allow a 120 bpm count-in
+    g, b = audible(pg, PLUCK), audible(pg, BASS)
+    pg.click("#playGig")
+    assert g and max(g) > 0, "gig guitar silent because of a Path mute"
+    assert b and max(b) > 0, "gig bass silent because of a Path mute"
+
+
+def test_S10_gig_timer_unlocks_audio(app):
+    pg = app(state={}, hash_="gig", clock=True)
+    assert pg.evaluate("()=>window.__audState().ctxs") == 0
+    pg.click('[data-gtime="5"]')
+    pg.wait_for_timeout(200)
+    a = pg.evaluate("()=>window.__audState()")
+    assert a["ctxs"] >= 1 and "running" in a["states"], f"timer tap didn't start audio: {a}"
+    n0 = len(starts(pg))
+    pg.clock.run_for(5 * 60_000 + 1000)
+    beeps = [s for s in starts(pg)[n0:] if s["kind"] == "osc"]
+    assert len(beeps) >= 1, "end beep not scheduled"
+
+
+def test_S11_present_mode_projects_run_sheet(app):
+    pg = app(width=1280, state={}, hash_="gig")
+    fs = "()=>{const c=[...document.querySelectorAll('#v-gig .card')].find(c=>/run sheet/i.test(c.textContent));const td=c&&c.querySelector('td');return td?parseFloat(getComputedStyle(td).fontSize):0}"
+    chart = "()=>{const s=document.querySelector('#v-gig .rmap');if(!s||!s.getClientRects().length)return 0;const r=s.getBoundingClientRect();return r.width*r.height}"
+    before, cb = pg.evaluate(fs), pg.evaluate(chart)
+    pg.click("#present")
+    hidden = pg.evaluate("()=>['input[data-gsong]','input[data-bname]','#addBand'].map(s=>{const e=document.querySelector(s);return !e||!e.getClientRects().length})")
+    assert all(hidden), "setup still shown in Present mode"
+    after, ca = pg.evaluate(fs), pg.evaluate(chart)
+    assert after > before * 1.2, f"run sheet not scaled ({before}px -> {after}px)"
+    assert ca >= cb and ca > 0, "chart hidden or shrunk"
+    pg.click("#present")
+    assert pg.locator("input[data-gsong]").first.is_visible(), "leaving Present restores setup"
+
+
+def test_S12_gig_metronome_uses_gig_song(app):
+    pg = app(state={"stage": "a-e", "bpm": 70}, hash_="gig")
+    assert pg.inner_text(".mbar .m-name") == PAT["shuffle"]["n"]
+    pg.click(".mbar .m-toggle")
+    pg.wait_for_timeout(1600)
+    pg.click(".mbar .m-toggle")
+    t = sorted(s["when"] for s in countin_clicks(starts(pg)))
+    assert len(t) >= 4
+    beat = 60 / 120
+    for a, b in zip(t, t[1:]):
+        d = b - a
+        assert min(abs(d - beat * 2 / 3), abs(d - beat / 3)) < 0.004, f"click gap {d:.3f}s is not swung quavers at 120"
+
+
+def test_S13_keys_label_shows_spelling(app):
+    pg = app(state={"inst": "keys"})
+    for c, sp in [("A", "A C♯ E"), ("E", "E G♯ B")]:
+        lab = pg.get_attribute(f'#stage [data-strum="{c}"]', "aria-label") or text(pg, f'#stage [data-strum="{c}"]')
+        assert sp in lab, f"label {lab!r} should show {sp}"
+
+
+ANNOUNCE_JS = r"""()=>{const out=[];for(const el of document.querySelectorAll('#v-path *, #toast')){if(!el.getClientRects().length&&el.id!=='toast')continue;
+  const t=(el.innerText||el.textContent||'').trim();if(!t||t.length>300)continue;
+  if(/\b(can[’']?t|cannot|won[’']?t|doesn[’']?t|does not|isn[’']?t|not)\b/i.test(t)&&/\b(feel|finish|flamenco)\b/i.test(t)&&/\bband\b/i.test(t))out.push(t)}return out}"""
+
+
+def test_S14_finish_feel_mismatch_announced(app):
+    pg = app(state={"stage": "c-g-f", "finish": "flam"}, hash_="c-g-f")
+    pg.click('[data-pat="1"]')
+    msgs = pg.evaluate(ANNOUNCE_JS)
+    assert msgs, "no announcement that the band can't follow the flamenco 12-beat compás in 3/4"
+
+
+@pytest.mark.parametrize("change,extra", [('[data-pat="1"]', {}), ('[data-fin="rock"]', {"useFin": True})])
+def test_S14_changing_feel_stops_playback(app, change, extra):
+    pg = app(state=dict(FAST, **extra))
+    pg.click("#playMap")
+    pg.wait_for_timeout(500)
+    pg.click(change)
+    assert text(pg, "#playMap") == "Play the chart", "feel changed mid-play"
+    n = len(starts(pg))
+    pg.wait_for_timeout(1200)
+    assert len(starts(pg)) == n, "band kept scheduling after the feel changed"
+
+
+@pytest.mark.parametrize("stage", ["four-chords", "hallelujah", "beyond"])
+def test_S15_listen_for_the_entry(app, stage):
+    pg = app(state={"inst": "vocals", "stage": stage}, hash_=stage)
+    cs = cue_sheet(pg)
+    assert cs and re.search(r"listen for the entry", cs["all"], re.I), cs and cs["all"]
+    assert not re.search(r"come in after the count-in|pickup", cs["all"], re.I), "specific pickup claim"
+    pg2 = app(state={"stage": stage}, hash_=stage)
+    assert not re.search(r"pickup", text(pg2, "#stage"), re.I)
