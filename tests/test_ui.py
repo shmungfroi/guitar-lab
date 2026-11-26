@@ -802,7 +802,7 @@ def test_R1_export_import_round_trip_is_lossless(app):
     txt = copy_backup(a)
     assert "copied" in text(a, "#bkMsg").lower()
     out = json.loads(txt)
-    assert out["app"] == "The Guitar Lab" and out["version"] == "0.7" and out["format"] == 1 and out["saved"]
+    assert out["app"] == "The Guitar Lab" and out["version"] == "0.8" and out["format"] == 1 and out["saved"]
     assert out["state"] == RICH, "export must carry the full saved state unchanged"
     with a.expect_download() as dl:
         a.click("#bkDown")
@@ -1007,10 +1007,10 @@ def test_R1_no_browser_popups_in_source():
     assert not re.search(r"<script[^>]+src=|<link[^>]+href=", src), "external script or stylesheet"
 
 
-def test_version_label_is_0_7(app):
+def test_version_label_is_0_8(app):
     pg = app(state={})
-    assert pg.title() == "The Guitar Lab 0.7"
-    assert "version 0.7" in text(pg, "header .sub")
+    assert pg.title() == "The Guitar Lab 0.8"
+    assert "version 0.8" in text(pg, "header .sub")
     assert "0.6" not in pg.evaluate("()=>document.body.innerText")
 
 
@@ -1594,3 +1594,129 @@ def test_T4_function_card_unchanged_without_a_capo(app, inst):
     pg = app(state={"inst": inst, "stage": "a-e"}, hash_="a-e")
     card = fn_card(pg)
     assert re.search(r"Tonic: A\b", card) and re.search(r"Dominant: E\b", card) and "Chart shows" not in card, card
+
+
+# --------------------------------------------------------------------- T3, T5 (sandboxed frame)
+
+def sandbox(browser, tmp_path, hash_="record", sel="#backup"):
+    """The app inside <iframe sandbox="allow-scripts">: storage, clipboard and downloads are all blocked. Returns (ctx, page, frame, log)."""
+    host = tmp_path / "host.html"
+    host.write_text(f'<!doctype html><meta charset="utf-8"><iframe id="f" sandbox="allow-scripts" src="{URL}#{hash_}" style="width:1100px;height:1400px;border:0"></iframe>', encoding="utf-8")
+    ctx = browser.new_context(viewport={"width": 1200, "height": 1500})
+    pg = ctx.new_page()
+    log = []
+    pg.on("console", lambda m: log.append(m.type + ": " + m.text) if m.type in ("error", "warning") else None)
+    pg.on("pageerror", lambda e: log.append("pageerror: " + str(e)))
+    pg.goto(host.as_uri())
+    fr = pg.frames[1]
+    fr.wait_for_selector(sel)
+    assert fr.evaluate("()=>{try{localStorage.getItem('x');return 'open'}catch(e){return 'blocked'}}") == "blocked", "frame is not sandboxed"
+    return ctx, pg, fr, log
+
+
+MADE = re.compile(r"file (was |has been |is )?(made|saved|downloaded|created)|saved as|downloaded", re.I)
+
+
+def test_T3_sandbox_import_does_not_claim_it_was_saved(browser, tmp_path):
+    ctx, pg, fr, log = sandbox(browser, tmp_path)
+    fr.evaluate(POPUPS_JS)
+    fr.fill("#bkIn", json.dumps({"app": "The Guitar Lab", "format": 1, "version": "0.7", "state": RICH}))
+    fr.click("#bkImport")
+    fr.click("#bkYes")
+    msg = fr.inner_text("#bkMsg")
+    assert "Backup imported" in msg and "Your path: Keys" in fr.inner_text("#v-record"), "the import itself must still work"
+    assert "saved in this browser" not in msg, msg
+    assert re.search(r"this visit only", msg) and re.search(r"Keep your backup file", msg) and "Download backup" in msg, msg
+    assert fr.evaluate("()=>window.__pop") == []
+    ctx.close()
+
+
+def test_T3_sandbox_download_does_not_claim_a_file_was_made(browser, tmp_path):
+    ctx, pg, fr, log = sandbox(browser, tmp_path)
+    fr.click("#bkDown")
+    fr.wait_for_function("()=>document.getElementById('bkMsg').textContent.length>10")
+    msg = fr.inner_text("#bkMsg")
+    assert "Copy backup" in msg and re.search(r"If no file appeared", msg), msg
+    lead = msg.split("If no file appeared")[0]
+    assert not MADE.search(lead) and "Look in your downloads" not in lead, f"claims a file before the fallback hint: {lead!r}"
+    assert re.search(r"guitar-lab-backup-\d{4}-\d\d-\d\d\.json", msg), "still names the file to look for"
+    ctx.close()
+
+
+def test_T3_normal_page_messages_still_correct(app):
+    pg = app(state={}, hash_="record")
+    offer(pg, json.dumps({"app": "The Guitar Lab", "format": 1, "version": "0.7", "state": RICH}))
+    pg.click("#bkYes")
+    msg = text(pg, "#bkMsg")
+    assert "saved in this browser" in msg and "this visit only" not in msg, msg
+    assert state(pg) == RICH, "and it really was saved"
+    with pg.expect_download() as dl:
+        pg.click("#bkDown")
+    assert re.fullmatch(r"guitar-lab-backup-\d{4}-\d\d-\d\d\.json", dl.value.suggested_filename)
+    m2 = text(pg, "#bkMsg")
+    assert dl.value.suggested_filename in m2 and "Copy backup" in m2
+    assert not MADE.search(m2.split("If no file appeared")[0]), m2
+    assert json.loads(pathlib.Path(dl.value.path()).read_text(encoding="utf-8"))["version"] == "0.8"
+    assert not pg.errors
+
+
+def test_T3_storage_blocked_on_a_normal_page_is_also_honest(app):
+    pg = app(state={}, hash_="record")
+    pg.evaluate("()=>{Storage.prototype.setItem=function(){throw new DOMException('full','QuotaExceededError')}}")
+    offer(pg, json.dumps(RICH))
+    pg.click("#bkYes")
+    msg = text(pg, "#bkMsg")
+    assert "saved in this browser" not in msg and "this visit only" in msg, msg
+    assert not pg.errors
+
+
+def test_T5_sandbox_copy_is_quiet(browser, tmp_path):
+    ctx, pg, fr, log = sandbox(browser, tmp_path)
+    blocked = fr.evaluate("()=>{const p=document.permissionsPolicy||document.featurePolicy;return !!p&&!p.allowsFeature('clipboard-write')}")
+    assert blocked, "this frame should have the clipboard blocked by policy"
+    n = len(log)
+    fr.click("#bkCopy")
+    fr.wait_for_selector("#bkOut", state="visible")
+    assert json.loads(fr.input_value("#bkOut"))["app"] == "The Guitar Lab"
+    assert len(fr.inner_text("#bkMsg")) > 10
+    pg.wait_for_timeout(300)
+    assert log[n:] == [], f"Copy backup left console messages: {log[n:]}"
+    fr.click("#bkCopy")                       # a second press is just as quiet
+    pg.wait_for_timeout(200)
+    assert log[n:] == [], log[n:]
+    ctx.close()
+
+
+def test_T5_sandbox_gig_copy_is_quiet(browser, tmp_path):
+    ctx, pg, fr, log = sandbox(browser, tmp_path, hash_="gig", sel="#copyGig")
+    n = len(log)
+    fr.click("#copyGig")
+    fr.wait_for_selector("#gigTxt", state="visible")
+    pg.wait_for_timeout(300)
+    assert log[n:] == [], f"Copy gig list left console messages: {log[n:]}"
+    ctx.close()
+
+
+def test_T5_rejected_and_missing_clipboard_stay_quiet(app):
+    pg = app(state=RICH, hash_="record")
+    log = []
+    pg.on("console", lambda m: log.append(m.type + ": " + m.text) if m.type in ("error", "warning") else None)
+    for js in (CLIP_BLOCKED_JS,
+               "()=>{Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:()=>{throw new Error('sync')}}})}",
+               "()=>{Object.defineProperty(navigator,'clipboard',{configurable:true,value:undefined})}"):
+        pg.evaluate(js)
+        pg.evaluate("()=>{document.getElementById('bkOut').classList.add('hide')}")
+        pg.click("#bkCopy")
+        pg.wait_for_selector("#bkOut", state="visible")
+    pg.wait_for_timeout(200)
+    assert log == [] and not pg.errors, log + pg.errors
+
+
+def test_T5_clipboard_still_used_when_allowed(app):
+    pg = app(state=RICH, hash_="record")
+    pg.evaluate("()=>{window.__clip=[];Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:t=>{window.__clip.push(t);return Promise.resolve()}}})}")
+    pg.click("#bkCopy")
+    pg.wait_for_function("()=>window.__clip.length===1")
+    assert json.loads(pg.evaluate("()=>window.__clip[0]"))["state"] == RICH
+    pg.wait_for_function("()=>/Backup copied/.test(document.getElementById('bkMsg').textContent)")
+    assert not pg.locator("#bkOut").is_visible()

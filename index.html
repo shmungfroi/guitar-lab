@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>The Guitar Lab 0.7</title>
+<title>The Guitar Lab 0.8</title>
 <style>
 /* VOICE: a patient guitar teacher in the Shmungfroi family: warm, exact, unhurried.
    IDEA: the guitar neck is the map; each fret is a stage, the inlays are the gates you earn.
@@ -121,7 +121,7 @@ table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px
 <div class="wrap">
 <header>
 <div class="top">
-<div><h1>The Guitar Lab</h1><div class="sub">version 0.7 · a Shmungfroi instrument</div></div>
+<div><h1>The Guitar Lab</h1><div class="sub">version 0.8 · a Shmungfroi instrument</div></div>
 <div class="sp"></div>
 <div class="chips" role="group" aria-label="Finish" id="finishes"></div>
 </div>
@@ -298,7 +298,8 @@ for(const o of ['marks','best','gates','sign'])for(const k in S[o]){const v=+S[o
 S.changes.forEach(c=>{if(!IK.includes(c.inst))c.inst='guitar'});S.journal.forEach(j=>{if(!IK.includes(j.inst))j.inst='guitar'});
 if(!FIN.some(f=>f.k===S.finish))S.finish='bossa';if(!ST.some(s=>s.id===S.stage))S.stage='a-e';if(!Array.isArray(S.changes))S.changes=[];if(!Array.isArray(S.journal))S.journal=[]}
 {let L=null;try{L=JSON.parse(localStorage.getItem('shredder')||'{}')}catch(e){}loadState(L)}
-const save=()=>{try{localStorage.setItem('shredder',JSON.stringify(S))}catch(e){}};
+/* true when the browser kept it; false where storage is blocked (a sandboxed frame, private mode), so the page can say so (0.8) */
+const save=()=>{try{localStorage.setItem('shredder',JSON.stringify(S));return true}catch(e){return false}};
 const $=id=>document.getElementById(id);
 const shp=c=>String(c).replace(/#/g,'♯');
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -545,7 +546,7 @@ function renderRecord(){const s=stage(),iname=INST.find(x=>x[0]===S.inst)[1],mc=
 let bk={note:null,pend:null,inTxt:'',out:''},dlCap;
 /* a claude.ai artifact can hand files to its viewer; anywhere else this stays empty and the plain download link is used */
 const dlFind=()=>{if(dlCap!==undefined)return Promise.resolve(dlCap);try{const c=window.claude;if(c&&typeof c.use==='function')return Promise.resolve(c.use('downloads')).then(d=>dlCap=(d&&typeof d.save==='function')?d:null,()=>dlCap=null)}catch(e){}return Promise.resolve(null)};
-const backupObj=()=>{gigS();return {app:'The Guitar Lab',format:1,version:'0.7',saved:new Date().toISOString(),state:JSON.parse(JSON.stringify(S))}};
+const backupObj=()=>{gigS();return {app:'The Guitar Lab',format:1,version:'0.8',saved:new Date().toISOString(),state:JSON.parse(JSON.stringify(S))}};
 const backupText=()=>JSON.stringify(backupObj(),null,1);
 const bkName=()=>'guitar-lab-backup-'+today()+'.json';
 const NOCHG=' Nothing has been changed.';
@@ -555,7 +556,7 @@ function readBackup(txt){txt=String(txt||'').replace(/^﻿/,'').trim();if(!txt)r
  try{o=JSON.parse(txt)}catch(e){return {err:'That isn\'t a Guitar Lab backup: the text can\'t be read as JSON, so part of it may be missing or changed. Copy the whole backup, from the first { to the last }, and try again.'+NOCHG}}
  const isO=v=>!!v&&typeof v==='object'&&!Array.isArray(v);if(!isO(o))return {err:'That isn\'t a Guitar Lab backup: a backup is one block of text that starts with { and ends with }.'+NOCHG};
  const wrapped=isO(o.state)&&('format' in o||'app' in o),st=wrapped?o.state:o;
- if(wrapped&&typeof o.format==='number'&&o.format>1)return {err:'That backup was made by a newer version of The Guitar Lab than this one (0.7), so it can\'t be read here.'+NOCHG};
+ if(wrapped&&typeof o.format==='number'&&o.format>1)return {err:'That backup was made by a newer version of The Guitar Lab than this one (0.8), so it can\'t be read here.'+NOCHG};
  const known=Object.keys(DEF).filter(k=>st[k]!==undefined&&st[k]!==null);if(!known.length)return {err:'That JSON isn\'t a Guitar Lab backup: it has none of the things this app saves (levels, journal, gig plan and so on).'+NOCHG};
  const bad=known.filter(k=>!kindOK(DEF[k],st[k]));if(bad.length)return {err:'That backup is damaged: '+bad.map(k=>'"'+k+'"').join(', ')+(bad.length>1?' are':' is')+' not in the form this app saves.'+NOCHG};
  if(Array.isArray(st.changes)&&st.changes.some(c=>!isO(c))||Array.isArray(st.journal)&&st.journal.some(j=>!isO(j)))return {err:'That backup is damaged: its practice log or journal has entries this app can\'t read.'+NOCHG};
@@ -572,15 +573,18 @@ function backupCard(){const q=bk.pend;return `<div class="card" id="backup"><h3>
 function bkSay(m,bad){bk.note=m?[m,!!bad]:null;const el=$('bkMsg');if(el)el.innerHTML=m?`<p class="bkmsg${bad?' bad':''}">${esc(m)}</p>`:''}
 function bkShowOut(txt){bk.out=txt;const ta=$('bkOut');if(!ta)return null;ta.value=txt;ta.classList.remove('hide');return ta}
 function bkBlob(txt){try{const u=URL.createObjectURL(new Blob([txt],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download=bkName();a.rel='noopener';a.style.display='none';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>{try{URL.revokeObjectURL(u)}catch(e){}},4000);return true}catch(e){return false}}
-function bkDownload(){const txt=backupText(),viaLink=()=>{if(bkBlob(txt))bkSay('Backup file made: '+bkName()+'. Look in your downloads. If no file appeared, this page isn\'t allowed to download here: use Copy backup instead.');else{bkShowOut(txt);bkSay('Downloading isn\'t available here. The backup is in the box above: select all of it, copy it, and paste it somewhere safe.',1)}};
+function bkDownload(){const txt=backupText(),viaLink=()=>{if(bkBlob(txt))bkSay('Backup prepared as '+bkName()+'. If no file appeared in your downloads, this page isn\'t allowed to download here: use Copy backup instead.');else{bkShowOut(txt);bkSay('Downloading isn\'t available here. The backup is in the box above: select all of it, copy it, and paste it somewhere safe.',1)}};
  dlFind().then(d=>{if(!d){viaLink();return}let pr;try{pr=Promise.resolve(d.save({filename:bkName(),data:txt}))}catch(e){pr=Promise.reject(e)}
   pr.then(()=>bkSay('Backup saved as '+bkName()+'.'),e=>{const c=e&&e.code;if(c==='declined')bkSay('Download cancelled, so no backup file was made. Your progress is untouched.');else if(c==='rate_limited')bkSay('A download is already waiting for your answer. Finish that one, then try again.',1);else viaLink()})})}
+/* copy without noise (0.8): where the page's permissions policy blocks the clipboard, the browser logs an error just for asking, so check first and go straight to the fallback */
+function clipWrite(txt){try{const fp=document.permissionsPolicy||document.featurePolicy;if(fp&&typeof fp.allowsFeature==='function'&&!fp.allowsFeature('clipboard-write'))return Promise.reject();
+  const c=navigator.clipboard;if(!c||typeof c.writeText!=='function')return Promise.reject();return Promise.resolve(c.writeText(txt))}catch(e){return Promise.reject()}}
 function bkCopy(){const txt=backupText(),done=()=>bkSay('Backup copied. Paste it into a note or an email to yourself and keep it safe.'),
  box=()=>{const ta=bkShowOut(txt);let ok=false;if(ta){ta.focus();ta.select();try{ok=document.execCommand('copy')}catch(e){}}if(ok)bkSay('Backup copied. It is also shown in the box above. Paste it into a note or an email to yourself and keep it safe.');else bkSay('Copying is blocked here. The backup is in the box above, already selected: copy it (Ctrl or ⌘ and C, or press and hold), then paste it somewhere safe.')};
- try{navigator.clipboard.writeText(txt).then(done,box)}catch(e){box()}}
+ clipWrite(txt).then(done,box)}
 function bkOffer(txt){const r=readBackup(txt);if(r.err){bk.pend=null;const a=$('bkAsk');if(a)a.innerHTML='';bkSay(r.err,1);return}bk.pend=r;bk.note=null;renderRecord();const no=$('bkNo');if(no)no.focus()}
 function bkApply(){const q=bk.pend;if(!q)return;const old=S,tch=S.teacher;try{loadState(JSON.parse(JSON.stringify(q.st)));S.teacher=tch;gigS();checkGates()}catch(e){S=old;bk.pend=null;renderRecord();bkSay('That backup couldn\'t be loaded.'+NOCHG,1);return}
- stopAll();if(metro)stopMetro();loop=[];loopChg='';for(const k in bus)bus[k].gain.value=S.mute[k]?0:1;bk={note:['Backup imported: '+bkCount(S)+'. Your progress has been replaced and saved in this browser.',false],pend:null,inTxt:'',out:''};save();all();mUI();toast('Backup imported');const h=$('backup');if(h){h.setAttribute('tabindex','-1');h.focus({preventScroll:true})}}
+ stopAll();if(metro)stopMetro();loop=[];loopChg='';for(const k in bus)bus[k].gain.value=S.mute[k]?0:1;const kept=save();bk={note:['Backup imported: '+bkCount(S)+(kept?'. Your progress has been replaced and saved in this browser.':'. It is loaded for this visit only: this page isn\'t allowed to store anything here, so it will be gone when the page closes. Keep your backup file, and use Download backup or Copy backup before you leave to keep anything new.'),false],pend:null,inTxt:'',out:''};all();mUI();toast('Backup imported');const h=$('backup');if(h){h.setAttribute('tabindex','-1');h.focus({preventScroll:true})}}
 /* sequencing */
 let metro=null,timerLeft=0,tmr=null,seqT=[],playing=false,confirmLower=null;
 const home=s=>s.ch.find(c=>/^(I|i)$/.test(fnOf(s.key,c)[0]))||s.ch[0];
@@ -643,7 +647,7 @@ document.addEventListener('click',e=>{if(e.target.closest('#tabs a')||e.target.c
  else if(t.dataset.gtime){const m=+t.dataset.gtime;if(!(m>0&&m<=60))return;clearInterval(gt);const a0=A();if(a0){try{a0.resume()}catch(err){}click(a0.currentTime+.03,0)}gtEnd=Date.now()+m*60000;const tk=()=>{const r=Math.max(0,Math.ceil((gtEnd-Date.now())/1000));const el=$('gtime');if(el)el.textContent=Math.floor(r/60)+':'+String(r%60).padStart(2,'0');if(!r){clearInterval(gt);gt=null;const a=A();if(a){const beep=()=>[0,.3,.6].forEach(x=>click(a.currentTime+x,1));if(a.state==='running')beep();else{try{a.resume().then(beep,()=>{})}catch(err){}}}toast('Time: change over.')}};tk();gt=setInterval(tk,250)}
  else if(t.id==='gstop'){clearInterval(gt);gt=null;const el=$('gtime');if(el)el.textContent='0:00'}
  else if(t.id==='present'){const on=document.body.classList.toggle('present');renderGig();refocus('#present');toast(on?'Present mode: setup is hidden; the run sheet, its phase headings and the chart are enlarged. Press Present again to go back.':'Present mode off')}
- else if(t.id==='copyGig'){const txt=gigText(gigS());try{navigator.clipboard.writeText(txt).then(()=>toast('Gig list copied'),()=>{$('gigTxt').classList.remove('hide');toast('Copy isn\'t available here: select the text below instead.')})}catch(err){$('gigTxt').classList.remove('hide')}}
+ else if(t.id==='copyGig'){const txt=gigText(gigS());clipWrite(txt).then(()=>toast('Gig list copied'),()=>{$('gigTxt').classList.remove('hide');toast('Copy isn\'t available here: select the text below instead.')})}
  else if(t.id==='bkDown')bkDownload()
  else if(t.id==='bkCopy')bkCopy()
  else if(t.id==='bkPick'){const f=$('bkFile');if(f){f.value='';f.click()}}
