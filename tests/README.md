@@ -5,7 +5,7 @@ Three pytest suites. They read `index.html` and never edit it.
 | Suite | What it checks | Time |
 |---|---|---|
 | `test_chords.py` | The 18 chord shapes (frets, fingers, barres, the notes they sound against their spelling), fretboard diagrams, key spellings, roman numerals and functions, sol-fa roots, bass root/fifth positions, song maps vs keys and labelled progressions, strum and Finish patterns, capo sounding keys | ~1 s |
-| `test_ui.py` | Render matrix (8 stages x 7 tabs x 5 instruments x 360/768/1280 px x light/dark: no console errors, no page-level horizontal overflow, key panels present); functional tests (gates, sign-off, grading, playback start/stop, capo, mute, gig max four, gig timer, roles); one or more tests per register item M1-M5, S1-S15 in `reports/spec06/SPEC_06.md` | ~70 s |
+| `test_ui.py` | Render matrix (8 stages x 7 tabs x 5 instruments x 360/768/1280 px x light/dark: no console errors, no page-level horizontal overflow, key panels present); functional tests (gates, sign-off, grading, playback start/stop, capo, mute, gig max four, gig timer, roles); one or more tests per register item M1-M5, S1-S15 in `reports/spec06/SPEC_06.md` and R1-R11 in `reports/spec07/SPEC_07.md` (`test_R<n>_...`; R6 and R7 also have data tests in `test_chords.py`) | ~3 min |
 | `test_timing.py` | Records every WebAudio source start via an init script and checks the schedule against the beat grid (4/4 at two tempos, swung shuffle, 3/4, 6/8), that nothing is scheduled late, and that a double tap on Play can't stack two bands (S2) | ~30 s |
 
 ## Setup (fresh session)
@@ -24,7 +24,7 @@ Node is not needed.
 From the repo root (`/home/claude/guitar`):
 
 ```bash
-python3 -m pytest tests -q -p no:cacheprovider                 # everything, ~2 min
+python3 -m pytest tests -q -p no:cacheprovider                 # everything, ~4 min
 python3 -m pytest tests/test_chords.py -q -p no:cacheprovider  # one suite
 python3 -m pytest tests/test_ui.py -q -p no:cacheprovider -k "not matrix"   # skip the big matrix
 python3 -m pytest tests/test_ui.py -q -p no:cacheprovider -k "M3 or S6"     # register items
@@ -66,4 +66,8 @@ SHREDDER_INDEX=/tmp/shredder05/index.html python3 -m pytest tests -q -p no:cache
   therefore also requires a scroll wrapper, or a grid that fits its column at 320 px.
 - S7 treats "beats 1 and 3" as wrong in 3/4 and 6/8 (in 6/8 there are two beats a bar).
 - S11 requires the run sheet text to grow by at least 20% in Present mode and the chart not to shrink.
-- Results for each build go in `reports/<spec>/TEST_BASELINE.md`.
+- R1 (0.7): the backup tests stub `navigator.clipboard` and `window.claude.use('downloads')` in the page to reach each
+  branch; the sandbox test loads the app in `<iframe sandbox="allow-scripts">` from a temp host page, where storage,
+  clipboard and downloads are all blocked.
+- R12 (0.7): `test_M3_keys_spelling_every_capo` waits for the keys panel to settle (`settle_keys_panel`) before reading it.
+- Results for each build go in `reports/<spec>/TEST_BASELINE.md` or that spec's `BUILD_REPORT.md`.

@@ -1258,3 +1258,174 @@ def test_R6_greensleeves_chart_and_band_agree(app):
     go(pg, "technique")
     assert pg.locator('#v-technique .cb[data-strum="F"]').count() >= 1, "the Andalusian cadence keeps its F"
     assert not pg.errors
+
+
+# --------------------------------------------------------------------- R8
+
+DRUM_JS = "()=>[...document.querySelectorAll('#stage .dg, #stage .dgw + p.note, #gigPart .dg, #gigPart .dgw + p.note')].map(e=>(e.getAttribute('aria-label')||'')+' '+e.innerText).join(' ')"
+STRUM_WORDS = r"\bstrum|\bdowns?\b|\bups?\b|\bDU\b|\bUDU\b|D ·|thumb|palm|\bchords (on|between)|\bbass, |\beighth|compás"
+
+
+def test_R8_drum_panel_uses_drum_words(app):
+    bad, seen = [], set()
+    for fin, use in [("bossa", False)] + [(f["k"], True) for f in D["FIN"]]:
+        pg = app(state={"inst": "drums", "finish": fin, "useFin": use, "gig": {"useFin": use}})
+        spots = [s["id"] for s in ST] + ["gig"]
+        for where in spots:
+            go(pg, where)
+            t = pg.evaluate(DRUM_JS)
+            seen.add(t)
+            if not re.search(r"\bhats\b", t) or not re.search(r"\bkick on 1\b", t):
+                bad.append(f"{fin}/{use}/{where}: groove not described in drum words: {t[-200:]!r}")
+            for m in re.finditer(STRUM_WORDS, t, re.I):
+                bad.append(f"{fin}/{use}/{where}: {m.group(0)!r} in {t[max(0, m.start() - 40):m.end() + 20]!r}")
+        assert not pg.errors
+        pg.context.close()
+    assert not bad, "\n".join(bad[:20])
+    pg = app(state={"inst": "drums"})
+    want = {"a-e": "hats on every beat, snare on 2 and 4, kick on 1 and 3",
+            "twelve-bar": "hats in swung quavers, snare on 2 and 4, kick on 1 and 3",
+            "c-g-f": "hats on every beat, rim click on 2 and 3, kick on 1",
+            "six-eight": "hats on all six quavers, snare on 4, kick on 1"}
+    for sid, words in want.items():
+        go(pg, sid)
+        assert words in pg.evaluate(DRUM_JS), f"{sid}: {pg.evaluate(DRUM_JS)[-220:]!r}"
+        assert words in pg.get_attribute("#stage .dg", "aria-label")
+
+
+# --------------------------------------------------------------------- R9
+
+def test_R9_f_sharp_uses_the_proper_sign(app):
+    bad = []
+    for inst in ["guitar", "bass"]:
+        pg = app(state={"inst": inst, "stage": "beyond"}, hash_="beyond")
+        fk = text(pg, "#side .fk")
+        assert "Dominant: F♯" in fk, fk
+        for where, t in walk(pg):
+            if where == "invent":
+                assert re.search(r"Pool: .*F♯", t), "Invent pool should list F♯"
+            for m in re.finditer(r".{0,25}[A-G]#.{0,10}", t):
+                bad.append(f"{inst}/{where}: {m.group(0)!r}")
+        pg.context.close()
+    assert not bad, "\n".join(bad[:20])
+    pg = app(state={"stage": "beyond"}, hash_="invent")
+    for _ in range(40):                                     # roll until F♯ comes up, then save the loop
+        pg.click("#roll")
+        if pg.locator('#v-invent .cb[data-strum="F#"]').count():
+            break
+    assert pg.locator('#v-invent .cb[data-strum="F#"]').count(), "F♯ never rolled"
+    pg.click("#keepLoop")
+    go(pg, "record")
+    j = text(pg, "#v-record .log")
+    assert "F♯" in j and "#" not in j, j
+
+
+def test_R9_la_bamba_bar_reference_fits_its_loop(app):
+    pg = app(state={}, hash_="gig")
+    pg.click('[data-gopen="g-bamba"][data-gview]')
+    t = text(pg, "#gigSong")
+    assert "Loop, 4 bars" in pg.get_attribute("#gigSong .rmap", "aria-label")
+    assert not re.search(r"bars? (10|12)|bars 10 and 12", t), "La Bamba's loop has four bars"
+    assert re.search(r"same four bars", t)
+    for g in [x for x in GIGS if x["id"] != "g-bamba"]:     # the 12-bar songs keep their real caveat
+        pg.click(f'[data-gopen="{g["id"]}"][data-gview]')
+        assert "bars 10 and 12" in text(pg, "#gigSong"), g["id"]
+    assert not pg.errors
+
+
+@pytest.mark.parametrize("inst", INSTS)
+def test_R9_bpm_label_is_tidy(app, inst):
+    pg = app(state={"inst": inst})
+    for sid in ["six-eight", "hallelujah", "a-e"]:
+        go(pg, sid)
+        t = pg.evaluate("()=>document.body.innerText")
+        assert "(bpm (" not in t and "))" not in t, sid
+        nested = re.findall(r"\([^()\n]*\([^()\n]*\)[^()\n]*\)", t)
+        assert not nested, f"{sid}: nested brackets {nested[:3]}"
+        row = pg.evaluate("()=>document.getElementById('playMap').parentElement.innerText")
+        if sid == "a-e":
+            assert "dotted crotchet" not in row
+        else:
+            assert "counts the dotted crotchet" in row, row
+            assert "bpm (dotted crotchet)" in pg.inner_text(".mbar"), "the metronome bar still names the unit"
+
+
+# --------------------------------------------------------------------- R10
+
+def lit_black(pg, chord):
+    k = pg.evaluate(KBD_JS, chord)
+    lb = [x for x in k["labels"] if not x["white"] and re.fullmatch(r"[A-G][♯♭]", x["s"])]
+    assert lb, "no lit black key on " + chord
+    return lb[0], k
+
+
+@pytest.mark.parametrize("chord", ["A", "E"])
+def test_R10_lit_black_key_contrast_in_light_mode(app, chord):
+    light = app(scheme="light", state={"inst": "keys"})
+    dark = app(scheme="dark", state={"inst": "keys"})
+    l, kl = lit_black(light, chord)
+    d, kd = lit_black(dark, chord)
+    assert d["key"] == "rgb(240, 212, 138)", "dark mode keeps its light gold"
+    assert l["key"] != d["key"], "light mode should use a darker gold on lit black keys"
+    assert _lum([float(x) for x in re.findall(r"[\d.]+", l["key"])[:3]]) < _lum([float(x) for x in re.findall(r"[\d.]+", d["key"])[:3]])
+    assert l["key"] != kl["unlitWhite"]
+    cw = contrast(l["key"], kl["unlitWhite"])
+    assert cw >= 3, f"lit black key {l['key']} vs cream white key {kl['unlitWhite']}: contrast {cw:.2f} < 3"
+    assert contrast(l["key"], kl["unlitBlack"]) >= 3, "lit black key must still stand out from the unlit black keys"
+    assert contrast(l["fill"], l["key"]) >= 4.5, "note name on the lit black key"
+    was = contrast("rgb(240, 212, 138)", kl["unlitWhite"])
+    assert cw > was * 2, f"contrast against the white keys should be clearly better than 0.6's {was:.2f}"
+
+
+def test_R10_follows_the_page_theme_not_just_the_os(app):
+    pg = app(scheme="dark", state={"inst": "keys"})
+    pg.evaluate("()=>{document.documentElement.dataset.theme='light'}")
+    l, _ = lit_black(pg, "A")
+    assert l["key"] != "rgb(240, 212, 138)"
+
+
+# --------------------------------------------------------------------- R11
+
+ODD_NOTES = {"C♭": "B", "F♭": "E", "B♯": "C", "E♯": "F"}
+SPELL_JS = r"""()=>{const st=document.getElementById('stage'),n=[...st.querySelectorAll('.spell-note')].filter(e=>e.getClientRects().length);
+ const shown=[...st.querySelectorAll('svg.kb')].map(s=>s.getAttribute('aria-label')).join(' ')+' '+[...st.querySelectorAll('.bcard, .solfa')].map(e=>e.innerText).join(' ');
+ return {notes:n.map(e=>e.innerText),count:n.length,lines:n.map(e=>Math.round(e.getBoundingClientRect().height/parseFloat(getComputedStyle(e).lineHeight))),shown}}"""
+
+
+@pytest.mark.parametrize("inst", ["keys", "bass", "vocals"])
+def test_R11_spelling_note_only_when_needed(app, inst):
+    bad, hits = [], 0
+    for capo in range(0, 8):
+        pg = app(width=1280, state={"inst": inst, "capo": {s["id"]: capo for s in ST} if capo else {}})
+        for s in ST:
+            go(pg, s["id"])
+            r = pg.evaluate(SPELL_JS)
+            odd = sorted(set(re.findall(r"C♭|F♭|B♯|E♯", r["shown"])))
+            where = f"{inst} {s['id']} capo {capo}"
+            if odd and r["count"] != 1:
+                bad.append(f"{where}: {odd} shown but {r['count']} notes")
+            elif not odd and r["count"]:
+                bad.append(f"{where}: note with nothing to explain: {r['notes']}")
+            elif odd:
+                hits += 1
+                for o in odd:
+                    if f"{o} is the same pitch as {ODD_NOTES[o]}" not in r["notes"][0]:
+                        bad.append(f"{where}: note does not explain {o}: {r['notes'][0]!r}")
+                if inst == "keys" and r["lines"][0] > 2:
+                    bad.append(f"{where}: note runs to {r['lines'][0]} lines")
+        assert not pg.errors
+        pg.context.close()
+    assert not bad, "\n".join(bad[:20])
+    assert hits, "no case exercised"
+
+
+def test_R11_b_minor_capo_4_explains_c_flat(app):
+    pg = app(state={"inst": "keys", "stage": "beyond", "capo": {"beyond": 4}}, hash_="beyond")
+    assert "sounds in E♭ minor" in text(pg, "#stage")
+    note = text(pg, "#stage .spell-note")
+    assert "C♭ is the same pitch as B" in note and "E♭ minor" in note
+    for _ in range(4):
+        pg.click('[data-capo="-1"]')
+    assert pg.locator("#stage .spell-note").count() == 0, "no note in plain B minor"
+    pg2 = app(state={"stage": "beyond", "capo": {"beyond": 4}}, hash_="beyond")
+    assert pg2.locator("#stage .spell-note").count() == 0, "guitar shows shapes, so no spelling note"
