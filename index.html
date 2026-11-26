@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Shredder 0.5</title>
+<style>
+/* VOICE: a patient guitar teacher in the Shmungfroi family: warm, exact, unhurried.
+   IDEA: the guitar neck is the map; each fret is a stage, the inlays are the gates you earn.
+   PICTURE: a rosewood neck across the top, chord boxes and fretboards coloured by harmonic function.
+   COLOUR and TYPE: Garden black, ivory, gold; function colours reserved; Poiret One display, Outfit text (Garden font files).
+   LAYOUT: tabs (Path, Warm-up, Rudiments, Technique, Invent, Record); Path = neck, next-up line, stage beside a practice column. */
+@font-face{font-family:'G Outfit';src:url(fonts/Outfit-Regular.ttf) format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:'G Outfit';src:url(fonts/Outfit-Bold.ttf) format('truetype');font-weight:500 700;font-display:swap}
+@font-face{font-family:'G Poiret';src:url(fonts/PoiretOne-Regular.ttf) format('truetype');font-display:swap}
+:root{--bg:#0b0906;--card:#12100b;--ink:#ece2c8;--mut:#9c927c;--rule:#2a2418;--hi:#f0d48a;--ok:#d9cfb6;
+--ton:#8fbf6a;--pre:#c9a24a;--dom:#d0574b;--sec:#a493d8;--wood:#2b1a12;--fret:#b9b4a8;--ivory:#ece2c8;--inlay:#c9a24a;--fin:#2f9e9b;color-scheme:dark}
+@supports (color:light-dark(#000,#fff)){:root{color-scheme:light dark;
+--bg:light-dark(#f7f1e3,#0b0906);--card:light-dark(#fffaf0,#12100b);--ink:light-dark(#2a2216,#ece2c8);--mut:light-dark(#6f634c,#9c927c);
+--rule:light-dark(#d9cdb2,#2a2418);--hi:light-dark(#7a5c12,#f0d48a);--ok:light-dark(#3d3426,#d9cfb6);
+--ton:light-dark(#4a7434,#8fbf6a);--pre:light-dark(#8a6a22,#c9a24a);--dom:light-dark(#a8352b,#d0574b);--sec:light-dark(#6b55b0,#a493d8)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 'G Outfit',Outfit,system-ui,sans-serif;overflow-x:clip}
+h1,h2,.pd{font-family:'G Poiret','Poiret One',system-ui,sans-serif;font-weight:400;line-height:1.05;margin:0}
+h3{font:500 16px/1.3 'G Outfit',system-ui,sans-serif;margin:0 0 8px}
+button,select,input,textarea{font:inherit;color:inherit}
+button{min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--rule);background:var(--card);cursor:pointer}
+button:hover{border-color:var(--mut)}
+button[aria-pressed=true],button.x-unused{border-color:var(--fin);box-shadow:inset 0 0 0 1px var(--fin);background:color-mix(in srgb,var(--fin) 18%,var(--card))}button[aria-pressed=true]::before{content:'✓ '}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.stick{position:sticky;top:0;z-index:5;background:var(--bg)}.mbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid var(--rule);font-size:14px}.mbar .v{min-width:3ch;text-align:right;font-weight:500}
+:focus-visible{outline:2px solid var(--hi);outline-offset:2px}
+input,select,textarea{min-height:44px;border:1px solid var(--rule);border-radius:10px;background:var(--bg);padding:8px 10px;font-size:16px}
+a{color:var(--ink);text-decoration-color:var(--mut);text-underline-offset:3px}
+.lk{display:inline-flex;align-items:center;min-height:44px}
+.wrap{max-width:1240px;margin:0 auto;padding:0 max(4vw,16px)}
+header{border-top:4px solid var(--fin);padding:16px 0 6px}
+.top{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.top h1{font-size:40px;color:var(--hi)}
+.sub,.note{font-size:13px;color:var(--mut)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{border-radius:999px;font-size:14px}
+.sp{flex:1}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--rule);margin:12px 0 0}
+.tabs a{flex:none;display:flex;align-items:center;min-height:48px;padding:0 14px;text-decoration:none;color:var(--mut);border-bottom:3px solid transparent}
+.tabs a[aria-current=page]{color:var(--ink);border-bottom-color:var(--fin)}
+.next{margin:14px 0 0;padding:12px 16px;border:1px solid var(--rule);border-left:0;border-radius:0;background:var(--card);display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}
+.next b{font-weight:500}
+.neck{margin:12px 0 6px;display:grid;grid-template-columns:14px repeat(8,minmax(0,1fr));background:var(--wood);border-radius:6px;overflow:hidden;
+background-image:repeating-linear-gradient(180deg,transparent 0 13px,rgba(236,226,200,.45) 13px 14.5px);background-position:0 6px}
+.nut{background:var(--ivory)}
+.fr{display:block;position:relative;border:0;border-right:3px solid var(--fret);border-radius:0;background:transparent;color:var(--ivory);min-height:98px;padding:6px 4px 22px;text-align:center;font-size:13px}
+.fr:hover{background:rgba(240,212,138,.08)}
+.fr.cur{background:rgba(240,212,138,.14);box-shadow:inset 0 0 0 2px #f0d48a}
+.fr.ahead .lb{opacity:.6}
+.fr .lb{position:absolute;top:8px;left:6px;right:6px;background:rgba(18,16,11,.8);border-radius:6px;padding:2px 4px;z-index:1}
+.fr .pg{position:absolute;left:8px;right:8px;bottom:6px;height:4px;background:rgba(236,226,200,.25);border-radius:2px}
+.fr .pg i{display:block;height:100%;background:#ece2c8;border-radius:2px}
+.dot{position:absolute;left:50%;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:#efe8d6;top:58%}
+.dot.done{background:var(--inlay)}.dot.a{top:46%}.dot.b{top:70%}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--mut);margin-bottom:6px}
+.view{padding:16px 0 28px}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:28px}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:16px;padding:16px 18px}
+.stk>*+*{margin-top:16px}
+.title h2{font-size:44px}
+.meta{color:var(--mut);font-size:14px;margin-top:6px}
+.boxes{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,132px));gap:12px}
+.cb{display:block;align-self:start;text-align:center;border:0;background:transparent;padding:4px;min-height:0}
+.cb svg{width:100%;max-width:140px;display:block;margin:0 auto}
+.cb .rn{font-size:13px}
+.kb{width:100%;max-width:170px;display:block;margin:6px auto}.dg{border-collapse:collapse;margin:8px 0;font-size:15px;width:auto}.dg th,.dg td{border:1px solid var(--rule);padding:6px 8px;text-align:center;min-width:30px}.dg th{color:var(--mut);font-weight:400}
+.gt{font:500 clamp(56px,12vw,140px)/1 'G Outfit',system-ui,sans-serif;font-variant-numeric:tabular-nums}.present .gt{font-size:clamp(90px,22vw,240px)}.present #v-gig{font-size:20px}
+.step{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:start;padding:12px 0;border-top:1px solid var(--rule)}
+.step .n{font:24px 'G Poiret','Poiret One',sans-serif;color:var(--mut)}
+.step.up .n{color:var(--hi)}
+.step p{margin:2px 0 0;font-size:14px;color:var(--mut)}
+.crit{font-size:13px;color:var(--mut);margin-top:6px}.crit b{font-weight:500;color:var(--ink)}
+.tag{display:inline-block;font-size:12px;border:1px solid var(--rule);border-radius:999px;padding:1px 8px;margin-left:6px;color:var(--mut);vertical-align:2px}
+.tag.up{border-color:var(--hi);color:var(--hi)}.tag.ok{color:var(--ok);border-color:var(--ok)}
+.lvl{display:flex;align-items:center;gap:4px}
+.lvl .lvname{min-width:96px;text-align:center;font-size:14px}
+.lvl button{min-width:44px;padding:0}
+.rm{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:12px;margin:10px 0}.rmap{width:100%;display:block;font-family:'G Outfit',system-ui,sans-serif}.rm-bar{fill:transparent}.rm-bar.now{fill:color-mix(in srgb,var(--hi) 22%,transparent)}
+.formstrip{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px;font-size:14px}.fs{border:1px solid var(--ink);border-radius:6px;padding:4px 10px;display:inline-flex;flex-direction:column;line-height:1.2}.fs.now{background:color-mix(in srgb,var(--hi) 22%,transparent)}.fs small{color:var(--mut);font-size:12px}.arr{color:var(--mut)}
+.fk{display:grid;gap:4px;font-size:14px}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+.grid{display:flex;flex-wrap:wrap;gap:4px;margin:10px 0}
+.cell{flex:1 0 30px;max-width:44px;aspect-ratio:1;border:1px solid var(--mut);border-radius:6px;display:grid;place-items:center;font-size:13px}
+.cell.acc{background:color-mix(in srgb,var(--fin) 35%,transparent);border-color:var(--fin)}
+.cell.play{outline:2px solid var(--hi)}
+.big{font:500 30px/1 'G Outfit',system-ui,sans-serif}
+.know summary{cursor:pointer;font-weight:500;min-height:44px;display:flex;align-items:center}
+.know p{margin:6px 0 0;font-size:15px}
+.tab{font:13px/1.35 ui-monospace,Menlo,Consolas,monospace;overflow-x:auto;white-space:pre;background:var(--bg);padding:8px 10px;border-radius:8px;margin:8px 0}
+.fb{width:100%;display:block}.wide{grid-column:1/-1}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px solid var(--rule);padding:6px 4px;text-align:left}th{font-weight:500;color:var(--mut)}
+.log{padding-left:18px}.log li{font-size:14px}
+.strip{display:flex;gap:4px;flex-wrap:wrap}.strip i{width:22px;height:22px;border-radius:5px;border:1px solid var(--rule);display:block}.strip i.y{background:var(--fin);border-color:var(--fin)}
+.chk{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--rule)}
+.chk input{width:24px;height:24px;min-height:0;margin-top:2px;accent-color:var(--fin)}
+.hide{display:none!important}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;max-width:92vw;background:var(--card);border:1px solid var(--hi);border-radius:12px;padding:12px 16px;font-size:15px;z-index:20}
+.gate{border:1px solid var(--inlay);border-radius:16px;padding:14px 18px;background:color-mix(in srgb,var(--inlay) 10%,transparent)}
+@media(max-width:900px){.cols,.two{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:640px){.top h1{font-size:32px}.title h2{font-size:34px}
+.neck{grid-template-columns:minmax(0,1fr);background-image:repeating-linear-gradient(90deg,transparent 0 calc(16.66% - 1px),rgba(236,226,200,.45) calc(16.66% - 1px) 16.66%)}
+.nut{height:12px}.fr{border-right:0;border-bottom:3px solid var(--fret);min-height:56px;text-align:left;padding:8px 12px 14px}
+.fr .lb{position:static;display:inline-block}.dot{top:50%!important;left:auto;right:18px;margin-top:-7px}.dot.a{right:38px}
+.step{grid-template-columns:24px minmax(0,1fr)}.step>.lvl{grid-column:2}.list{grid-template-columns:minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="top">
+<div><h1>The Shredder</h1><div class="sub">Working title · version 0.5 · a Shmungfroi instrument</div></div>
+<div class="sp"></div>
+<div class="chips" role="group" aria-label="Finish" id="finishes"></div>
+</div>
+<div class="row" style="margin-top:10px">
+<button id="nswBtn" aria-pressed="false">NSW syllabus mode</button>
+<button id="tchBtn" aria-pressed="false">Teacher mode</button>
+<span class="note">Chord listening through the microphone is planned for the hosted version; this preview page can't use the microphone.</span>
+</div>
+</header>
+<div class="stick"><nav class="tabs" aria-label="Sections" id="tabs">
+<a href="#path">Path</a><a href="#warm-up">Warm-up</a><a href="#rudiments">Rudiments</a><a href="#technique">Technique</a><a href="#invent">Invent</a><a href="#gig">Gig</a><a href="#record">Record</a>
+</nav>
+<div class="mbar" role="group" aria-label="Metronome"><button class="m-toggle" aria-pressed="false">Metronome</button><button class="m-step" data-step="-5" aria-label="Slower">−</button><span class="v m-out">70</span><button class="m-step" data-step="5" aria-label="Faster">+</button><span class="note m-unit">bpm</span><span class="note m-name"></span></div></div>
+
+<section id="v-path" class="view">
+<div class="next" id="next"></div>
+<nav class="neck" id="neck" aria-label="Stages on the neck"></nav>
+<div class="legend"><span>The bar under each fret shows steps at Consistent or better.</span><span>Inlays sit at frets 3, 5 and 7 as on a real neck (Hallelujah carries the double), and turn gold when that stage's gate passes.</span></div>
+<div id="gateMsg"></div>
+<div class="cols" style="margin-top:12px"><div class="stk" id="stage"></div><aside class="stk" id="side"></aside></div>
+</section>
+<section id="v-warm-up" class="view hide"></section>
+<section id="v-rudiments" class="view hide"></section>
+<section id="v-technique" class="view hide"></section>
+<section id="v-invent" class="view hide"></section>
+<section id="v-gig" class="view hide"></section>
+<section id="v-record" class="view hide"></section>
+<p class="note" style="padding-bottom:28px">Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. Progress is saved in this browser only. Fonts: Outfit and Poiret One, SIL Open Font License.</p>
+</div>
+<div id="toast" class="toast hide" role="status" aria-live="polite"></div>
+
+<script type="application/json" id="chordData">
+{"A": {"f": "x02220", "g": "001230", "t": "A C♯ E"}, "E": {"f": "022100", "g": "023100", "t": "E G♯ B"}, "D": {"f": "xx0232", "g": "000132", "t": "D F♯ A"}, "Am": {"f": "x02210", "g": "002310", "t": "A C E"}, "E7": {"f": "020100", "g": "020100", "t": "E G♯ B D"}, "C": {"f": "x32010", "g": "032010", "t": "C E G"}, "G": {"f": "320003", "g": "210003", "t": "G B D"}, "F": {"f": "xx3211", "g": "003211", "name": "F (small)", "barre": [1, 4, 5], "t": "F A C"}, "Fmaj7": {"f": "xx3210", "g": "003210", "t": "F A C E"}, "Em": {"f": "022000", "g": "023000", "t": "E G B"}, "Bm": {"f": "x24432", "g": "013421", "barre": [2, 1, 5], "t": "B D F♯"}, "F#": {"f": "244322", "g": "134211", "name": "F♯", "barre": [2, 0, 5], "t": "F♯ A♯ C♯"}, "Amaj7": {"f": "x02120", "g": "002130", "t": "A C♯ E G♯"}, "E5": {"f": "02xxxx", "g": "010000", "t": "E B"}, "A5": {"f": "x02xxx", "g": "001000", "t": "A E"}, "G5": {"f": "35xxxx", "g": "130000", "t": "G D"}, "C5": {"f": "x35xxx", "g": "013000", "t": "C G"}, "D5": {"f": "x57xxx", "g": "013000", "t": "D A"}}
+</script>
+<script type="application/json" id="fretData">
+{"cscale":{"title":"C major scale, open position, one octave","notes":[[1,3,"C",3],[2,0,"D",0],[2,2,"E",2],[2,3,"F",3],[3,0,"G",0],[3,2,"A",2],[4,0,"B",0],[4,1,"C",1]],"from":0,"to":4},
+"ctri":{"title":"C major triads on the G, B and E strings","groups":[["Root position",[[3,5,"C"],[4,5,"E"],[5,3,"G"]]],["1st inversion",[[3,9,"E"],[4,8,"G"],[5,8,"C"]]],["2nd inversion",[[3,12,"G"],[4,13,"C"],[5,12,"E"]]]],"root":"C","from":2,"to":13},
+"ftri":{"title":"F major triads (IV)","groups":[["1st inversion",[[3,2,"A"],[4,1,"C"],[5,1,"F"]]],["2nd inversion",[[3,5,"C"],[4,6,"F"],[5,5,"A"]]],["Root position",[[3,10,"F"],[4,10,"A"],[5,8,"C"]]]],"root":"F","from":0,"to":11},
+"gtri":{"title":"G major triads (V)","groups":[["1st inversion",[[3,4,"B"],[4,3,"D"],[5,3,"G"]]],["2nd inversion",[[3,7,"D"],[4,8,"G"],[5,7,"B"]]],["Root position",[[3,12,"G"],[4,12,"B"],[5,10,"D"]]]],"root":"G","from":2,"to":13}}
+</script>
+<script>
+{
+const CH=JSON.parse(document.getElementById('chordData').textContent);
+const FB=JSON.parse(document.getElementById('fretData').textContent);
+const SOLFA={A:{A:'do',D:'fa',E:'so',Amaj7:'do',E7:'so'},Am:{Am:'la',E7:'mi'},C:{C:'do',F:'fa',Fmaj7:'fa',G:'so',Am:'la',E7:'mi'},Am6:{Am:'la',C:'do',F:'fa',G:'so',E:'mi'},Bm:{Bm:'la','F#':'mi',A:'so',E:'re',G:'fa',D:'do',Em:'re'}};
+const KEYS={
+ A:{name:'A major',m:{A:['I','T'],D:['IV','P'],E:['V','D'],Amaj7:['Imaj7','T'],E7:['V7','D']}},
+ Am:{name:'A minor',m:{Am:['i','T'],E7:['V7','D']}},
+ C:{name:'C major',m:{C:['I','T'],F:['IV','P'],Fmaj7:['IVmaj7','P'],G:['V','D'],Am:['vi','T'],E7:['V7/vi','S']}},
+ Am6:{name:'A minor (relative of C)',m:{Am:['i','T'],C:['III','T'],F:['VI','P'],G:['VII','D','subtonic'],E:['V','D']}},
+ Bm:{name:'B minor',m:{Bm:['i','T'],'F#':['V','D'],A:['VII','D','subtonic'],E:['IV','P'],G:['VI','P'],D:['III','T'],Em:['iv','P']}}};
+const FN={T:['tonic','--ton'],P:['predominant','--pre'],D:['dominant','--dom'],S:['secondary dominant','--sec']};
+const yt=q=>'https://www.youtube.com/results?search_query='+encodeURIComponent(q);
+const PAT={
+ four:{n:'Four downs',m:4,b:4,s:1,c:'DDDD',a:[0]},
+ shuffle:{n:'Boogie shuffle, swung',m:4,b:4,s:2,c:'DUDUDUDU',a:[2,6],sw:1},
+ eighths:{n:'Straight eighths',m:4,b:4,s:2,c:'DUDUDUDU',a:[0,4]},
+ waltz:{n:'Bass, strum, strum',m:3,b:3,s:1,c:'BDD',a:[0]},
+ pop:{n:'D · DU · UDU',m:4,b:4,s:2,c:'D.DU.UDU',a:[0]},
+ six:{n:'Six-eight sway',m:6,b:2,s:3,c:'DDUDDU',a:[0,3]}};
+PAT.click={n:'Plain click',m:4,b:4,s:1,c:'1234',a:[0]};const C12=['1','2','3','4','5','6','7','8','9','10','11','12'];
+const FIN=[
+ {k:'rock',n:'Rock and roll',col:'#e0a24a',lc:'#9a5a12',p:{4:{n:'Backbeat eighths',b:4,s:2,c:'DUDUDUDU',a:[2,6]},3:{n:'Rock waltz eighths',b:3,s:2,c:'DUDUDU',a:[0]},6:{n:'Rock and roll ballad triplets',b:2,s:3,c:'DDDDDD',a:[0,3]}}},
+ {k:'flam',n:'Flamenco',col:'#d8b878',lc:'#7d5f1f',p:{4:{n:'Tangos: four, beat 1 light, weight on 2, 3 and 4',b:4,s:1,c:'DDDD',a:[1,2,3]},3:{n:'12-beat compás, counted across the bars',b:12,s:1,c:C12,a:[2,5,7,9,11]},6:{n:'12-beat compás across two bars of 6/8',b:4,s:3,c:C12,a:[2,5,7,9,11]}}},
+ {k:'bossa',n:'Bossa',col:'#2f9e9b',lc:'#1f6f6d',p:{4:{n:'Simplified bossa: thumb on 1 and 3, chords on the and of 2 and on 4',b:4,s:2,c:'B..CB.C.',a:[0,3,6]},3:{n:'Bossa waltz: thumb on 1, chords on 2 and 3',b:3,s:1,c:'BCC',a:[0]},6:{n:'Thumb on 1 and 4, chords between',b:2,s:3,c:'B.CB.C',a:[0,3]}}},
+ {k:'metal',n:'Hair metal',col:'#ff3d81',lc:'#b3184f',p:{4:{n:'Palm-muted eighths',b:4,s:2,c:'DDDDDDDD',a:[0,4]},3:{n:'Palm-muted eighths in three',b:3,s:2,c:'DDDDDD',a:[0]},6:{n:'Palm-muted quavers in six',b:2,s:3,c:'DDDDDD',a:[0,3]}}}];
+const KNOW={
+ strings:['The six strings','Thickest to thinnest: E A D G B E. One way to remember it: Eddie Ate Dynamite, Good Bye Eddie. The thick E is string 6; the thin E is string 1.'],
+ parts:['Parts of the guitar','Headstock and tuners, nut, neck and fretboard, frets, body, then the soundhole on an acoustic or the pickups on an electric, and the bridge and saddle.'],
+ boxes:['Reading a chord box','The box is the neck standing up. Vertical lines are strings, thick E on the left. Horizontal lines are frets. A dot is a finger, numbered 1 index, 2 middle, 3 ring, 4 little. o means play the string open; × means don\'t play it. A long bar is a barre: one finger flat across several strings.'],
+ tab:['Reading TAB','TAB has six lines, one per string, with the thin E on top. Each number is a fret; 0 is an open string. Read left to right. TAB shows where, not when: the strum grid shows the rhythm.'],
+ minor:['Major or minor: one fret','A and Am differ by one note on the B string. A major plays C♯ (fret 2); A minor plays C (fret 1). That single fret is the whole difference between bright and dark.'],
+ e7:['Why E7 pulls to Am','E7 is E, G♯, B with D added. The G♯ wants to rise to A and the D wants to fall to C: both land in Am. That pull is dominant function.'],
+ func:['Home, away, and the pull back','In C, C is home (I). F leaves home (IV, predominant). G wants to go home (V, dominant). The colours on every chord box show these jobs. Sing the roots in sol-fa: do, fa, so.'],
+ four:['Four chords, hundreds of songs','I–V–vi–IV in C is C–G–Am–F. The Axis of Awesome built a whole medley proving how many hits loop it. Am is C\'s relative minor: home in shadow.'],
+ six:['Feeling six-eight','Six quavers in two groups of three. Count 1 2 3 4 5 6, lean on 1 and 4. The tempo here counts the dotted crotchet: two beats a bar.'],
+ vii:['G or E in A minor?','G is the seventh note of A minor left as it is: a subtonic, a step below home, gentle. E major raises that note to G♯, a leading note a semitone below A, so it pulls hard: a true dominant. Greensleeves uses both.'],
+ sec:['A secondary dominant','E7 isn\'t in C major: it is the dominant of A minor, brought in to point at Am. V of vi. It is the twist in Hallelujah\'s harmony, the major chord that tips into the minor.'],
+ barre:['Barre chords','One finger lies flat across several strings like a moveable nut. Press with the bony side of your first finger, close to the fret, thumb low behind the neck. F♯ is the E shape moved up two frets; Bm is the Am shape moved up two frets.']};
+const ST=[
+ {id:'a-e',fret:'A · E',title:'A and E',key:'A',ch:['A','E'],pat:'four',know:['strings','parts','boxes'],pair:['A','E'],tgt:90,
+  song:{t:'Skip to My Lou',by:'Traditional, USA',pd:1,time:'4/4',q:'Skip to My Lou traditional song',map:[{s:'Chorus',b:['A','A','E','E','A','A','E','A']}]},
+  also:[['Achy Breaky Heart, Billy Ray Cyrus (1992): A and E the whole way','Billy Ray Cyrus Achy Breaky Heart']]},
+ {id:'twelve-bar',fret:'A–D–E',title:'The 12-bar in A',key:'A',ch:['A','D','E'],pat:'shuffle',know:['tab'],pair:['A','D'],tgt:100,
+  song:{t:'12-bar boogie in A',by:'The blues form behind early rock and roll',pd:1,time:'4/4 shuffle',q:'Chuck Berry Johnny B. Goode 1958',ql:'Hear a 12-bar in A: Johnny B. Goode',map:[{s:'12 bars',b:['A','A','A','A','D','D','A','A','E','D','A','E']}],
+  riff:{title:'Boogie riff on A, two quavers per note pair, swung. On D move it up a string set (D open, G 2 and 4); on E move it down (E open, A 2 and 4).',ev:[[[1,0],[2,2]],[[1,0],[2,2]],[[1,0],[2,4]],[[1,0],[2,4]],[[1,0],[2,2]],[[1,0],[2,2]],[[1,0],[2,4]],[[1,0],[2,4]]]}},
+  also:[['Rock Around the Clock, Bill Haley and His Comets (1954)','Bill Haley Rock Around the Clock'],['Garage to Grammys: the Feelin\' Blues-E ensemble task','']]},
+ {id:'am-e7',fret:'Am · E7',title:'Am and E7',key:'Am',ch:['Am','E7'],pat:'eighths',know:['minor','e7'],pair:['Am','E7'],tgt:100,
+  song:{t:'Joshua Fit the Battle of Jericho',by:'African American spiritual',pd:1,time:'4/4',q:'Joshua Fit the Battle of Jericho spiritual',map:[{s:'Chorus',b:['Am','Am','E7','Am','Am','Am','E7','Am']}]},also:[]},
+ {id:'c-g-f',fret:'C G F',title:'C, G and the small F',key:'C',ch:['C','G','F','Fmaj7'],pat:'waltz',know:['func'],pair:['C','F'],tgt:90,
+  song:{t:'Amazing Grace',by:'Words John Newton (1779); tune New Britain (first printed 1829)',pd:1,time:'3/4',q:'Amazing Grace hymn traditional',pick:'The melody starts on the last beat of the count-in: a pickup. Sing "A-" on beat 3, "-ma-" lands on bar 1; the same pickup returns on the last beat of each verse.',map:[{s:'Verse',b:['C','C','F','C','C','C','G','G','C','C','F','C','C','G','C','C']}]},
+  also:[],tip:'Can\'t get the small F to ring yet? Play Fmaj7 (lift your first finger off the high E) and come back to F next week.'},
+ {id:'four-chords',fret:'I V vi IV',title:'C–G–Am–F',key:'C',ch:['C','G','Am','F'],pat:'pop',know:['four'],pair:['Am','F'],tgt:76,
+  song:{t:'Let It Be',by:'The Beatles (1970)',pd:0,time:'4/4',map:[{s:'Verse',b:['C G','Am F','C G','F C']},{s:'Chorus',b:['Am G','F C','C G','F C']}],q:'The Beatles Let It Be official'},
+  also:[['Riptide, Vance Joy (2013): Am–G–C, from your Guitar Book; capo 1 matches the recording','Vance Joy Riptide official'],['4 Chords, The Axis of Awesome','Axis of Awesome 4 Chords']]},
+ {id:'six-eight',fret:'6/8',title:'Six-eight feel',key:'Am6',ch:['Am','G','F','E','C'],pat:'six',know:['six','vii'],pair:['Am','E'],tgt:50,
+  song:{t:'Greensleeves',by:'Traditional English, 16th century',pd:1,time:'6/8',q:'Greensleeves traditional',pick:'The melody starts on the last quaver of the count-in: a pickup into bar 1, and again at the end of each section.',map:[{s:'Verse',b:['Am','G','F','E','Am','G','Am E','Am']},{s:'Refrain',b:['C','G','Am','E','C','G','Am E','Am']}]},also:[]},
+ {id:'hallelujah',fret:'Hallelujah',title:'Hallelujah',key:'C',ch:['C','Am','F','G','E7'],pat:'six',know:['sec'],pair:['G','E7'],tgt:50,
+  song:{t:'Hallelujah',by:'Leonard Cohen (1984)',pd:0,time:'6/8 (felt as 12/8)',map:[{s:'Verse',b:['C','Am','C','Am','F','G','C','G','C','F G','Am','F','G','E7','Am','Am']},{s:'Chorus',b:['F','F','Am','Am','F','F','C','G','C','G']}],q:'Leonard Cohen Hallelujah 1984 official',note:'Chord order shown; bar lengths approximate the recording, so check them against it. Add a capo to suit your voice: the shapes stay the same.'},
+  also:[['Jeff Buckley\'s version (1994)','Jeff Buckley Hallelujah official']]},
+ {id:'beyond',fret:'Beyond',title:'Beyond: barre chords',key:'Bm',ch:['Bm','F#','A','E','G','D','Em'],pat:'pop',know:['barre'],pair:['Bm','F#'],tgt:74,
+  song:{t:'Hotel California',by:'Eagles (1976)',pd:0,time:'4/4',map:[{s:'Verse',b:['Bm','F#','A','E','G','D','Em','F#']}],q:'Eagles Hotel California official',note:'Bm and F♯ are your first barre chords. The rest you already know. Bar lengths: check against the recording, which may hold each chord for two bars.'},also:[]}];
+const RUD=[
+ {id:'pulse',n:'Pulse on one string',st:0,w:'Pick the open low E on every beat, then twice a beat. The foundation of steady time.',ev:[[0,0],[0,0],[0,0],[0,0]],c:60,a:100,u:'quavers'},
+ {id:'cross',n:'String crossing',st:0,w:'Alternate picking across the open strings, down-up, thick to thin and back. Keep the pick close to the strings.',ev:[[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[4,0],[3,0],[2,0],[1,0]],c:60,a:100,u:'quavers'},
+ {id:'spider',n:'The spider (1-2-3-4)',st:0,w:'One finger per fret, frets 1 to 4 on each string. The TAB shows the first four strings: carry on across all six, then come back down. Leave each finger down until it has to move.',ev:[[0,1],[0,2],[0,3],[0,4],[1,1],[1,2],[1,3],[1,4],[2,1],[2,2],[2,3],[2,4],[3,1],[3,2],[3,3],[3,4]],c:60,a:100,u:'quavers'},
+ {id:'pendulum',n:'Pendulum strum',st:0,w:'Your strumming hand never stops: down on the beat, up on the and. Ghost the strokes you skip by missing the strings. This is what makes D · DU · UDU possible.',c:60,a:90,u:'crotchets'},
+ {id:'hover',n:'Lift, hover, land',st:0,w:'Change chords by lifting all fingers together, hovering the new shape just above the strings, then landing it at once. Slow and silent first.',c:30,a:45,u:'changes a minute'},
+ {id:'mute',n:'Palm muting',st:1,w:'Rest the edge of your picking hand on the strings right at the bridge. Pick A5 chugs: short, thick, not dead. Palm-mute (P.M.) every note in the TAB.',ev:[[[1,0],[2,2]],[[1,0],[2,2]],[[1,0],[2,2]],[[1,0],[2,2]]],c:70,a:110,u:'quavers'},
+ {id:'hammer',n:'Hammer-on and pull-off',st:2,w:'Pick once, then hammer a finger down hard enough to sound the next note; pull off by flicking the finger slightly down off the string.',ev:[[3,'0h2'],[3,'2p0'],[4,'0h1'],[4,'1p0']],c:60,a:90,u:'crotchets'},
+ {id:'indep',n:'Finger independence 1-3, 2-4',st:3,w:'On each string play frets 1 then 3, then 2 then 4. The TAB shows three strings: carry on across all six. Fingers you are not using stay close to the fretboard.',ev:[[0,1],[0,3],[0,2],[0,4],[1,1],[1,3],[1,2],[1,4],[2,1],[2,3],[2,2],[2,4]],c:60,a:100,u:'quavers'},
+ {id:'slide',n:'Slides',st:3,w:'Keep pressure on as you slide from one fret to the next so the note never stops. Try G string 2 to 4 and back.',ev:[[3,'2/4'],[3,'4\\2'],[2,'2/4'],[2,'4\\2']],c:60,a:90,u:'crotchets'},
+ {id:'thumb',n:'Thumb and fingers',st:4,w:'Thumb (p) plays the bass string on the beat; index, middle and ring (i m a) pluck G, B and E together between. The engine of bossa and folk picking.',c:60,a:90,u:'crotchets'}];
+const TECH=[
+ {id:'power',f:'core',n:'Power chords',w:'Root and fifth only, two strings, first and third fingers; open E5 and A5 need only the first finger. Move the fretted shape anywhere: the lowest note names it.',ch:['E5','A5','G5','C5','D5'],st:3},
+ {id:'cscale',f:'core',n:'C major scale, open position',w:'From the Guitar Book, position 1. Say the note names as you play, then sing them in sol-fa: do re mi fa so la ti do.',fb:'cscale',st:3},
+ {id:'triads',f:'core',n:'I–IV–V triads up the neck',w:'C, F and G as three-note shapes on the top strings, in root position and both inversions: the Guitar Book\'s chord practical skills. The root is ringed.',fb:['ctri','ftri','gtri'],st:4},
+ {id:'shuffle',f:'rock',n:'Boogie shuffle',w:'Root and fifth, then root and sixth, swung. The 12-bar riff on your Path stage 2 is this technique.',st:1},
+ {id:'backbeat',f:'rock',n:'Backbeat accents',w:'Strum eighths but dig in on beats 2 and 4, where the snare sits in a rock band.',st:1},
+ {id:'rasg',f:'flam',n:'Four-finger rasgueado',w:'Curl your fingers into your palm, then flick them out one at a time across the strings, little finger first (c, a, m, i), to make one rolling strum.',st:3},
+ {id:'golpe',f:'flam',n:'Golpe',w:'A tap of the ring finger on the tap plate (golpeador) beside the strings, on the accented beats of the compás.',st:3},
+ {id:'andaluz',f:'flam',n:'Andalusian cadence',w:'Am, G, F, E: four chords stepping down to E. Heard in A minor they are i–VII–VI–V. Flamenco hears E as home, in the Phrygian mode on E, where the same chords are iv–III–II–I. Every chord here is one you already know.',ch:['Am','G','F','E'],k:'Am6',st:5},
+ {id:'maj7',f:'bossa',n:'Bossa grips: Amaj7 and E7',w:'Amaj7 is your A chord with the G string dropped one fret, from A to G♯: soft and open. The fingers change: 2 on D, 1 on G, 3 on B. Alternate the thumb between the root and the fifth.',ch:['Amaj7','E7'],k:'A',st:4},
+ {id:'gallop',f:'metal',n:'Palm-muted gallop',w:'One quaver then two semiquavers, down-down-up, palm-muted on E5: the galloping engine of metal rhythm guitar. Set the metronome and gallop once per click.',ch:['E5'],st:3},
+ {id:'tremolo',f:'metal',n:'Tremolo picking',w:'Pick one note as fast and even as you can with tiny down-ups from the wrist. Use the metronome and build up.',st:5},
+ {id:'bends',f:'metal',n:'Bends and vibrato (electric)',w:'Push the string up with three fingers together until it reaches the pitch a fret or two higher. Vibrato is a small, even, repeated bend.',st:5}];
+const FORM={'a-e':[['Chorus',4]],'twelve-bar':[['12 bars',3]],'am-e7':[['Chorus',2]],'c-g-f':[['Verse',3]],'four-chords':[['Verse',1],['Chorus',1],['Verse',1],['Chorus',1]],'six-eight':[['Verse',1],['Refrain',1],['Verse',1],['Refrain',1]],'hallelujah':[['Verse',1],['Chorus',1],['Verse',1],['Chorus',1]],'beyond':[['Verse',2]]};
+const TON={A:[9,'major'],Am:[9,'minor'],C:[0,'major'],Am6:[9,'minor'],Bm:[11,'minor']};const PCN={major:['C','D♭','D','E♭','E','F','F♯','G','A♭','A','B♭','B'],minor:['C','C♯','D','E♭','E','F','F♯','G','G♯','A','B♭','B']};
+const sounds=s=>{const [pc,md]=TON[s.key],c=S.capo[s.id]||0;return PCN[md][(pc+c)%12]+' '+md};
+const LV=['Not started','Exploring','Consistent','Applied'];
+const CPM=s=>s.id==='beyond'?[20,30]:[30,45];
+const STEPS=s=>S.inst==='guitar'?GSTEPS(s):PSTEPS(s);
+const GSTEPS=s=>{const [c1,c2]=CPM(s),p=PAT[s.pat],six=p.m===6,u=six?' bpm (dotted crotchet)':' bpm',slow=(six?40:60)+u,tg=s.tgt+u;return [
+ ['Hear','Listen to a recording (link on the song card), then play the chart with the band. Tap the pulse and follow the road map.',['you have listened to a recording and the chart once','you can point to every chord change on the road map as it plays','you sing the roots in sol-fa while the chart plays']],
+ ['Shapes','Play each chord once, every string ringing, muted strings silent: '+s.ch.map(c=>c.replace('#','♯')).join(', ')+'.',['you can make each shape slowly, with help','every string rings on every chord, three times running','you make each shape without looking, in under two seconds']],
+ ['Changes and strum','One-minute changes for '+s.pair.map(c=>c.replace('#','♯')).join(' ↔ ')+', then '+p.n.toLowerCase()+' on '+s.ch[0].replace('#','♯')+' for four cycles.',['you have logged one minute and tried the strum',c1+' changes a minute, and the strum steady at '+slow,c2+' changes a minute, and the strum at '+tg+' with dynamics']],
+ ['Rehearse with the band','Mute the guitar in the band and play your part along with the chart.',['you get through the chart with stops at '+slow,'the whole chart with the band at '+slow+', no stops','the whole chart with the band at '+tg]],
+ ['Perform, eyes up','The whole practice form with the band, singing or humming the melody. Look at the chart only for section changes.',['you sing and play with stops','the whole form, singing, without stopping','performed for someone, or recorded, without the chart']]]};
+const PSTEPS=s=>{const p=PAT[s.pat],six=p.m===6,u=six?' bpm (dotted crotchet)':' bpm',slow=(six?40:60)+u,tg=s.tgt+u,I=S.inst,nm=INST.find(x=>x[0]===I)[1],ch=s.ch.map(c=>c.replace('#','♯')).join(', ');
+ const hear=['Hear','Listen to a recording (link on the song card), then play the chart with the band and follow the '+nm.toLowerCase()+' through the road map.',['you have listened to a recording and the chart once','you can point to every section change as it plays','you can count the bars of every section aloud while it plays']];
+ const reh=['Rehearse with the band','Turn the '+(I==='vocals'?'keys':nm.toLowerCase())+' off in the band and play your part along with the chart.',['you get through the chart with stops at '+slow,'the whole chart with the band at '+slow+', no stops','the whole chart with the band at '+tg]];
+ const perf=['Perform, eyes up','The whole practice form with the band. Look at the chart only for section changes.',['you play the form with stops','the whole form without stopping, eyes up','performed for someone, or recorded, without the chart']];
+ const mid={bass:[['Roots','Find the root of each chord on the E or A string: '+ch+'.',['you can find each root slowly','every root found and played cleanly, three times running','each root found without looking']],['Changes and groove','Roots on beat 1 through the chart at '+slow+', then on beats 1 and 3. Applied adds the fifth.',['roots on beat 1 with stops','roots on 1 and 3 through the chart at '+slow+', no stops','root and fifth through the chart at '+tg]]],
+  drums:[['Groove','The groove grid at '+slow+', four bars without stopping. Count aloud.',['you can play the grid slowly','four bars of the grid at '+slow+', steady','the grid at '+tg+' with dynamics']],['Form and fills','Count the bars of each section and play a one-bar fill into each new section.',['you know where each section starts','every section change marked with a fill at '+slow,'fills that lead the band at '+tg]]],
+  keys:[['Voicings','Right hand plays each chord as shown; left hand plays the root: '+ch+'.',['you can find each chord slowly','every chord found cleanly, three times running','each chord found without looking']],['Changes','Move between chords by the smallest step, keeping shared notes, one chord a bar at '+slow+'.',['changes with stops','the whole chart at '+slow+', one chord a bar, no stops','the whole chart at '+tg+' with the strum rhythm']]],
+  vocals:[['Pitch','Sing each chord root in sol-fa while the band plays the chart.',['you can match the home note','every root in sol-fa through the chart at '+slow,'roots in sol-fa at '+tg+', then the melody by ear']],['Entries and form','Know every section and come in on cue (pickups are noted on the chart).',['you know where each section starts','every entry on cue at '+slow,'every entry on cue at '+tg+', eyes up']]]}[I];
+ return [hear,mid[0],mid[1],reh,perf]};
+const DEF={finish:'bossa',stage:'a-e',nsw:false,teacher:false,lv:{},sign:{},marks:{},changes:[],journal:[],bpm:70,useFin:false,gates:{},warm:{},best:{},capo:{},mute:{},inst:'guitar',gig:{}};
+let S=JSON.parse(JSON.stringify(DEF));
+try{const L=JSON.parse(localStorage.getItem('shredder')||'{}');if(L&&typeof L==='object'&&!Array.isArray(L))for(const k in DEF){const v=L[k],d=DEF[k];if(v===undefined||v===null)continue;const ok=Array.isArray(d)?Array.isArray(v):typeof d==='object'?(typeof v==='object'&&!Array.isArray(v)):typeof v===typeof d;if(ok)S[k]=v}}catch(e){}
+S.bpm=Math.min(200,Math.max(30,Math.round(+S.bpm)||70));S.teacher=false;if(!['guitar','bass','drums','keys','vocals'].includes(S.inst))S.inst='guitar';
+for(const k in S.lv){const v=S.lv[k];if(!(v>=0&&v<=3))delete S.lv[k];else S.lv[k]=Math.round(v)}
+S.changes=S.changes.filter(c=>c&&typeof c.n==='number'&&typeof c.pair==='string');S.journal=S.journal.filter(j=>j&&typeof j.d==='number');
+for(const k in S.warm)if(!Array.isArray(S.warm[k]))delete S.warm[k];for(const k in S.capo){const v=Math.round(+S.capo[k]);if(v>=1&&v<=7)S.capo[k]=v;else delete S.capo[k]}
+for(const o of ['marks','best','gates','sign'])for(const k in S[o]){const v=+S[o][k];if(!isFinite(v))delete S[o][k];else S[o][k]=v}for(const k in S.mute)S.mute[k]=!!S.mute[k];S.changes=S.changes.filter(c=>typeof c.d==='number');
+if(!FIN.some(f=>f.k===S.finish))S.finish='bossa';if(!ST.some(s=>s.id===S.stage))S.stage='a-e';if(!Array.isArray(S.changes))S.changes=[];if(!Array.isArray(S.journal))S.journal=[];
+const save=()=>{try{localStorage.setItem('shredder',JSON.stringify(S))}catch(e){}};
+const $=id=>document.getElementById(id);
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const toast=m=>{const t=$('toast');t.textContent=m;t.classList.remove('hide');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.add('hide'),3200)};
+const audDate=d=>new Date(d).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
+const dkey=d=>{d=new Date(d);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};const today=()=>dkey(Date.now());
+const stage=()=>ST.find(s=>s.id===S.stage)||ST[0];
+const INST=[['guitar','Guitar'],['bass','Bass'],['drums','Drums'],['keys','Keys'],['vocals','Vocals']];
+const gk=s=>S.inst==='guitar'?s.id:s.id+'@'+S.inst;const kk=(s,i)=>gk(s)+':'+i;
+const lvl=k=>S.lv[k]||0;
+const done=s=>[0,1,2,3,4].filter(i=>lvl(kk(s,i))>=2).length;
+const passed=s=>done(s)===5;
+const fnOf=(k,c)=>(KEYS[k].m[c]||['','']);
+const cells=p=>Array.isArray(p.c)?p.c:[...p.c];
+const finPat=s=>{const f=FIN.find(f=>f.k===S.finish);return f.p[PAT[s.pat].m]};
+const curPat=()=>(view==='rudiments'||view==='technique')?PAT.click:S.useFin?finPat(stage()):PAT[stage().pat];
+const unit=p=>p.s===3?'bpm (dotted crotchet)':'bpm';
+/* audio */
+let ac=null;const A=()=>{if(!ac){try{ac=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}try{if(ac&&ac.state==='suspended')ac.resume()}catch(e){}return ac};
+const OPEN=[40,45,50,55,59,64];const bufs={};let live=[];let master=null;const bus={};let lastTap=[],lastBand=[];
+const out=()=>{const a=A();if(!master){const c=a.createDynamicsCompressor();master=a.createGain();master.gain.value=.8;master.connect(c);c.connect(a.destination)}return master};
+const part=k=>{const a=A();if(!bus[k]){bus[k]=a.createGain();bus[k].connect(out())}bus[k].gain.value=S.mute[k]?0:1;return bus[k]};
+const capo=()=>view==='path'?(S.capo[stage().id]||0):0;
+function track(s){live.push(s);s.onended=()=>{live=live.filter(x=>x!==s)}}
+function tone(m){const a=A();if(!a)return;const o=a.createOscillator(),g=a.createGain(),t=a.currentTime;o.type='triangle';o.frequency.value=440*2**((m-69)/12);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.3,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+2.5);o.connect(g).connect(out());o.start(t);o.stop(t+2.6);track(o)}
+function pluck(m){const a=A();if(!a)return null;if(bufs[m])return bufs[m];const sr=a.sampleRate,f=440*2**((m-69)/12),N=Math.round(sr/f),len=Math.floor(sr*2.2),b=a.createBuffer(1,len,sr),d=b.getChannelData(0),r=new Float32Array(N);
+ for(let i=0;i<N;i++)r[i]=Math.random()*2-1;let p=0;for(let i=0;i<len;i++){const n=(p+1)%N;d[i]=r[p];r[p]=(r[p]+r[n])*.497;p=n}return bufs[m]=b}
+function note(m,t,g,dest){const a=A();if(!a)return null;const b=pluck(m);if(!b)return null;const s=a.createBufferSource(),v=a.createGain();s.buffer=b;v.gain.value=g;s.connect(v).connect(dest||out());s.start(t);track(s);return v}
+function strum(name,t0,mode,dest){const a=A();if(!a||!CH[name])return;const f=CH[name].f;const t=t0||a.currentTime;const idx=[0,1,2,3,4,5].filter(i=>f[i]!=='x');
+ const L=dest?lastBand:lastTap;L.forEach(v=>{try{v.gain.setTargetAtTime(0,t,.02)}catch(e){}});L.length=0;
+ const cp=capo();if(mode==='B'){const v=note(OPEN[idx[0]]+(+f[idx[0]])+cp,t,.24,dest);if(v)L.push(v);return}
+ const order=mode==='U'?idx.slice().reverse().slice(0,4):(mode==='C'?idx.slice(-4):idx);order.forEach((i,k)=>{const v=note(OPEN[i]+(+f[i])+cp,t+k*.016,mode==='U'?.09:.13,dest);if(v)L.push(v)})}
+function stopAll(){live.forEach(s=>{try{s.stop()}catch(e){}});live=[];lastTap=[];lastBand=[];seqT.forEach(x=>{clearTimeout(x);clearInterval(x)});seqT=[];document.querySelectorAll('.rm-bar.now,.fs.now').forEach(x=>x.classList.remove('now'));const gb=$('playGig');if(gb)gb.textContent='Play the chart';playing=false;const b=$('playMap');if(b)b.textContent='Play the chart';const l=$('playLoop');if(l)l.textContent='Play the loop ×4'}
+function click(t,acc,dest){const a=A();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.frequency.value=acc?1500:1000;g.gain.setValueAtTime(acc?.25:.12,t);g.gain.exponentialRampToValueAtTime(.001,t+.05);o.connect(g).connect(dest||a.destination);o.start(t);o.stop(t+.06);track(o)}
+/* drawing */
+function box(name,k){const c=CH[name];const [rn,fn,lab]=fnOf(k,name);const col=fn?`var(${FN[fn][1]})`:'currentColor';const x=i=>12+i*13.2,top=Math.max(1,...[...c.f].filter(v=>v!=='x'&&v!=='0').map(Number))>4?Math.min(...[...c.f].filter(v=>/[1-9]/.test(v)).map(Number)):1;
+ const yf=v=>26+(v-top+.5)*17;let s=`<svg viewBox="-10 0 100 106" role="img" aria-label="${name} chord, frets ${c.f}"><text x="45" y="12" text-anchor="middle" font-size="14" font-weight="500" style="fill:${col}" font-family="G Outfit, Outfit, system-ui, sans-serif">${esc(c.name||name)}</text>`;
+ s+=top===1?`<rect x="12" y="24" width="66" height="3.5" fill="currentColor"/>`:`<text x="-2" y="${yf(top)+4}" font-size="11" fill="currentColor">${top}</text>`;
+ for(let r=0;r<=4;r++)s+=`<line x1="12" x2="78" y1="${26+r*17}" y2="${26+r*17}" stroke="currentColor" stroke-opacity=".45"/>`;
+ for(let i=0;i<6;i++)s+=`<line x1="${x(i)}" x2="${x(i)}" y1="26" y2="94" stroke="currentColor" stroke-opacity=".7" stroke-width="${1.6-i*.15}"/>`;
+ if(c.barre){const [bf,a1,a2]=c.barre;s+=`<rect x="${x(a1)-5.6}" y="${yf(bf)-5.6}" width="${x(a2)-x(a1)+11.2}" height="11.2" rx="5.6" style="fill:${col}" opacity=".45"/>`}
+ [...c.f].forEach((v,i)=>{if(v==='x')s+=`<text x="${x(i)}" y="21" text-anchor="middle" font-size="11" fill="currentColor" opacity=".7">×</text>`;else if(v==='0')s+=`<circle cx="${x(i)}" cy="17" r="3.4" fill="none" stroke="currentColor" stroke-opacity=".8"/>`;else{const y=yf(+v);s+=`<circle cx="${x(i)}" cy="${y}" r="5.6" style="fill:${col}"/><text x="${x(i)}" y="${y+3.8}" text-anchor="middle" font-size="10" style="fill:var(--bg)" font-family="G Outfit, Outfit, system-ui, sans-serif" font-weight="600">${c.g[i]}</text>`}});
+ s+='</svg>';const sf=(SOLFA[k]||{})[name];return `<button class="cb" data-strum="${esc(name)}" aria-label="Play ${esc(c.name||name)}${rn?', '+rn+', '+(lab||FN[fn][0]):''}${sf?', root '+sf:''}">${s}<div class="rn" style="color:${col}">${rn?rn+' · '+(lab||FN[fn][0]):''}${sf?'<br>root: '+sf:''}</div></button>`}
+function mkTab(ev){const L=['e','B','G','D','A','E'],rows=L.map(l=>l+'|-');ev.forEach(e=>{const ns=Array.isArray(e[0])?e:[e];const w=Math.max(...ns.map(n=>String(n[1]).length));for(let r=0;r<6;r++){const str=5-r;const hit=ns.find(n=>n[0]===str);rows[r]+=(hit?String(hit[1]).padEnd(w,'-'):'-'.repeat(w))+'-'}});return rows.map(r=>r+'|').join('\n')}
+function fretboard(d){const groups=d.groups||[[d.title,d.notes]];const from=d.from,to=d.to,ff=from===0?1:from,nf=to-ff+1,lx=56,W=lx+nf*46+10,fw=(W-lx-8)/nf,H=6*22+30;const sy=s=>16+(5-s)*22;
+ let s=`<svg class="fb" viewBox="0 0 ${W} ${H}" style="max-width:${W*1.25}px;min-width:${W>520?520:0}px" role="img" aria-label="${esc(d.title)}"><rect x="${lx}" y="${sy(5)-6}" width="${nf*fw}" height="${5*22+12}" fill="#2b1a12" rx="3"/>`;
+ for(let f=0;f<=nf;f++)s+=`<line x1="${lx+f*fw}" x2="${lx+f*fw}" y1="${sy(5)-6}" y2="${sy(0)+6}" stroke="${from===0&&f===0?'#ece2c8':'#b9b4a8'}" stroke-width="${from===0&&f===0?5:2}"/>`;const cxf=f=>f===0?lx-16:lx+(f-ff+.5)*fw;
+ ['E','A','D','G','B','E'].forEach((n,i)=>{s+=`<line x1="${lx}" x2="${lx+nf*fw}" y1="${sy(i)}" y2="${sy(i)}" stroke="#ece2c8" stroke-opacity=".6" stroke-width="${2-i*.2}"/><text x="${12}" y="${sy(i)+4}" text-anchor="middle" font-size="12" fill="currentColor">${n}</text>`});
+ for(let f=ff;f<=to;f++)if([3,5,7,9,12].includes(f))s+=`<text x="${cxf(f)}" y="${H-4}" text-anchor="middle" font-size="11" fill="currentColor" opacity=".7">${f}</text>`;
+ const INV={'Root position':'#ece2c8','1st inversion':'#7fb3c8','2nd inversion':'#e39bc0'};const gcol=g=>INV[g]||'#ece2c8';
+ groups.forEach(([gname,ns],gi)=>ns.forEach(([str,f,nm])=>{const cx=cxf(f),cy=sy(str),root=nm===(d.root||'C');s+=`<circle cx="${cx}" cy="${cy}" r="9" fill="${gcol(gname)}" ${root?'stroke="#7a5c12" stroke-width="3.5"':''}/><text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="10.5" font-weight="600" fill="#0b0906">${nm}</text>`}));
+ s+='</svg>';s+=`<p class="sr">${groups.map(([g,ns])=>g+': '+ns.map(([st,f,nm])=>nm+' on the '+['low E','A','D','G','B','high E'][st]+' string, '+(f?'fret '+f:'open')).join('; ')).join('. ')}</p>`;const key=d.groups?`<div class="row note">${groups.map(([g],i)=>`<span><span class="sw" style="background:${gcol(g)}"></span>${g}</span>`).join('')}<span>ringed: the root</span></div>`:'';return s+key}
+function lvlCtl(k,label){const l=lvl(k);return `<div class="lvl" role="group" aria-label="${esc(label)} level"><button data-lv="${k}" data-dir="-1" aria-label="Lower ${esc(label)} level">−</button><span class="lvname" style="color:${l>=2?'var(--ok)':l===1?'var(--hi)':'var(--mut)'}">${LV[l]}</span><button data-lv="${k}" data-dir="1" aria-label="Raise ${esc(label)} level">+</button></div>`}
+/* band parts */
+function bassPos(n){const pc=rootOf(n),e=(pc-4+12)%12;if(e<=3)return {r:['E',e],f:['A',e+2]};const a=(pc-9+12)%12;return {r:['A',a],f:['D',a+2]}}
+const spell=n=>(CH[n].t||n).split(' ');
+function kbd(n){const pcs=pcsOf(n),r=rootOf(n),W=[0,2,4,5,7,9,11],B=[1,3,6,8,10],ww=22;let s=`<svg viewBox="0 0 ${7*ww+2} 70" class="kb" role="img" aria-label="${esc(n.replace('#','♯'))}: ${spell(n).join(' ')}, root ${spell(n)[0]}">`;
+ W.forEach((pc,i)=>{const on=pcs.includes(pc);s+=`<rect x="${1+i*ww}" y="1" width="${ww}" height="66" rx="2" style="fill:${on?'#f0d48a':'#ece2c8'};stroke:#12100b"/>`+(pc===r?`<circle cx="${1+i*ww+ww/2}" cy="56" r="5" style="fill:#12100b"/>`:'')});
+ const bx={1:1,3:2,6:4,8:5,10:6};B.forEach(pc=>{const on=pcs.includes(pc),x=1+bx[pc]*ww-7;s+=`<rect x="${x}" y="1" width="14" height="40" rx="2" style="fill:${on?'#c9a24a':'#12100b'};stroke:#12100b"/>`+(pc===r?`<circle cx="${x+7}" cy="32" r="4" style="fill:#12100b"/>`:'')});return s+'</svg>'}
+function drumGrid(s){const p=PAT[s.pat],n=p.b*(p.m===3?1:p.m===6?3:2),lab=p.m===6?['1','2','3','4','5','6']:p.m===3?['1','2','3']:['1','&','2','&','3','&','4','&'];
+ const hit=(row,i)=>{const beatIdx=p.m===6?(i===0?0:i===3?1:-1):p.m===3?i:(i%2===0?i/2:-1);if(row==='HH')return true;if(row==='BD')return beatIdx===0||(p.m===4&&beatIdx===2);if(row==='SN')return (p.m===4&&(beatIdx===1||beatIdx===3))||(p.m===6&&beatIdx===1);if(row==='Rim')return p.m===3&&beatIdx>0;return false};
+ const rows=p.m===3?['HH','Rim','BD']:['HH','SN','BD'];
+ return `<table class="dg" aria-label="Drum groove, ${p.m===6?'6/8':p.m+'/4'}"><tr><th></th>${lab.slice(0,n).map(l=>`<th>${l}</th>`).join('')}</tr>${rows.map(r=>`<tr><th>${r==='HH'?'Hi-hat':r==='SN'?'Snare':r==='Rim'?'Rim':'Kick'}</th>${lab.slice(0,n).map((_,i)=>`<td>${hit(r,i)?'●':''}</td>`).join('')}</tr>`).join('')}</table><p class="note">${p.sw?'Swing the hi-hat quavers. ':''}Play a one-bar fill into each new section; end with a crash on the home chord.</p>`}
+function partPanel(s){const I=S.inst,uniq=[...new Set(s.ch)];
+ if(I==='bass')return `<div class="boxes" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">${uniq.map(c=>{const b=bassPos(c),[,fn]=fnOf(s.key,c),col=fn?`var(${FN[fn][1]})`:'var(--ink)';return `<div class="card"><div style="font-size:20px;font-weight:600;color:${col}">${esc(c.replace('#','♯'))}</div><div>Root ${spell(c)[0]}: ${b.r[0]} string, ${b.r[1]?'fret '+b.r[1]:'open'}</div><div class="note">Fifth ${spell(c)[2]||spell(c)[1]}: ${b.f[0]} string, fret ${b.f[1]}</div></div>`}).join('')}</div><p class="note">Bass notes come from the chord's root. Start with roots on beat 1, then 1 and 3, then root–fifth.</p>`;
+ if(I==='drums')return drumGrid(s);
+ if(I==='keys')return `<div class="boxes" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">${uniq.map(c=>{const [,fn]=fnOf(s.key,c),col=fn?`var(${FN[fn][1]})`:'var(--ink)';return `<button class="cb" data-strum="${esc(c)}" aria-label="Play ${esc(c.replace('#','♯'))}"><div style="font-size:18px;font-weight:600;color:${col}">${esc(c.replace('#','♯'))}</div>${kbd(c)}<div class="note">${spell(c).join(' ')} · root dot</div></button>`}).join('')}</div><p class="note">Right hand: the highlighted keys. Left hand: the root, an octave lower.</p>`;
+ if(I==='vocals'){const [pc,md]=TON[s.key];return `<div class="card"><h3>Cue sheet</h3><p>Home note (${md==='minor'?'la':'do'}): ${PCN[md][(pc+(S.capo[s.id]||0))%12]}. Sounds in ${sounds(s)}.</p>${s.song.pick?`<p>${s.song.pick}</p>`:'<p>Come in after the count-in.</p>'}<ol>${(FORM[s.id]||s.song.form||s.song.map.map(m=>[m.s,1])).map(([n,r])=>{const sec=s.song.map.find(m=>m.s===n);return `<li>${esc(n)}${r>1?' ×'+r:''}: ${sec?sec.b.length:'?'} bars</li>`}).join('')}<li>Outro: hold the last note with the home chord</li></ol><p class="note">Lyrics aren't reproduced here: learn them from the recording.</p></div>`}
+ return ''}
+/* road map chart */
+function roadmap(s){const sg=s.song,p=PAT[s.pat],beats=p.m===4?4:p.m===3?3:2,narrow=window.innerWidth<700,bpl=narrow?4:8,W=narrow?340:1000,x0=44,bw=(W-x0-12)/bpl,LH=84;
+ let y=6,gi=0,prev='',body='',lines=0;const cnt=p.m===4?'1 · 2 · 1 2 3 4':p.m===3?'1 2 3':'1 2 3 4 5 6';const total=sg.map.reduce((a,m)=>a+m.b.length,0);
+ const bp=bandPat(s),fe=bp!==p?FIN.find(f=>f.k===S.finish).n:'';const head=`<div class="row" style="margin:0 0 6px"><span class="note">Target ${s.tgt} ${unit(p)} · count in: ${cnt} · whole band, ${p.m===6?'6/8':p.m+'/4'}${p.sw&&!fe?' · swing the quavers':''}${fe?' · band plays the '+fe+' feel':''}</span><button data-tgt="${s.tgt}">Set metronome to target</button></div>${sg.pick?`<p class="note" style="margin:0 0 6px">${sg.pick}</p>`:''}`;
+ sg.map.forEach((sec,si)=>{for(let li=0;li*bpl<sec.b.length;li++){const row=sec.b.slice(li*bpl,li*bpl+bpl);const top=y;prev='';
+  if(li===0)body+=`<rect x="0" y="${top}" width="${Math.max(76,sec.s.length*10+22)}" height="24" rx="4" fill="none" style="stroke:var(--ink)"/><text x="10" y="${top+18}" font-size="17" style="fill:var(--ink)">${esc(sec.s)}</text>`;
+  const sy=top+62;if(lines===0)body+=`<text x="${x0-30}" y="${sy-2}" font-size="17" font-weight="600" style="fill:var(--ink)">${p.m===6?'6':p.m}</text><text x="${x0-30}" y="${sy+15}" font-size="17" font-weight="600" style="fill:var(--ink)">${p.m===6?'8':4}</text>`;
+  body+=`<line x1="${x0}" x2="${x0+row.length*bw}" y1="${sy}" y2="${sy}" style="stroke:var(--mut)"/>`;
+  row.forEach((bar,bi)=>{const bx=x0+bi*bw;const parts=bar.split(' ');body+=`<rect class="rm-bar" data-i="${gi}" x="${bx}" y="${top+24}" width="${bw}" height="44"/>`;
+   parts.forEach((c,ci)=>{const show=parts.length>1||c!==prev;if(show){const [,fn]=fnOf(s.key,c);body+=`<text x="${bx+6+ci*bw/parts.length}" y="${top+46}" font-size="20" font-weight="600" style="fill:${fn?`var(${FN[fn][1]})`:'var(--ink)'}">${esc(c.replace('#','♯'))}</text>`}prev=c});
+   for(let k=0;k<beats;k++){const sx=bx+bw*(k+.5)/beats;body+=`<line x1="${sx-5}" x2="${sx+5}" y1="${sy+7}" y2="${sy-7}" stroke-width="3" style="stroke:var(--ink)"/>`+(p.m===6?`<circle cx="${sx+9}" cy="${sy+5}" r="2.2" style="fill:var(--ink)"/>`:'')}
+   body+=gi===total-1?`<line x1="${bx+bw-6}" x2="${bx+bw-6}" y1="${sy-12}" y2="${sy+12}" style="stroke:var(--ink)"/><line x1="${bx+bw-1}" x2="${bx+bw-1}" y1="${sy-12}" y2="${sy+12}" stroke-width="4" style="stroke:var(--ink)"/>`:`<line x1="${bx+bw}" x2="${bx+bw}" y1="${sy-12}" y2="${sy+12}" style="stroke:var(--mut)"/>`;gi++});
+  body+=`<line x1="${x0}" x2="${x0}" y1="${sy-12}" y2="${sy+12}" style="stroke:var(--mut)"/>`;y+=LH;lines++}});
+ const H=y+6;const svg=`<svg class="rmap" viewBox="0 0 ${W} ${H}" role="img" aria-label="Road map chart: ${sg.map.map(m=>m.s+', '+m.b.length+' bars: '+m.b.join(' ')).join('; ')}">${body}</svg>`;
+ const form=(FORM[s.id]||sg.form||sg.map.map(m=>[m.s,1])).map(([n,r])=>{const sec=sg.map.find(m=>m.s===n);return `<span class="fs">${esc(n)}${r>1?' ×'+r:''}<small>${sec?sec.b.length+' bars':''}</small></span>`}).join('<span class="arr">→</span>')+'<span class="arr">→</span><span class="fs fs-outro">Outro<small>hold the home chord for two bars</small></span>';
+ return `<div class="rm">${head}${svg}<div class="formstrip" role="group" aria-label="Practice form">${form}</div>${sg.pd?'':'<p class="note">Practice form for the chart. The recording\'s form is longer: follow it when you play along.</p>'}</div>`}
+/* backing band */
+let nbuf=null;function noise(){const a=A();if(nbuf)return nbuf;const n=a.sampleRate*.3|0;nbuf=a.createBuffer(1,n,a.sampleRate);const d=nbuf.getChannelData(0);for(let i=0;i<n;i++)d[i]=Math.random()*2-1;return nbuf}
+function drum(kind,t,dest){const a=A();if(!a)return;dest=dest||part('drums');const g=a.createGain();g.connect(dest);
+ if(kind==='k'){const o=a.createOscillator();o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(50,t+.12);g.gain.setValueAtTime(.6,t);g.gain.exponentialRampToValueAtTime(.001,t+.22);o.connect(g);o.start(t);o.stop(t+.25);track(o);
+  const n=a.createBufferSource(),f=a.createBiquadFilter(),g2=a.createGain();n.buffer=noise();f.type='highpass';f.frequency.value=2500;g2.gain.setValueAtTime(.18,t);g2.gain.exponentialRampToValueAtTime(.001,t+.015);n.connect(f).connect(g2).connect(dest);n.start(t);n.stop(t+.03);track(n);return}
+ const s=a.createBufferSource(),f=a.createBiquadFilter();s.buffer=noise();f.type=kind==='h'?'highpass':'bandpass';f.frequency.value=kind==='h'?7000:1800;const L=kind==='h'?.04:kind==='r'?.06:.16;g.gain.setValueAtTime(kind==='s'?.3:kind==='r'?.1:.07,t);g.gain.exponentialRampToValueAtTime(.001,t+L);s.connect(f).connect(g);s.start(t);s.stop(t+L+.02);track(s)}
+function pcsOf(n){const c=CH[n];const st=new Set();[...c.f].forEach((v,i)=>{if(v!=='x')st.add((OPEN[i]+(+v))%12)});return [...st]}
+function rootOf(n){const c=CH[n];const i=[...c.f].findIndex(v=>v!=='x');return (OPEN[i]+(+c.f[i]))%12}
+function synth(m,t,d,type,gain,dest,lp){const a=A();const o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.value=440*2**((m-69)/12);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(gain,t+.02);g.gain.setValueAtTime(gain,t+Math.max(.03,d-.08));g.gain.linearRampToValueAtTime(0,t+d);
+ if(lp){const f=a.createBiquadFilter();f.type='lowpass';f.frequency.value=lp;o.connect(f).connect(g)}else o.connect(g);g.connect(dest);o.start(t);o.stop(t+d+.02);track(o)}
+function bass(n,t,d,dest){if(!CH[n])return;dest=dest||part('bass');const m=28+((rootOf(n)-4+12)%12)+capo();synth(m,t,d*.9,'triangle',.3,dest);synth(m+12,t,d*.9,'sawtooth',.06,dest,900)}
+function keys(n,t,d,dest){if(!CH[n])return;const r=rootOf(n);pcsOf(n).filter(pc=>!(n.includes('maj7')&&pc===r)).forEach(pc=>synth(55+((pc-7+12)%12)+capo(),t,d*.95,'sine',.045,dest||part('keys')))}
+const PARTS=[['guitar','Guitar'],['bass','Bass'],['drums','Drums'],['keys','Keys']];
+/* path */
+function nextUp(){for(const s of ST){const i=[0,1,2,3,4].find(i=>lvl(kk(s,i))<2);if(i!==undefined)return {s,i}}return null}
+function renderNext(){const n=nextUp();const w=S.warm[today()]||[];$('next').innerHTML=n?`<b>Up next:</b><span>Stage ${ST.indexOf(n.s)+1}, ${esc(n.s.title)} · step ${n.i+1}, ${STEPS(n.s)[n.i][0]}.</span><span class="note">To reach Consistent: ${STEPS(n.s)[n.i][2][1]}.</span><span class="sp"></span><a class="lk" href="#${n.s.id}">Go to it</a>${w.length<5?`<a class="lk" href="#warm-up">Warm up first (${w.length}/5 today)</a>`:''}`:'<b>Every gate passed.</b><span>Go back and take every step to Applied.</span>'}
+function renderFinish(){const f=FIN.find(f=>f.k===S.finish);let lc=false;try{lc=CSS.supports('color','light-dark(#000,#fff)')}catch(e){}document.documentElement.style.setProperty('--fin',lc?`light-dark(${f.lc},${f.col})`:f.col);
+ $('finishes').innerHTML=FIN.map(x=>`<button data-fin="${x.k}" aria-pressed="${x.k===S.finish}">${x.n}</button>`).join('');$('nswBtn').setAttribute('aria-pressed',S.nsw);$('tchBtn').setAttribute('aria-pressed',S.teacher)}
+function renderNeck(){const dots={2:1,4:1,6:2},n=nextUp();$('neck').innerHTML='<div class="nut"></div>'+ST.map((s,i)=>{const d=dots[i],pd=passed(s)?' done':'',ahead=n&&ST.indexOf(n.s)<i&&!done(s);
+ return `<button class="fr${s.id===S.stage?' cur':''}${ahead?' ahead':''}" data-st="${s.id}" aria-current="${s.id===S.stage?'step':'false'}" aria-label="Stage ${i+1}: ${esc(s.title)}, ${done(s)} of 5 steps done${passed(s)?', gate passed':''}"><span class="lb">${esc(s.fret)}</span>${d===1?`<span class="dot${pd}"></span>`:''}${d===2?`<span class="dot a${pd}"></span><span class="dot b${pd}"></span>`:''}<span class="pg"><i style="width:${done(s)*20}%"></i></span></button>`}).join('')}
+function renderStage(){const s=stage(),sg=s.song,steps=STEPS(s);const link=sg.q?`<a class="lk" href="${yt(sg.q)}" target="_blank" rel="noopener">${sg.ql||(sg.pd?'Find a recording':'Find the original recording')}</a>`:'';
+ const firstOpen=[0,1,2,3,4].find(i=>lvl(kk(s,i))<2);
+ const stepsH=steps.map(([h,p,cr],i)=>{const k=kk(s,i),l=lvl(k);const st=l>=2?'<span class="tag ok">Done</span>':i===firstOpen?'<span class="tag up">Up next</span>':i>firstOpen?`<span class="tag">After step ${i}</span>`:'';
+  return `<div class="step${i===firstOpen?' up':''}"><span class="n">${i+1}</span><div><h3 style="margin:0">${h}${st}</h3><p>${esc(p)}</p><div class="crit"><b>Exploring</b>: ${cr[0]} · <b>Consistent</b>: ${cr[1]} · <b>Applied</b>: ${cr[2]}</div>${S.sign[k]?'<div class="crit"><b>Teacher signed off</b></div>':''}${S.teacher&&l>=2?`<button style="margin-top:8px" data-sign="${k}" aria-pressed="${!!S.sign[k]}">${S.sign[k]?'Signed off':'Sign off'}</button>`:''}</div>${lvlCtl(k,h)}</div>`}).join('');
+ const map=roadmap(s);
+ const rub=S.nsw?`<div class="card"><h3>NSW Music 7–10 (2024): performing</h3><p class="note">Outcomes MU4-PER-01 performing · MU4-LIS-01 listening. Marked as in the Ode to Joy task: each row 0 to 2, by the teacher.</p><table><tr><th>Criterion</th><th>Mark</th></tr>${['Listening and road map',S.inst==='guitar'?'Chord accuracy':'Part accuracy',S.inst==='drums'?'Groove and fills':S.inst==='vocals'?'Pitch and entries':S.inst==='guitar'?'Changes, strum and technique':'Changes and technique','Timing with the band','Performance, eyes up'].map((r,i)=>{const k=kk(s,i),v=S.marks[k];return `<tr><td>${r}</td><td>${S.teacher?`<select data-mark="${k}" aria-label="${r} mark"><option value="">–</option>${[0,.5,1,1.5,2].map(x=>`<option value="${x}" ${v===x?'selected':''}>${x}</option>`).join('')}</select>`:(v===undefined?'–':v)}</td></tr>`}).join('')}</table><p class="big" style="margin-top:10px" id="grade"></p>${S.teacher?'':'<p class="note">Turn on Teacher mode to enter marks.</p>'}</div>`:'';
+ const gate=passed(s)?`<div class="gate"><b>Gate passed${S.gates[gk(s)]?' on '+audDate(S.gates[gk(s)]):''}.</b> Every step is at Consistent or better. Take steps to Applied, or move on.</div>`:'';
+ $('stage').innerHTML=`<div class="title"><div class="note">Stage ${ST.indexOf(s)+1} of ${ST.length} · ${KEYS[s.key].name} · ${INST.find(x=>x[0]===S.inst)[1]} · ${done(s)} of 5 steps done</div><h2>${esc(s.title)}</h2></div>${gate}
+ <div class="row" role="group" aria-label="Your instrument"><span class="note">Your instrument:</span>${INST.map(([k,n])=>`<button data-inst="${k}" aria-pressed="${S.inst===k}">${n}</button>`).join('')}</div>
+ ${S.inst==='guitar'?`<div class="boxes">${s.ch.map(c=>box(c,s.key)).join('')}</div><p class="note">Tap a chord box to hear it. Sing the root in sol-fa as you strum.${s.tip?' '+s.tip:''}</p>`:partPanel(s)}
+ <div class="card"><div class="row"><div><div class="pd" style="font-size:30px">${esc(sg.t)}</div><div class="meta">${esc(sg.by)} · ${sg.time}${sg.pd?' · public domain':''}</div></div><div class="sp"></div>${link}</div>
+ ${map}${sg.riff?`<p class="note">${sg.riff.title}</p><div class="tab">${esc(mkTab(sg.riff.ev))}</div>`:''}${sg.note?`<p class="note">${sg.note}</p>`:''}
+ <div class="row"><button id="playMap">${playing==='map'?'Stop':'Play the chart'}</button><span class="note">Count-in, then the band plays the practice form at the metronome tempo (${unit(PAT[s.pat])}) and ends on the home chord.</span></div>
+ <div class="row" role="group" aria-label="Band parts" style="margin-top:8px"><span class="note">Band:</span>${PARTS.map(([k,n])=>`<button data-mute="${k}" aria-pressed="${!S.mute[k]}">${n}</button>`).join('')}<span class="note">Turn your own part off and play along.</span></div>
+ <div class="row" style="margin-top:8px"><span class="note">Higher voice:</span><button data-capo="-1" aria-label="Capo down">−</button><span>${capo()?'Capo '+capo():'No capo'}</span><button data-capo="1" aria-label="Capo up">+</button><span class="note">Same shapes; sounds in ${sounds(s)}. Lower voices: sing an octave lower.</span></div></div>
+ <div><h3>Five steps: hear, shape, change, rehearse, perform</h3><p class="note" style="margin:0 0 6px">Work in order. The gate opens when all five reach Consistent.</p>${stepsH}</div>${rub}
+ ${s.also.length?`<div><h3>Also try</h3><ul class="log">${s.also.map(([t,q])=>`<li>${q?`<a class="lk" href="${yt(q)}" target="_blank" rel="noopener">${esc(t)}</a>`:esc(t)}</li>`).join('')}</ul></div>`:''}`;
+ grade()}
+function grade(){const g=$('grade');if(!g)return;const s=stage();const ks=[0,1,2,3,4].map(i=>S.marks[kk(s,i)]);if(ks.every(v=>v===undefined)){g.textContent='Not yet marked';return}const t=ks.reduce((a,v)=>a+(v||0),0);const L=t>=9?'A':t>=7?'B':t>=5?'C':t>=3?'D':'E';g.textContent=`${t} / 10 · grade ${L}${ks.some(v=>v===undefined)?' so far':''}`}
+function metroCard(){const s=stage(),f=FIN.find(f=>f.k===S.finish),p=curPat();return `<div class="card"><h3>Metronome</h3><div class="row"><button data-pat="0" aria-pressed="${!S.useFin}">Stage strum</button><button data-pat="1" aria-pressed="${S.useFin}">${f.n} feel</button></div>
+ <div class="note" style="margin-top:8px">${esc(p.n)}</div><div class="grid">${cells(p).map((c,i)=>`<div class="cell${p.a.includes(i)?' acc':''}">${c==='.'?'·':esc(c)}</div>`).join('')}</div>
+ <div class="row"><input type="range" min="30" max="200" step="1" class="m-bpm" value="${S.bpm}" aria-label="Tempo" style="flex:1"><span class="big m-out">${S.bpm}</span></div><div class="note">${unit(p)}</div><div class="row" style="margin-top:8px"><button class="m-toggle" aria-pressed="${!!metro}">Metronome</button><span class="note">D down · U up · B thumb bass · C chord</span></div></div>`}
+function renderSide(){const s=stage();
+ const keyRows=[...new Set(s.ch.map(c=>fnOf(s.key,c)[1]).filter(Boolean))].map(f=>`<div><span class="sw" style="background:var(${FN[f][1]})"></span>${FN[f][0][0].toUpperCase()+FN[f][0].slice(1)}: ${s.ch.filter(c=>fnOf(s.key,c)[1]===f).map(esc).join(', ')}</div>`).join('');
+ const pk=s.pair.join('-');const mine=S.changes.filter(c=>c.pair===pk).slice(-5).reverse();const best=Math.max(0,...S.changes.filter(c=>c.pair===pk).map(c=>c.n));
+ $('side').innerHTML=`<div class="card"><h3>Function in this stage</h3><div class="fk">${keyRows}</div></div>${metroCard()}
+ ${['drums','vocals'].includes(S.inst)?'':`<div class="card"><h3>One-minute changes</h3><p class="note" style="margin:0 0 8px">${s.pair.map(esc).join(' ↔ ')}: change back and forth for one minute, then count. Consistent is ${CPM(s)[0]}, Applied is ${CPM(s)[1]}.</p>
+ <div class="row"><button id="timer">${timerLeft?timerLeft+' s':'Start 60 s'}</button><input id="cnt" type="number" min="0" max="200" inputmode="numeric" placeholder="Changes" style="width:110px" aria-label="Number of changes"><button id="logChg">Log</button></div>
+ <p class="note">Best: ${best?best+' changes a minute'+(best>=CPM(s)[1]?' · Applied target met':best>=CPM(s)[0]?' · Consistent target met':''):'not logged yet'}</p>${mine.length?`<ul class="log">${mine.map(c=>`<li>${audDate(c.d)}: ${c.n} changes</li>`).join('')}</ul>`:''}</div>`}
+ ${s.know.map(k=>`<details class="card know"><summary>${KNOW[k][0]}</summary><p>${KNOW[k][1]}</p></details>`).join('')}`}
+/* warm-up */
+const WARM=[['tune','Tune and listen','Play each reference string and match your guitar to it, thick E to thin E.'],['clap','Clap the strum','Clap today\'s stage strum with the metronome, saying D and U aloud. Two minutes.'],['spider','Spider at 60','The 1-2-3-4 rudiment, up and back once, then once more cleaner. Two minutes.'],['changes','One-minute changes','Today\'s chord pair from your Path stage. Log the count.'],['sing','Sing the roots','Strum the stage map once, singing each chord\'s root in sol-fa (do, re, mi, fa, so, la).']];
+function renderWarm(){const d=S.warm[today()]||[];const days=[...Array(14)].map((_,i)=>{const dd=new Date();dd.setDate(dd.getDate()-(13-i));const t=dkey(dd);return `<i class="${(S.warm[t]||[]).length>=5?'y':''}" title="${t}"></i>`}).join('');
+ $('v-warm-up').innerHTML=`<div class="two"><div><h2 style="font-size:40px">Warm-up</h2><p class="note">Ten minutes, every time you pick up the guitar. Tick each as you go.</p>${WARM.map(([k,h,p])=>`<label class="chk"><input type="checkbox" data-warm="${k}" ${d.includes(k)?'checked':''}><span><b style="font-weight:500">${h}</b><br><span class="note">${p}</span></span></label>`).join('')}
+ <p>${d.length>=5?'<b style="font-weight:500">Warm-up done for today.</b>':`${d.length} of 5 done today.`}</p></div>
+ <div class="stk"><div class="card"><h3>Reference strings</h3><div class="row">${['E','A','D','G','B','e'].map((n,i)=>`<button data-ref="${i}" aria-label="Play string ${6-i}, ${n}">${n}</button>`).join('')}</div><p class="note">Standard tuning, thick to thin: E A D G B E.</p></div>
+ <div class="card"><h3>Last 14 days</h3><div class="strip" role="img" aria-label="${[...Array(14)].filter((_,i)=>{const dd=new Date();dd.setDate(dd.getDate()-(13-i));return (S.warm[dkey(dd)]||[]).length>=5}).length} of the last 14 days had a full warm-up">${days}</div><p class="note">Filled: all five warm-up items done that day. The metronome is in the bar at the top.</p></div></div></div>`}
+/* rudiments and technique */
+const unlocked=st=>ST.slice(0,st).every(passed)||st===0;
+function itemCard(it,pre,kind){const k=pre+it.id,l=lvl(k),open=unlocked(it.st);const b=S.best[k];
+ const crit=kind==='r'?[`you can play it slowly`,`${it.c} ${it.u.includes('change')?'':'bpm, '}${it.u}, three clean runs`,`${it.a} ${it.u.includes('change')?'':'bpm, '}${it.u}, or used in a song`]:['you can play it slowly','clean three times running with the metronome','used musically in a song or your Invent loop'];
+ return `<div class="card${it.fb?' wide':''}"><h3>${esc(it.n)}${l>=2?'<span class="tag ok">Done</span>':open?'':`<span class="tag">Opens with stage ${it.st+1}</span>`}</h3><p style="margin:0 0 6px;font-size:15px">${esc(it.w)}</p>
+ ${it.ev?`<div class="tab">${esc(mkTab(it.ev))}</div>`:''}${it.ch?`<div class="boxes">${it.ch.map(c=>box(c,it.k||'C')).join('')}</div>`:''}${it.fb?(Array.isArray(it.fb)?it.fb:[it.fb]).map(f=>`<p class="note" style="margin:8px 0 2px">${esc(FB[f].title)}</p><div style="overflow-x:auto">${fretboard(FB[f])}</div>`).join(''):''}
+ <div class="crit"><b>Exploring</b>: ${crit[0]} · <b>Consistent</b>: ${crit[1]} · <b>Applied</b>: ${crit[2]}</div>
+ <div class="row" style="margin-top:10px">${lvlCtl(k,it.n)}${kind==='r'&&!it.u.includes('change')?`<input type="number" min="30" max="300" inputmode="numeric" placeholder="Best bpm" aria-label="Best clean tempo for ${esc(it.n)}" data-best="${k}" value="${b||''}" style="width:120px">`:''}</div></div>`}
+function renderRud(){$('v-rudiments').innerHTML=`<h2 style="font-size:40px">Rudiments</h2><p class="note">The guitar's daily drills, like a drummer's rudiments. Each opens with a stage of your Path; log your best clean tempo.</p><div class="list" style="margin-top:12px">${RUD.map(r=>itemCard(r,'r:','r')).join('')}</div>`}
+function renderTech(){const groups=[['core','Core and the Guitar Book']].concat(FIN.map(f=>[f.k,f.n]));
+ $('v-technique').innerHTML=`<h2 style="font-size:40px">Technique</h2><p class="note">Core techniques, the Guitar Book's scale and triads, and each Finish's signature moves. Your current Finish is listed first after the core.</p>
+ ${groups.sort((a,b)=>(a[0]==='core'?-2:a[0]===S.finish?-1:0)-(b[0]==='core'?-2:b[0]===S.finish?-1:0)).map(([g,n])=>`<h3 style="margin-top:22px;font-size:18px">${n}</h3><div class="list">${TECH.filter(t=>t.f===g).map(t=>itemCard(t,'t:','t')).join('')}</div>`).join('')}`}
+/* invent */
+let loop=[];const CHG=[['Change the order of the chords.'],['Give each chord two bars instead of one.'],['Play it in 3/4 instead of 4/4.'],['Swap the strum: try the Finish feel.'],['Swap one voicing: F for Fmaj7.',['F','Fmaj7']],['Swap one voicing: E for E7.',['E','E7']],['Hum a melody over it and keep the hum that sticks.']];
+function learned(){const i=ST.indexOf(stage());const set=[];ST.slice(0,i+1).forEach(s=>s.ch.forEach(c=>{if(!set.includes(c))set.push(c)}));return set}
+let loopChg='';
+function renderInvent(){const s=stage();const k=s.key;const L=learned();const pool=L.filter(c=>KEYS[k].m[c]);
+ $('v-invent').innerHTML=`<h2 style="font-size:40px">Invent</h2><p class="note">Roll a loop from the chords you've learned, in ${KEYS[k].name}. Play it, change exactly one thing, play it again and keep the better version.</p>
+ <div class="row"><button id="roll">Roll four chords</button>${loop.length?`<button id="playLoop">${playing==='loop'?'Stop':'Play the loop ×4'}</button>`:''}</div>
+ ${loop.length?`<div class="boxes" style="margin-top:12px">${loop.map(c=>box(c,k)).join('')}</div><p><b style="font-weight:500">Change one thing:</b> <span id="chg">${loopChg}</span></p><button id="keepLoop">Save to record</button>`:`<p class="note">Pool: ${pool.map(esc).join(', ')||'learn a stage first'}.</p>`}`;
+ $('roll').onclick=()=>{if(!pool.length)return;if(playing)stopAll();const t=pool.find(c=>/^(I|i)$/.test(KEYS[k].m[c][0]))||pool[0];loop=[t];let g=0;while(loop.length<4&&g++<50){const c=pool[Math.floor(Math.random()*pool.length)];if(c!==loop[loop.length-1])loop.push(c)}while(loop.length<4)loop.push(t);const ok2=CHG.filter(c=>(!c[1]||(c[1].every(x=>L.includes(x))&&loop.includes(c[1][0])))&&(c[0].indexOf('3/4')<0||PAT[s.pat].m===4));loopChg=ok2[Math.floor(Math.random()*ok2.length)][0];renderInvent();refocus('#roll')};
+ if($('playLoop'))$('playLoop').onclick=()=>{if(playing==='loop'){stopAll();return}playSeq([0,1,2,3].flatMap(()=>loop.map(c=>({c}))),'loop')};
+ if($('keepLoop'))$('keepLoop').onclick=()=>{S.journal.push({d:Date.now(),st:s.id,h:'',o:'Loop: '+loop.join(' – '),w:$('chg').textContent});save();toast('Saved to your record')}}
+/* gig */
+const TB=['A','A','A','A','D','D','A','A','E','D','A','E'];
+const GIG=[
+ {id:'g-boogie',t:'12-bar boogie in A',by:'Our own arrangement',pd:1,yr:'',q:'',story:'The 12-bar blues came out of the blues and became the backbone of early rock and roll. Three chords (I, IV, V) in a fixed 12-bar pattern: once you know it, you can join almost any rock and roll jam.'},
+ {id:'g-clock',t:'Rock Around the Clock',by:'Bill Haley and His Comets',yr:'1954',q:'Bill Haley Rock Around the Clock',story:'Recorded in 1954, it became a hit in 1955 when it opened the film Blackboard Jungle, and is often called the song that carried rock and roll into the mainstream. A 12-bar, as your rock history lesson notes.'},
+ {id:'g-johnny',t:'Johnny B. Goode',by:'Chuck Berry',yr:'1958',q:'Chuck Berry Johnny B. Goode 1958',story:'Chuck Berry\'s guitar-driven 12-bar, with one of rock\'s most copied guitar intros. It was later chosen for the Voyager Golden Record sent into space in 1977.'},
+ {id:'g-hound',t:'Hound Dog',by:'Big Mama Thornton (1953); Elvis Presley (1956)',yr:'1953',q:'Big Mama Thornton Hound Dog',story:'Written by Jerry Leiber and Mike Stoller, first recorded by Big Mama Thornton, then turned into a rock and roll hit by Elvis Presley. Listen to both: same 12-bar, very different feel.'},
+ {id:'g-shoes',t:'Blue Suede Shoes',by:'Carl Perkins',yr:'1956',q:'Carl Perkins Blue Suede Shoes',story:'Written and first recorded by Carl Perkins, then covered by Elvis Presley in the same year. Its verses use stop-time: the band hits and stops while the singer carries on.'},
+ {id:'g-bamba',t:'La Bamba',by:'Traditional Mexican son jarocho; Ritchie Valens (1958)',yr:'1958',q:'Ritchie Valens La Bamba',story:'A folk song from Veracruz in Mexico that Ritchie Valens turned into a rock and roll hit. It loops I–IV–V over and over, so it is the easiest song in the set to join.',loop:1}];
+GIG.forEach(g=>{g.key='A';g.ch=['A','D','E'];g.pat=g.loop?'eighths':'shuffle';g.tgt=g.loop?140:120;g.song={t:g.t,by:g.by,pd:g.pd,time:'4/4',q:g.q,map:g.loop?[{s:'Loop',b:['A D','E','A D','E']}]:[{s:'12 bars',b:TB}],form:g.loop?[['Loop',6]]:[['12 bars',4]]}});
+const gigS=()=>{const G=S.gig;if(!Array.isArray(G.songs))G.songs=['g-boogie','g-clock','g-johnny','g-bamba'];if(!Array.isArray(G.bands)||!G.bands.length)G.bands=[{name:'Band 1',m:{}}];if(!(G.block>=5&&G.block<=60))G.block=20;if(typeof G.rotate!=='boolean')G.rotate=true;if(!G.open)G.open=G.songs[0];return G};
+let gt=null,gtEnd=0;
+function runSheet(G){const songs=G.songs.map(id=>GIG.find(g=>g.id===id)).filter(Boolean),roles=INST.map(x=>x[0]);
+ return songs.map((_,ph)=>({ph,rows:G.bands.map((b,bi)=>{const sg=songs[(bi+ph)%songs.length];const people=roles.map(r=>b.m[r]).filter(Boolean);const who=roles.map((r,ri)=>{const nm=G.rotate&&people.length?people[(ri+ph)%people.length]:b.m[r];return nm?[r,nm]:null}).filter(Boolean);return {b,sg,who}})}))}
+function gigText(G){return 'Gig set: '+G.songs.map((id,i)=>(i+1)+'. '+GIG.find(g=>g.id===id).t).join(', ')+'\n\n'+runSheet(G).map(({ph,rows})=>`Phase ${ph+1} (${G.block} min)\n`+rows.map(({b,sg,who})=>`  ${b.name}: ${sg.t} · `+(who.map(([r,n])=>INST.find(x=>x[0]===r)[1]+': '+n).join(', ')||'roles not assigned')).join('\n')).join('\n\n')}
+function renderGig(){const G=gigS();save();const g=GIG.find(x=>x.id===G.open)||GIG[0];
+ $('v-gig').innerHTML=`<div class="two"><div class="stk"><h2 style="font-size:40px">Gig</h2><p class="note">Plan a rock and roll gig for a class or one band. Choose four of the six songs, set up the bands, then run it with the run sheet and timers.</p>
+ <div class="card"><h3>1. Choose four songs</h3>${GIG.map(x=>`<label class="chk"><input type="checkbox" data-gsong="${x.id}" ${G.songs.includes(x.id)?'checked':''}><span><b style="font-weight:500">${esc(x.t)}</b> <span class="note">${esc(x.by)}</span></span></label>`).join('')}<p class="note">${G.songs.length} of 4 chosen. Order: ${G.songs.map((id,i)=>`<button data-gup="${id}" aria-label="Move ${esc(GIG.find(x=>x.id===id).t)} earlier">${i+1}. ${esc(GIG.find(x=>x.id===id).t)}</button>`).join(' ')}</p></div>
+ <div class="card"><h3>2. Bands and roles</h3>${G.bands.map((b,bi)=>`<div style="margin-bottom:12px"><input data-bname="${bi}" value="${esc(b.name)}" aria-label="Band ${bi+1} name"><div class="list" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:6px">${INST.map(([r,n])=>`<label>${n}<br><input data-bm="${bi}:${r}" value="${esc(b.m[r]||'')}" placeholder="Name" style="width:100%"></label>`).join('')}</div></div>`).join('')}
+ <div class="row"><button id="addBand">Add a band</button>${G.bands.length>1?'<button id="delBand">Remove the last band</button>':''}<label class="row"><input type="checkbox" id="rot" ${G.rotate?'checked':''} style="width:24px;height:24px;min-height:0"> Rotate instruments each phase</label><label>Block <input id="blk" type="number" min="5" max="60" value="${G.block}" style="width:80px"> min</label></div><p class="note">One band and one student works too: leave the other roles empty.</p></div></div>
+ <div class="stk"><div class="card"><h3>Timer</h3><div class="gt" id="gtime" role="timer" aria-live="off">${gt?'':'0:00'}</div><div class="row">${[5,10,15,20].map(m=>`<button data-gtime="${m}">${m} min</button>`).join('')}<button id="gstop">Stop</button><button id="present" aria-pressed="${document.body.classList.contains('present')}">Present</button></div><p class="note">Typical block: 10 minutes to set up, the rehearsal, then pack up.</p></div>
+ <div class="card"><h3>3. Run sheet</h3>${runSheet(G).map(({ph,rows})=>`<h3 style="margin:12px 0 4px">Phase ${ph+1} · ${G.block} min</h3><table>${rows.map(({b,sg,who})=>`<tr><td>${esc(b.name)}</td><td><button class="lk" data-gopen="${sg.id}" style="min-height:44px;border:0;background:none;text-decoration:underline">${esc(sg.t)}</button></td><td>${who.map(([r,n])=>INST.find(x=>x[0]===r)[1]+': '+esc(n)).join(', ')||'<span class="note">roles not assigned</span>'}</td></tr>`).join('')}</table>`).join('')}
+ <div class="row" style="margin-top:10px"><button id="copyGig">Copy the gig list</button></div><textarea id="gigTxt" class="hide" rows="8" style="width:100%">${esc(gigText(G))}</textarea></div></div></div>
+ <div class="card" style="margin-top:16px"><div class="row"><div><div class="pd" style="font-size:30px">${esc(g.t)}</div><div class="meta">${esc(g.by)}${g.yr?' · '+g.yr:''}${g.pd?' · our own arrangement':''}</div></div><div class="sp"></div>${g.q?`<a class="lk" href="${yt(g.q)}" target="_blank" rel="noopener">Find the original recording</a>`:''}</div>
+ <p>${esc(g.story)}</p>${roadmap(g)}<div class="row"><button id="playGig">${playing==='gig'?'Stop':'Play the chart'}</button><span class="note">The whole band plays; charted in A for the gig. Recordings vary in key and in bars 10 and 12: listen and adjust.</span></div></div>`}
+/* record */
+function renderRecord(){const s=stage();const rows=ST.map((x,i)=>`<tr><td>${i+1}. ${esc(x.title)}</td><td>${done(x)} / 5</td><td>${passed(x)?'Gate passed'+(S.gates[gk(x)]?', '+audDate(S.gates[gk(x)]):''):'–'}</td></tr>`).join('');
+ const rd=RUD.concat(TECH).filter(r=>lvl((RUD.includes(r)?'r:':'t:')+r.id)>=2).map(r=>esc(r.n));
+ $('v-record').innerHTML=`<div class="two"><div class="stk"><h2 style="font-size:40px">Record</h2><div class="card"><h3>Your path: ${INST.find(x=>x[0]===S.inst)[1]}</h3><table><tr><th>Stage</th><th>Steps</th><th>Gate</th></tr>${rows}</table></div>
+ <div class="card"><h3>Rudiments and techniques at Consistent or better</h3><p>${rd.length?rd.join(', '):'None yet.'}</p></div>
+ <div class="card"><h3>Best tempos</h3><p>${Object.keys(S.best).length?Object.entries(S.best).map(([k,v])=>{const r=RUD.find(x=>'r:'+x.id===k);return r?esc(r.n)+': '+v+' bpm':''}).filter(Boolean).join(' · '):'None logged yet.'}</p><h3 style="margin-top:12px">One-minute changes, best</h3><p>${[...new Set(S.changes.map(c=>c.pair))].map(pk=>esc(pk.replace('-',' ↔ ').replace('#','♯'))+': '+Math.max(...S.changes.filter(c=>c.pair===pk).map(c=>c.n))).join(' · ')||'None logged yet.'}</p></div>
+ <div class="card"><h3>Teacher</h3><p>${Object.keys(S.sign).length} steps signed off.${ST.filter(x=>[0,1,2,3,4].some(i=>S.marks[kk(x,i)]!==undefined)).map(x=>' '+esc(x.title)+': '+[0,1,2,3,4].reduce((a,i)=>a+(S.marks[kk(x,i)]||0),0)+' / 10.').join('')}</p></div>
+ <div class="card"><h3>Warm-ups</h3><p>${Object.values(S.warm).filter(v=>v.length>=5).length} full warm-ups recorded.</p></div></div>
+ <div><h3 style="font-size:18px;margin-top:8px">Journal</h3><p class="note">Hear, do, write: what you listened for, what you played, what you noticed.</p><form id="jf" class="stk"><label>Hear<br><input id="jh" style="width:100%" placeholder="Listened for the pull from E7 to Am"></label><label>Do<br><input id="jd" style="width:100%" placeholder="Changes at 70 bpm, two clean runs"></label><label>Write<br><textarea id="jw" rows="2" style="width:100%" placeholder="The small F buzzes on the B string"></textarea></label><button>Save entry</button></form>
+ <ul class="log">${S.journal.slice().sort((a,b)=>b.d-a.d).slice(0,12).map(j=>`<li><b style="font-weight:500">${audDate(j.d)}, ${esc((ST.find(x=>x.id===j.st)||{}).title||'')}</b>: ${[j.h,j.o,j.w].filter(Boolean).map(esc).join(' · ')}</li>`).join('')}</ul></div></div>`;
+ $('jf').onsubmit=e=>{e.preventDefault();const h=$('jh').value.trim(),o=$('jd').value.trim(),w=$('jw').value.trim();if(!h&&!o&&!w){toast('Write something in one of the three fields first');return}S.journal.push({d:Date.now(),st:s.id,h,o,w});save();renderRecord();refocus('#jh');toast('Entry saved')}}
+/* sequencing */
+let metro=null,timerLeft=0,tmr=null,seqT=[],playing=false,confirmLower=null;
+const home=s=>s.ch.find(c=>/^(I|i)$/.test(fnOf(s.key,c)[0]))||s.ch[0];
+function formBars(s){const sg=s.song,idx=[];let off=0;const start={};sg.map.forEach(m=>{start[m.s]=off;off+=m.b.length});
+ (FORM[s.id]||sg.form||sg.map.map(m=>[m.s,1])).forEach(([n,r])=>{const m=sg.map.find(x=>x.s===n);if(!m)return;for(let k=0;k<r;k++)m.b.forEach((b,i)=>idx.push({c:b,i:start[n]+i}))});return idx}
+function bandPat(s){const sp=PAT[s.pat];if(!S.useFin)return sp;const fp=finPat(s);return fp&&fp.b===sp.b?Object.assign({},fp,{m:sp.m}):sp}
+async function playSeq(bars,kind,s){const a=A();if(!a)return;stopAll();if(metro)stopMetro();try{await a.resume()}catch(e){}s=s||stage();playing=kind;const p=bandPat(s),beat=60/S.bpm,cs=cells(p),n=cs.length,free=kind==='loop';
+ const P=k=>free?out():part(k);let t=a.currentTime+.15;
+ if(p.m===4){[0,2].forEach(k=>click(t+k*beat,k===0));t+=4*beat;for(let k=0;k<4;k++)click(t+k*beat,k===0);t+=4*beat}
+ else if(p.m===3){for(let k=0;k<3;k++)click(t+k*beat,k===0);t+=3*beat}
+ else{for(let k=0;k<6;k++)click(t+k*beat/3,k%3===0);t+=2*beat}
+ const bb=p.m===4?[0,2]:p.m===3?[0]:[0,1],bl=beat*(p.m===6?1:p.m===3?2.6:1.8);let idx=0,ended=false;
+ const hl=(sel,t0)=>seqT.push(setTimeout(()=>{document.querySelectorAll('.rm-bar.now,.fs.now').forEach(x=>x.classList.remove('now'));const el=document.querySelector(sel);if(el)el.classList.add('now')},Math.max(0,(t0-a.currentTime)*1000)));
+ function bar({c:bar,i:gi}){const parts=bar.split(' ');const t0=t,ct=[];cs.forEach((c,ci)=>{ct.push(t);let dur=beat/p.s;if(p.sw)dur=ci%2===0?beat*2/3:beat/3;t+=dur});const bd=t-t0;
+  cs.forEach((c,ci)=>{const ch=parts[Math.floor(ci*parts.length/n)];if(c!=='.')strum(ch,ct[ci],/^[0-9]/.test(c)?'D':c,P('guitar'))});
+  parts.forEach((ch,j)=>keys(ch,ct[Math.floor(j*n/parts.length)],bd/parts.length,P('keys')));
+  for(let k=0;k<p.b;k++){const bt=ct[k*p.s];const ch=parts[Math.floor(k*parts.length/p.b)];if(bb.includes(k))bass(ch,bt,Math.min(bl,bd/parts.length),P('bass'));
+   if(k===0||(p.m===4&&k===2))drum('k',bt,P('drums'));if((p.m===4&&(k===1||k===3))||(p.m===6&&k===1))drum('s',bt,P('drums'));if(p.m===3&&k>0)drum('r',bt,P('drums'))}
+  ct.forEach(x=>drum('h',x,P('drums')));
+  if(gi!==undefined&&kind!=='loop')hl(`#v-${view} .rm-bar[data-i="${gi}"]`,t0)}
+ function finish(){const hc=kind==='loop'?bars[0].c.split(' ')[0]:home(s),L=beat*p.b*(kind==='loop'?1:2);strum(hc,t,'D',P('guitar'));keys(hc,t,L,P('keys'));bass(hc,t,L,P('bass'));drum('k',t,P('drums'));if(kind!=='loop')hl(`#v-${view} .fs-outro`,t);t+=L;seqT.push(setTimeout(()=>stopAll(),(t-a.currentTime)*1000+400))}
+ const tick=()=>{while(!ended&&t<a.currentTime+.8){if(idx<bars.length)bar(bars[idx++]);else{ended=true;finish()}}};tick();const iv=setInterval(tick,120);seqT.push(iv);
+ const b=$(kind==='map'?'playMap':kind==='gig'?'playGig':'playLoop');if(b)b.textContent='Stop'}
+function startMetro(){const a=A();if(!a)return;const p=curPat(),cs=cells(p),n=cs.length;let i=0,next=a.currentTime+.1;
+ metro=setInterval(()=>{if(next<a.currentTime-.05)next=a.currentTime+.05;while(next<a.currentTime+.12){const beat=60/S.bpm;let dur=beat/p.s;if(p.sw)dur=(i%2===0)?beat*2/3:beat/3;click(next,p.a.includes(i%n));const idx=i%n,at=next;setTimeout(()=>{document.querySelectorAll('.grid').forEach(g=>[...g.children].forEach((c,k)=>c.classList.toggle('play',k===idx)))},Math.max(0,(at-a.currentTime)*1000));next+=dur;i++}},25)}
+function stopMetro(){clearInterval(metro);metro=null;mUI();document.querySelectorAll('.cell.play').forEach(c=>c.classList.remove('play'))}
+function restartMetro(){if(metro){stopMetro();startMetro()}}
+function checkGates(){ST.forEach(s=>{if(passed(s)&&!S.gates[gk(s)]){S.gates[gk(s)]=Date.now();toast(`Gate passed: stage ${ST.indexOf(s)+1}, ${s.title}.${[2,4,6].includes(ST.indexOf(s))?' Its inlay is now gold.':''}`)}else if(!passed(s)&&S.gates[gk(s)])delete S.gates[gk(s)]})}
+const VIEWS=['path','warm-up','rudiments','technique','invent','gig','record'];let view='path';
+function route(){let h='';try{h=location.hash.slice(1)}catch(e){}const before=view+S.stage;if(ST.some(s=>s.id===h)){if(S.stage!==h){S.stage=h;loop=[];save();stopAll()}view='path'}else if(VIEWS.includes(h))view=h;else view='path';
+ if(before!==view+S.stage&&playing)stopAll();VIEWS.forEach(v=>{$('v-'+v).classList.toggle('hide',v!==view);if(v!==view&&v!=='path')$('v-'+v).innerHTML=''});document.querySelectorAll('#tabs a').forEach(a=>a.setAttribute('aria-current',a.getAttribute('href')==='#'+view?'page':'false'));all();restartMetro();mUI();if(pendingFocus){refocus(pendingFocus);pendingFocus=null}else if(focusView){const hd=view==='path'?$('next'):$('v-'+view).querySelector('h2');if(hd){hd.setAttribute('tabindex','-1');hd.focus()}}focusView=false}
+function all(){renderFinish();if(view==='path'){renderNext();renderNeck();renderStage();renderSide()}else if(view==='warm-up')renderWarm();else if(view==='rudiments')renderRud();else if(view==='technique')renderTech();else if(view==='invent')renderInvent();else if(view==='gig')renderGig();else renderRecord()}
+function refocus(sel){const el=document.querySelector(sel);if(el)el.focus()}
+let focusView=false,pendingFocus=null;
+document.addEventListener('click',e=>{if(e.target.closest('#tabs a')||e.target.closest('#next a'))focusView=true;const t=e.target.closest('button');if(!t)return;if(!(t.dataset.lv&&t.dataset.lv===confirmLower&&t.dataset.dir==='-1'))confirmLower=null;
+ if(t.dataset.fin){S.finish=t.dataset.fin;save();all();restartMetro();refocus(`[data-fin="${t.dataset.fin}"]`)}
+ else if(t.dataset.st&&t.dataset.st===S.stage&&view==='path'){t.focus()}
+ else if(t.dataset.st){pendingFocus=`[data-st="${t.dataset.st}"]`;try{location.hash=t.dataset.st}catch(err){S.stage=t.dataset.st;all()}}
+ else if(t.dataset.strum)strum(t.dataset.strum)
+ else if(t.dataset.ref!==undefined)tone(OPEN[+t.dataset.ref])
+ else if(t.dataset.lv){const k=t.dataset.lv,d=+t.dataset.dir,o=lvl(k),n=Math.max(0,Math.min(3,o+d));if(n===o)return;
+  if(n<o&&S.sign[k]&&confirmLower!==k){confirmLower=k;toast('Lowering this level clears the teacher sign-off. Press − again to confirm.');return}
+  confirmLower=null;const sg=ST.find(x=>k.split(/[:@]/)[0]===x.id),wasP=sg&&passed(sg);S.lv[k]=n;if(n<o&&S.sign[k]){delete S.sign[k];toast('Level lowered: teacher sign-off cleared')}else if(wasP&&!passed(sg))toast(`Stage ${ST.indexOf(sg)+1}'s gate closes until this step is back at Consistent.`);checkGates();save();all();refocus(`[data-lv="${k}"][data-dir="${d}"]`)}
+ else if(t.dataset.sign){const k=t.dataset.sign;if(S.sign[k])delete S.sign[k];else S.sign[k]=Date.now();save();renderStage();refocus(`[data-sign="${k}"]`)}
+ else if(t.dataset.pat){S.useFin=t.dataset.pat==='1';save();const r=!!metro;stopMetro();all();if(r)startMetro();mUI();refocus(`[data-pat="${t.dataset.pat}"]`)}
+ else if(t.id==='nswBtn'){S.nsw=!S.nsw;save();all()}
+ else if(t.id==='tchBtn'){S.teacher=!S.teacher;save();all()}
+ else if(t.classList.contains('m-toggle')){if(metro)stopMetro();else{if(playing)stopAll();startMetro()}mUI()}
+ else if(t.classList.contains('m-step')){S.bpm=Math.min(200,Math.max(30,S.bpm+(+t.dataset.step)));save();mUI();tempoStop()}
+ else if(t.id==='playMap'){if(playing==='map'){stopAll();return}playSeq(formBars(stage()),'map')}
+ else if(t.dataset.gup){const G=gigS(),i=G.songs.indexOf(t.dataset.gup);if(i>0){G.songs.splice(i,1);G.songs.splice(i-1,0,t.dataset.gup)}save();renderGig();refocus(`[data-gup="${t.dataset.gup}"]`)}
+ else if(t.dataset.gopen){gigS().open=t.dataset.gopen;save();if(playing)stopAll();renderGig();refocus('#playGig')}
+ else if(t.id==='playGig'){if(playing==='gig'){stopAll();return}const g=GIG.find(x=>x.id===gigS().open);playSeq(formBars(g),'gig',g)}
+ else if(t.id==='addBand'){const G=gigS();G.bands.push({name:'Band '+(G.bands.length+1),m:{}});save();renderGig();refocus('#addBand')}
+ else if(t.id==='delBand'){const G=gigS();if(G.bands.length>1)G.bands.pop();save();renderGig();refocus('#addBand')}
+ else if(t.dataset.gtime){const m=+t.dataset.gtime;clearInterval(gt);gtEnd=Date.now()+m*60000;const tk=()=>{const r=Math.max(0,Math.ceil((gtEnd-Date.now())/1000));const el=$('gtime');if(el)el.textContent=Math.floor(r/60)+':'+String(r%60).padStart(2,'0');if(!r){clearInterval(gt);gt=null;const a=A();if(a)[0,.3,.6].forEach(x=>click(a.currentTime+x,1));toast('Time: change over.')}};tk();gt=setInterval(tk,250)}
+ else if(t.id==='gstop'){clearInterval(gt);gt=null;const el=$('gtime');if(el)el.textContent='0:00'}
+ else if(t.id==='present'){document.body.classList.toggle('present');t.setAttribute('aria-pressed',document.body.classList.contains('present'))}
+ else if(t.id==='copyGig'){const txt=gigText(gigS());try{navigator.clipboard.writeText(txt).then(()=>toast('Gig list copied'),()=>{$('gigTxt').classList.remove('hide');toast('Copy isn\'t available here: select the text below instead.')})}catch(err){$('gigTxt').classList.remove('hide')}}
+ else if(t.dataset.inst){S.inst=t.dataset.inst;save();all();refocus(`[data-inst="${S.inst}"]`);toast(INST.find(x=>x[0]===S.inst)[1]+': your steps, gates and record are now for this instrument.')}
+ else if(t.dataset.mute){const k=t.dataset.mute;S.mute[k]=!S.mute[k];save();t.setAttribute('aria-pressed',!S.mute[k]);if(bus[k])bus[k].gain.value=S.mute[k]?0:1}
+ else if(t.dataset.tgt){S.bpm=+t.dataset.tgt;save();mUI();if(!tempoStop())toast('Metronome set to '+S.bpm+' bpm')}
+ else if(t.dataset.capo){if(playing)stopAll();const s=stage();S.capo[s.id]=Math.max(0,Math.min(7,capo()+(+t.dataset.capo)));if(!S.capo[s.id])delete S.capo[s.id];save();renderStage();refocus(`[data-capo="${t.dataset.capo}"]`);toast((capo()?'Capo '+capo():'No capo')+': sounds in '+sounds(s)+'.')}
+ else if(t.id==='timer'){if(tmr){clearInterval(tmr);tmr=null;timerLeft=0;t.textContent='Start 60 s';toast('Timer cancelled');return}A();timerLeft=60;t.textContent='60 s';const end=Date.now()+60000;tmr=setInterval(()=>{timerLeft=Math.max(0,Math.ceil((end-Date.now())/1000));const b=$('timer');if(b)b.textContent=timerLeft?timerLeft+' s':'Start 60 s';if(!timerLeft){clearInterval(tmr);tmr=null;const a=A();if(a){click(a.currentTime,1);click(a.currentTime+.15,1)}toast('Time. Count your changes and log them.');if($('cnt'))$('cnt').focus()}},250)}
+ else if(t.id==='logChg'){const v=parseInt($('cnt').value,10);if(!(v>=0&&v<=200)){toast('Enter the number of changes, 0 to 200');return}const s=stage();S.changes.push({d:Date.now(),st:s.id,pair:s.pair.join('-'),n:v});save();renderSide();refocus('#logChg');toast('Logged '+v+' changes'+(v>=CPM(s)[1]?': Applied target met':v>=CPM(s)[0]?': Consistent target met':''))}});
+document.addEventListener('input',e=>{if(e.target.classList.contains('m-bpm')){S.bpm=+e.target.value;save();mUI();tempoStop()}});
+function tempoStop(){if(playing){stopAll();toast('Tempo changed: press Play again to hear the band at '+S.bpm+' bpm.');return true}return false}
+function mUI(){const p=curPat();document.querySelectorAll('.m-out').forEach(o=>o.textContent=S.bpm);document.querySelectorAll('.m-bpm').forEach(o=>{if(+o.value!==S.bpm)o.value=S.bpm});document.querySelectorAll('.m-toggle').forEach(b=>b.setAttribute('aria-pressed',!!metro));document.querySelectorAll('.m-name').forEach(n=>n.textContent=p.n);document.querySelectorAll('.m-unit').forEach(n=>n.textContent=unit(p))}
+document.addEventListener('change',e=>{const d=e.target.dataset;
+ if(d.gsong){const G=gigS(),id=d.gsong;if(e.target.checked){if(G.songs.length>=4){e.target.checked=false;toast('Four songs per gig: untick one first.');return}G.songs.push(id)}else G.songs=G.songs.filter(x=>x!==id);save();renderGig();refocus(`[data-gsong="${id}"]`);return}
+ if(d.bname!==undefined){gigS().bands[+d.bname].name=e.target.value.trim()||'Band '+(+d.bname+1);save();renderGig();return}
+ if(d.bm){const [bi,r]=d.bm.split(':');const G=gigS();G.bands[+bi].m[r]=e.target.value.trim().slice(0,40);save();renderGig();refocus(`[data-bm="${d.bm}"]`);return}
+ if(e.target.id==='rot'){gigS().rotate=e.target.checked;save();renderGig();refocus('#rot');return}
+ if(e.target.id==='blk'){const v=parseInt(e.target.value,10);gigS().block=v>=5&&v<=60?v:20;save();renderGig();return}
+ if(d.mark!==undefined){if(e.target.value==='')delete S.marks[d.mark];else S.marks[d.mark]=+e.target.value;save();grade()}
+ else if(d.warm){const t=today(),cur=S.warm[t]||[];S.warm[t]=e.target.checked?[...new Set(cur.concat(d.warm))]:cur.filter(x=>x!==d.warm);save();renderWarm();if((S.warm[t]||[]).length===5)toast('Warm-up done. Off to your Path.');refocus(`[data-warm="${d.warm}"]`)}
+ else if(d.best){const v=parseInt(e.target.value,10);if(v>=30&&v<=300){S.best[d.best]=v;save();toast('Best tempo saved: '+v+' bpm')}else{e.target.value=S.best[d.best]||'';toast('Enter a tempo from 30 to 300')}}});
+window.addEventListener('hashchange',route);let wasNarrow=window.innerWidth<700;window.addEventListener('resize',()=>{const nw=window.innerWidth<700;if(nw!==wasNarrow){wasNarrow=nw;if(view==='path')renderStage();else if(view==='gig')renderGig()}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){if(metro)stopMetro();if(playing)stopAll()}});
+checkGates();route();
+}
+</script>
+</body>
+</html>
