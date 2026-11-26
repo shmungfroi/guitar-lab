@@ -388,6 +388,21 @@ def _transpose_name(n, frm, to):
     return spell_note(LETTERS[li], (pc(n) + pc(to) - pc(frm)) % 12)
 
 
+SETTLED_JS = r"""({id,title,nkb,capo})=>{const st=document.getElementById('stage'),h=st&&st.querySelector('h2');
+ return location.hash==='#'+id&&!!h&&h.textContent.trim()===title&&st.querySelectorAll('svg.kb').length===nkb
+  &&[...st.querySelectorAll('svg.kb')].every(s=>s.getAttribute('aria-label'))&&st.innerText.includes('Capo '+capo)&&/sounds in [A-G]/.test(st.innerText)}"""
+
+
+def settle_keys_panel(pg, s, capo):
+    """R12 (0.7): wait until the keys panel for this stage and capo is fully drawn before reading it.
+    Returns False if it never settles, so the caller reports what is on screen instead of a bare timeout."""
+    try:
+        pg.wait_for_function(SETTLED_JS, arg={"id": s["id"], "title": s["title"], "nkb": len(dict.fromkeys(s["ch"])), "capo": capo}, timeout=15_000)
+        return True
+    except Exception:
+        return False
+
+
 def test_M3_keys_spelling_every_capo(app):
     """Every stage, capo 1-7: the keys panel spells each chord in the sounding key,
     exactly as the un-capoed spelling moved by the same interval (no enharmonic slips)."""
@@ -396,8 +411,12 @@ def test_M3_keys_spelling_every_capo(app):
     bad = []
     for capo in range(1, 8):
         pg = app(state={"inst": "keys", "capo": {s["id"]: capo for s in ST}})
+        pg.wait_for_function("()=>document.querySelectorAll('#stage svg.kb').length>0", timeout=15_000)   # seeded state is on screen
         for s in ST:
             go(pg, s["id"])
+            if not settle_keys_panel(pg, s, capo):
+                bad.append(f"{s['id']} capo {capo}: keys panel never settled; stage shows {text(pg, '#stage')[:100]!r}; saved {state(pg).get('inst')}/{state(pg).get('capo')}")
+                continue
             t = text(pg, "#stage")
             m = re.search(r"sounds in ([A-G][♯♭]?) (major|minor)", t)
             if not m:
@@ -412,8 +431,22 @@ def test_M3_keys_spelling_every_capo(app):
                 want = " ".join(_transpose_name(n, tonic[s["key"]], to) for n in D["CH"][c]["t"].split(" "))
                 if want not in labels:
                     bad.append(f"{s['id']} capo {capo} ({to} {md}): {c} should read {want}; panel: {labels[:120]}")
+        assert not pg.errors, pg.errors
         pg.context.close()
     assert not bad, "\n".join(bad[:25])
+
+
+def test_R12_keys_panel_settle_wait_is_real(app):
+    """The settle check must be true for the right stage and capo, and false for a wrong one (so it cannot pass vacuously)."""
+    pg = app(state={"inst": "keys", "capo": {"beyond": 3}})
+    by = {s["id"]: s for s in ST}
+    go(pg, "beyond")
+    assert settle_keys_panel(pg, by["beyond"], 3)
+    args = lambda s, c: {"id": s["id"], "title": s["title"], "nkb": len(dict.fromkeys(s["ch"])), "capo": c}
+    assert not pg.evaluate(SETTLED_JS, args(by["beyond"], 4)), "wrong capo reported as settled"
+    assert not pg.evaluate(SETTLED_JS, args(by["a-e"], 3)), "wrong stage reported as settled"
+    go(pg, "a-e")
+    assert not pg.evaluate(SETTLED_JS, args(by["beyond"], 3))
 
 
 @pytest.mark.parametrize("width", [360, 390])
@@ -700,3 +733,699 @@ def test_S15_listen_for_the_entry(app, stage):
     assert not re.search(r"come in after the count-in|pickup", cs["all"], re.I), "specific pickup claim"
     pg2 = app(state={"stage": stage}, hash_=stage)
     assert not re.search(r"pickup", text(pg2, "#stage"), re.I)
+
+
+# ===================================================================== register 0.7
+# One or more tests per item R1-R11 of tests/reports/spec07/SPEC_07.md (R6 and the data half
+# of R7 are in test_chords.py; R12 is the settle-wait in test_M3_keys_spelling_every_capo).
+
+import json
+import pathlib
+
+from uihelp import URL
+
+TS = 1764200000000
+# A full saved state in the app's own normal form: every field of the 0.7 shape is used.
+RICH = {
+    "finish": "rock", "stage": "c-g-f", "nsw": True, "teacher": False,
+    "lv": {"a-e:0": 2, "a-e:1": 2, "a-e:2": 3, "a-e:3": 2, "a-e:4": 2, "c-g-f@keys:0": 1, "r:pulse": 2, "t:power@bass": 1},
+    "sign": {"a-e:0": TS}, "marks": {"a-e:0": 1.5, "a-e:1": 2},
+    "changes": [{"d": TS, "st": "a-e", "inst": "guitar", "pair": "A-E", "n": 31},
+                {"d": TS + 5, "st": "beyond", "inst": "bass", "pair": "Bm-F#", "n": 12}],
+    "journal": [{"d": TS, "st": "a-e", "inst": "guitar", "h": "Heard the pull", "o": "Two clean runs", "w": "B string buzzes"},
+                {"d": TS + 9, "st": "c-g-f", "inst": "keys", "tag": "Invent", "h": "", "o": "Loop: C – F – G – C", "w": "Swap one voicing"}],
+    "bpm": 96, "useFin": True, "gates": {"a-e": TS}, "warm": {"2026-11-20": ["tune", "clap", "spider", "changes", "sing"]},
+    "best": {"r:pulse": 80, "r:pulse@bass": 70}, "capo": {"beyond": 4}, "mute": {"bass": True}, "inst": "keys",
+    "gig": {"songs": ["g-clock", "g-bamba", "g-hound", "g-shoes"],
+            "bands": [{"name": "Band 1", "m": {"guitar": "Player One", "drums": "Player Two"}}, {"name": "The Loud Ones", "m": {}}],
+            "block": 15, "rotate": False, "useFin": True, "open": "g-bamba", "bpm": 110},
+}
+POPUPS_JS = "()=>{window.__pop=[];for(const k of ['alert','confirm','prompt'])window[k]=(...a)=>{window.__pop.push(k+': '+a.join(' '));return k==='confirm'?true:''}}"
+CLIP_OK_JS = "()=>{window.__clip=null;Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:t=>{window.__clip=t;return Promise.resolve()}}})}"
+CLIP_BLOCKED_JS = "()=>{Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:()=>Promise.reject(new Error('blocked'))}})}"
+
+
+def raw(pg):
+    return pg.evaluate("()=>localStorage.getItem('shredder')")
+
+
+def copy_backup(pg):
+    pg.evaluate(CLIP_OK_JS)
+    pg.click("#bkCopy")
+    pg.wait_for_function("()=>window.__clip")
+    return pg.evaluate("()=>window.__clip")
+
+
+def offer(pg, txt):
+    pg.fill("#bkIn", txt)
+    pg.click("#bkImport")
+
+
+def test_R1_backup_panel_is_findable(app):
+    pg = app(state={})
+    foot = pg.locator(".foot a[href='#record']")
+    assert foot.count() == 1 and re.search(r"backup", foot.inner_text(), re.I), "footer should point to the backup"
+    foot.click()
+    pg.wait_for_selector("#backup")
+    card = text(pg, "#backup")
+    for label in ["Download backup", "Copy backup", "Choose a backup file", "Import pasted backup"]:
+        assert label in card, label
+    look = pg.evaluate("""()=>{const b=document.getElementById('bkDown'),o=document.getElementById('playMap')||document.querySelector('#jf button'),c=s=>getComputedStyle(s);
+      return [c(b).fontFamily===c(o).fontFamily,c(b).borderRadius===c(o).borderRadius,c(b).backgroundColor===c(o).backgroundColor,parseFloat(c(b).minHeight)>=44]}""")
+    assert all(look), f"backup buttons should match the app's own buttons: {look}"
+    assert not pg.errors
+
+
+def test_R1_export_import_round_trip_is_lossless(app):
+    a = app(state=RICH, hash_="record")
+    a.evaluate(POPUPS_JS)
+    txt = copy_backup(a)
+    assert "copied" in text(a, "#bkMsg").lower()
+    out = json.loads(txt)
+    assert out["app"] == "The Guitar Lab" and out["version"] == "0.7" and out["format"] == 1 and out["saved"]
+    assert out["state"] == RICH, "export must carry the full saved state unchanged"
+    with a.expect_download() as dl:
+        a.click("#bkDown")
+    assert re.fullmatch(r"guitar-lab-backup-\d{4}-\d\d-\d\d\.json", dl.value.suggested_filename)
+    assert json.loads(pathlib.Path(dl.value.path()).read_text(encoding="utf-8"))["state"] == RICH
+    assert a.evaluate("()=>window.__pop") == []
+
+    b = app(state={}, hash_="record")
+    b.evaluate(POPUPS_JS)
+    before = raw(b)
+    offer(b, txt)
+    ask = b.locator("#bkAsk")
+    assert "Replace your progress with this backup?" in ask.inner_text()
+    assert b.locator("#bkYes").is_visible() and b.locator("#bkNo").is_visible()
+    assert raw(b) == before, "nothing may change before the confirm is answered"
+    b.click("#bkYes")
+    assert state(b) == RICH, "import must restore the full state"
+    rec = text(b, "#v-record")
+    assert "Your path: Keys" in rec and "B string buzzes" in rec, "page should re-render from the imported state"
+    assert "imported" in text(b, "#bkMsg").lower() and b.locator("#bkYes").count() == 0
+    assert json.loads(copy_backup(b))["state"] == RICH, "second export differs from the first"
+    b.reload()
+    b.wait_for_selector("#backup")
+    assert state(b) == RICH and "Your path: Keys" in text(b, "#v-record"), "imported state must survive a reload"
+    go(b, "gig")
+    assert state(b) == RICH, "the gig plan came back in normal form"
+    assert b.evaluate("()=>window.__pop||[]") == [] and not a.errors and not b.errors
+
+
+def test_R1_import_accepts_a_raw_saved_state_and_old_saves(app):
+    old = {"finish": "flam", "stage": "am-e7", "lv": {"a-e:0": 2}, "bpm": 84, "inst": "guitar",
+           "changes": [{"d": TS, "st": "a-e", "pair": "A-E", "n": 20}], "journal": [{"d": TS, "st": "a-e", "h": "x", "o": "", "w": ""}],
+           "gig": {"songs": ["g-boogie"], "bands": [{"name": "Band 1", "m": {}}], "block": 20, "rotate": True}}
+    pg = app(state={}, hash_="record")
+    offer(pg, json.dumps(old))            # exactly what an older build left in localStorage
+    pg.click("#bkYes")
+    s = state(pg)
+    assert s["finish"] == "flam" and s["stage"] == "am-e7" and s["lv"] == {"a-e:0": 2} and s["bpm"] == 84
+    assert s["changes"][0]["inst"] == "guitar" and s["journal"][0]["inst"] == "guitar", "pre-0.6 entries are guitar's"
+    assert s["gig"]["songs"] == ["g-boogie"] and s["gig"]["useFin"] is False, "new field gets its default"
+    assert not pg.errors
+    # and the same old save still loads straight from storage
+    pg2 = app(state=old, hash_="gig")
+    s2 = state(pg2)
+    assert s2["lv"] == {"a-e:0": 2} and s2["gig"]["useFin"] is False and s2["gig"]["songs"] == ["g-boogie"]
+    assert not pg2.errors
+
+
+BAD = [
+    ("", r"nothing to import"),
+    ("   ", r"nothing to import"),
+    ("{not json", r"can't be read as JSON"),
+    (json.dumps({"app": "The Guitar Lab", "format": 1, "state": RICH})[:-40], r"can't be read as JSON"),   # cut short
+    ("[1,2,3]", r"isn't a Guitar Lab backup"),
+    ('"hello"', r"isn't a Guitar Lab backup"),
+    ("42", r"isn't a Guitar Lab backup"),
+    ("null", r"isn't a Guitar Lab backup"),
+    ('{"foo":1,"bar":[]}', r"none of the things this app saves"),
+    ('{"lv":[1,2],"journal":[]}', r'damaged: "lv"'),
+    ('{"lv":{},"journal":"none","bpm":"fast"}', r"damaged"),
+    ('{"journal":[1,2]}', r"damaged"),
+    (json.dumps({"app": "The Guitar Lab", "format": 99, "state": {"lv": {}}}), r"newer version"),
+]
+
+
+@pytest.mark.parametrize("bad,why", BAD)
+def test_R1_bad_backup_is_rejected_and_changes_nothing(app, bad, why):
+    pg = app(state=RICH, hash_="record")
+    pg.evaluate(POPUPS_JS)
+    before, shown = raw(pg), text(pg, "#v-record .card")
+    offer(pg, bad)
+    msg = pg.locator("#bkMsg .bkmsg.bad")
+    assert msg.is_visible() and re.search(why, msg.inner_text(), re.I), msg.inner_text()
+    assert "nothing has been changed" in msg.inner_text().lower() or "nothing to import" in msg.inner_text().lower()
+    assert pg.locator("#bkYes").count() == 0, "no confirm for a bad backup"
+    assert raw(pg) == before and text(pg, "#v-record .card") == shown
+    assert json.loads(copy_backup(pg))["state"] == RICH, "state in memory changed"
+    assert pg.evaluate("()=>window.__pop") == [] and not pg.errors
+
+
+def test_R1_confirm_box_cancel_changes_nothing(app):
+    pg = app(state=RICH, hash_="record")
+    pg.evaluate(POPUPS_JS)
+    before = raw(pg)
+    other = dict(RICH, inst="bass", lv={}, journal=[])
+    offer(pg, json.dumps(other))
+    box = pg.locator("#bkAsk .bkask")
+    assert box.is_visible() and "Replace your progress with this backup?" in box.inner_text()
+    assert "can't be undone" in box.inner_text()
+    assert pg.evaluate("()=>document.activeElement&&document.activeElement.id") == "bkNo", "Cancel should hold the focus"
+    pg.click("#bkNo")
+    assert pg.locator("#bkAsk .bkask").count() == 0
+    assert raw(pg) == before and "Your path: Keys" in text(pg, "#v-record")
+    assert "unchanged" in text(pg, "#bkMsg").lower()
+    assert json.loads(copy_backup(pg))["state"] == RICH
+    # a bad paste after a good one withdraws the question
+    offer(pg, json.dumps(other))
+    offer(pg, "{oops")
+    assert pg.locator("#bkYes").count() == 0 and raw(pg) == before
+    # leaving the tab withdraws it too
+    offer(pg, json.dumps(other))
+    go(pg, "path")
+    go(pg, "record")
+    assert pg.locator("#bkYes").count() == 0 and raw(pg) == before
+    assert pg.evaluate("()=>window.__pop") == [] and not pg.errors
+
+
+def test_R1_import_by_file_pick(app):
+    pg = app(state={}, hash_="record")
+    pg.evaluate(POPUPS_JS)
+    payload = json.dumps({"app": "The Guitar Lab", "format": 1, "version": "0.7", "saved": "2026-11-27T01:00:00.000Z", "state": RICH})
+    pg.set_input_files("#bkFile", {"name": "guitar-lab-backup-2026-11-27.json", "mimeType": "application/json", "buffer": payload.encode("utf-8")})
+    pg.wait_for_selector("#bkYes")
+    assert "27 Nov 2026" in text(pg, "#bkAsk"), "confirm should say when the backup was made"
+    assert state(pg) != RICH
+    pg.click("#bkYes")
+    assert state(pg) == RICH
+    pg.set_input_files("#bkFile", {"name": "notes.txt", "mimeType": "text/plain", "buffer": b"these are not the droids"})
+    pg.wait_for_selector("#bkMsg .bkmsg.bad")
+    assert state(pg) == RICH and pg.locator("#bkYes").count() == 0
+    assert pg.evaluate("()=>window.__pop") == [] and not pg.errors
+
+
+def test_R1_copy_falls_back_to_a_visible_textarea(app):
+    pg = app(state=RICH, hash_="record")
+    assert not pg.locator("#bkOut").is_visible()
+    pg.evaluate(CLIP_BLOCKED_JS)
+    pg.click("#bkCopy")
+    pg.wait_for_selector("#bkOut", state="visible")
+    assert json.loads(pg.input_value("#bkOut"))["state"] == RICH
+    assert re.search(r"box above", text(pg, "#bkMsg"))
+    sel = pg.evaluate("()=>{const t=document.getElementById('bkOut');return [document.activeElement===t,t.selectionStart,t.selectionEnd===t.value.length]}")
+    assert sel == [True, 0, True], "the fallback text should be focused and selected"
+    pg.evaluate("()=>{Object.defineProperty(navigator,'clipboard',{configurable:true,value:undefined})}")   # no clipboard API at all
+    pg.click("#bkCopy")
+    assert pg.locator("#bkOut").is_visible() and not pg.errors
+
+
+def test_R1_download_uses_the_viewer_capability_when_present(app):
+    pg = app(state=RICH, hash_="record")
+    pg.evaluate("""()=>{window.__saves=[];window.__mode='ok';window.claude={use:async n=>n==='downloads'?Object.freeze({save:async r=>{window.__saves.push(r);
+       if(window.__mode!=='ok')throw {code:window.__mode,message:'no'};return {status:'saved'}}}):null};
+      window.__anch=0;const c=HTMLAnchorElement.prototype.click;HTMLAnchorElement.prototype.click=function(){if(this.download)window.__anch++;return c.call(this)}}""")
+    pg.click("#bkDown")
+    pg.wait_for_function("()=>window.__saves.length===1")
+    sv = pg.evaluate("()=>window.__saves[0]")
+    assert re.fullmatch(r"guitar-lab-backup-\d{4}-\d\d-\d\d\.json", sv["filename"]) and json.loads(sv["data"])["state"] == RICH
+    pg.wait_for_function("()=>/saved as/i.test(document.getElementById('bkMsg').textContent)")
+    assert pg.evaluate("()=>window.__anch") == 0, "capability present: no blob link needed"
+    pg.evaluate("()=>{window.__mode='declined'}")
+    pg.click("#bkDown")
+    pg.wait_for_function("()=>/cancelled/i.test(document.getElementById('bkMsg').textContent)")
+    assert pg.evaluate("()=>window.__anch") == 0, "a declined save must not download behind the viewer's back"
+    pg.evaluate("()=>{window.__mode='unavailable'}")
+    with pg.expect_download() as dl:          # capability refuses: fall back to the plain link
+        pg.click("#bkDown")
+    assert dl.value.suggested_filename.endswith(".json") and not pg.errors
+
+
+def test_R1_works_in_a_sandboxed_frame(browser, tmp_path):
+    """Sandboxed iframe, no same-origin: storage, clipboard and downloads are all blocked. The panel must still export and import."""
+    host = tmp_path / "host.html"
+    host.write_text(f'<!doctype html><meta charset="utf-8"><iframe id="f" sandbox="allow-scripts" src="{URL}#record" style="width:1100px;height:1400px;border:0"></iframe>', encoding="utf-8")
+    ctx = browser.new_context(viewport={"width": 1200, "height": 1500})
+    pg = ctx.new_page()
+    errs = []
+    pg.on("pageerror", lambda e: errs.append(str(e)))
+    pg.goto(host.as_uri())
+    fr = pg.frames[1]
+    fr.wait_for_selector("#backup")
+    assert fr.evaluate("()=>{try{localStorage.getItem('x');return 'open'}catch(e){return 'blocked'}}") == "blocked", "frame is not sandboxed"
+    fr.evaluate(POPUPS_JS)
+    fr.click("#bkDown")                      # blocked or not, it must not throw and must say something
+    fr.wait_for_function("()=>document.getElementById('bkMsg').textContent.length>10")
+    assert re.search(r"Copy backup", fr.inner_text("#bkMsg"))
+    fr.click("#bkCopy")
+    fr.wait_for_selector("#bkOut", state="visible")
+    empty = json.loads(fr.input_value("#bkOut"))
+    assert empty["state"]["lv"] == {} and empty["state"]["inst"] == "guitar"
+    fr.fill("#bkIn", json.dumps({"app": "The Guitar Lab", "format": 1, "state": RICH}))
+    fr.click("#bkImport")
+    assert "Replace your progress with this backup?" in fr.inner_text("#bkAsk")
+    fr.click("#bkYes")
+    assert "Your path: Keys" in fr.inner_text("#v-record") and "B string buzzes" in fr.inner_text("#v-record")
+    fr.click("#bkCopy")
+    fr.wait_for_function("()=>{try{return JSON.parse(document.getElementById('bkOut').value).state.inst==='keys'}catch(e){return false}}")
+    assert json.loads(fr.input_value("#bkOut"))["state"] == RICH, "round trip inside the sandbox is not lossless"
+    fr.set_input_files("#bkFile", {"name": "b.json", "mimeType": "application/json", "buffer": json.dumps(dict(RICH, inst="drums")).encode()})
+    fr.wait_for_selector("#bkYes")
+    fr.click("#bkYes")
+    assert "Your path: Drums" in fr.inner_text("#v-record")
+    assert fr.evaluate("()=>window.__pop") == [] and not errs, errs
+    ctx.close()
+
+
+def test_R1_no_browser_popups_in_source():
+    src = pathlib.Path(URL.replace("file://", "")).read_text(encoding="utf-8")
+    assert not re.search(r"(?<![\w.$])(alert|confirm|prompt)\s*\(", src), "alert/confirm/prompt call in index.html"
+    assert "'shredder'" in src and len(re.findall(r"localStorage\.(get|set)Item\('([^']+)'", src)) == 2
+    assert {m[1] for m in re.findall(r"localStorage\.(get|set)Item\('([^']+)'", src)} == {"shredder"}
+    assert not re.search(r"\b(fetch|XMLHttpRequest|WebSocket|sendBeacon|importScripts)\b", src), "network call in index.html"
+    assert not re.search(r"<script[^>]+src=|<link[^>]+href=", src), "external script or stylesheet"
+
+
+def test_version_label_is_0_7(app):
+    pg = app(state={})
+    assert pg.title() == "The Guitar Lab 0.7"
+    assert "version 0.7" in text(pg, "header .sub")
+    assert "0.6" not in pg.evaluate("()=>document.body.innerText")
+
+
+# --------------------------------------------------------------------- R2
+
+def hat_gaps(pg):
+    """Play the open gig song for a moment and return the gaps between drum hits after the count-in."""
+    n0 = len(starts(pg))
+    pg.click("#playGig")
+    pg.wait_for_timeout(5800)      # two bars of count-in at 120, then a bar and a bit of the song
+    pg.click("#playGig")
+    t = sorted({round(s["when"], 4) for s in starts(pg)[n0:] if s["kind"] == "buf" and s["dur"] and s["dur"] < 1})
+    assert len(t) >= 4, "no drums scheduled"
+    return [b - a for a, b in zip(t, t[1:])]
+
+
+def test_R2_gig_song_keeps_its_own_feel(app):
+    """Path set to the Flamenco feel (Tangos in 4/4): the gig boogie still plays its swung shuffle."""
+    tangos = next(f for f in D["FIN"] if f["k"] == "flam")["p"]["4"]["n"]
+    pg = app(state={"useFin": True, "finish": "flam", "stage": "twelve-bar", "gig": {"bpm": 120}}, hash_="gig")
+    assert "12-bar boogie" in text(pg, "#gigSong .pd")
+    assert pg.inner_text(".mbar .m-name") == PAT["shuffle"]["n"]
+    assert pg.get_attribute('[data-gpat="0"]', "aria-pressed") == "true" and pg.get_attribute('[data-gpat="1"]', "aria-pressed") == "false"
+    assert "Flamenco feel" not in text(pg, "#gigSong .rm"), "chart says the band plays the Path's feel"
+    gaps = hat_gaps(pg)
+    beat = 60 / 120
+    assert min(gaps) < beat / 3 + 0.02 and any(abs(g - beat * 2 / 3) < 0.02 for g in gaps), f"boogie is not swung: {gaps[:8]}"
+    go(pg, "twelve-bar")
+    assert pg.inner_text(".mbar .m-name") == tangos, "Path keeps its Finish feel"
+    s = state(pg)
+    assert s["useFin"] is True and s["gig"]["useFin"] is False
+    assert not pg.errors
+
+
+def test_R2_gig_feel_switch_changes_gig_only(app):
+    rock = next(f for f in D["FIN"] if f["k"] == "rock")["p"]["4"]["n"]
+    tangos = next(f for f in D["FIN"] if f["k"] == "flam")["p"]["4"]["n"]
+    pg = app(state={"useFin": False, "finish": "flam", "stage": "twelve-bar", "gig": {"bpm": 120}}, hash_="gig")
+    assert "Flamenco feel" in text(pg, '[data-gpat="1"]')
+    pg.click('[data-gpat="1"]')
+    assert pg.get_attribute('[data-gpat="1"]', "aria-pressed") == "true"
+    assert pg.inner_text(".mbar .m-name") == tangos
+    assert "Flamenco feel" in text(pg, "#gigSong .rm")
+    s = state(pg)
+    assert s["gig"]["useFin"] is True and s["useFin"] is False, "the Gig switch must not move the Path's"
+    gaps = hat_gaps(pg)
+    assert min(gaps) > 0.45, f"Tangos is four to the bar at 120: {gaps[:8]}"
+    go(pg, "twelve-bar")
+    assert pg.inner_text(".mbar .m-name") == PAT["shuffle"]["n"]
+    assert pg.get_attribute('#side [data-pat="0"]', "aria-pressed") == "true"
+    pg.click('#side [data-pat="1"]')                 # and the Path's switch must not move the Gig's
+    pg.click('[data-fin="rock"]')
+    s = state(pg)
+    assert s["useFin"] is True and s["gig"]["useFin"] is True
+    go(pg, "gig")
+    assert pg.inner_text(".mbar .m-name") == rock and "Rock and roll feel" in text(pg, '[data-gpat="1"]')
+    pg.click('[data-gpat="0"]')
+    s = state(pg)
+    assert s["gig"]["useFin"] is False and s["useFin"] is True
+    assert pg.inner_text(".mbar .m-name") == PAT["shuffle"]["n"]
+    pg.click("#playGig")                             # switching feel mid-song stops the band
+    pg.wait_for_timeout(400)
+    pg.click('[data-gpat="1"]')
+    assert text(pg, "#playGig") == "Play the chart" and "stopped" in toast(pg)
+    assert not pg.errors
+
+
+# --------------------------------------------------------------------- R3
+
+PRESENT_JS = r"""()=>{const h=e=>e?e.getBoundingClientRect().height:0;
+ const chord=[...document.querySelectorAll('#v-gig .rmap text')].filter(t=>/^[A-G][♯♭]?m?7?$/.test(t.textContent.trim()));
+ const ph=[...document.querySelectorAll('#gigRun h3')].filter(e=>/^Phase \d/.test(e.textContent.trim()));
+ const svg=document.querySelector('#v-gig .rmap');
+ return {chord:Math.max(0,...chord.map(h)),nchord:document.querySelectorAll('#v-gig .rmap .rm-bar').length,phase:ph.length?parseFloat(getComputedStyle(ph[0]).fontSize):0,nphase:ph.length,
+  sub:ph.length&&ph[0].querySelector('.note')?parseFloat(getComputedStyle(ph[0].querySelector('.note')).fontSize):0,
+  svgW:svg?svg.getBoundingClientRect().width:0,cardW:svg?svg.closest('.card').getBoundingClientRect().width:0}}"""
+
+
+@pytest.mark.parametrize("song", ["g-boogie", "g-bamba"])
+@pytest.mark.parametrize("width", [360, 768, 1280])
+def test_R3_present_mode_enlarges_chart_and_phase_headings(app, width, song):
+    pg = app(width=width, state={"gig": {"open": song, "bands": [{"name": "Band 1", "m": {"guitar": "Player One", "bass": "Player Two"}}, {"name": "Band 2", "m": {}}]}}, hash_="gig")
+    a = pg.evaluate(PRESENT_JS)
+    assert a["nchord"] and a["nphase"] == 4
+    pg.click("#present")
+    b = pg.evaluate(PRESENT_JS)
+    assert b["nchord"] == a["nchord"] and b["nphase"] == 4, "Present mode lost part of the chart or run sheet"
+    assert b["chord"] >= a["chord"] * 1.5, f"chart chords {a['chord']:.1f}px -> {b['chord']:.1f}px"
+    assert b["phase"] >= a["phase"] * 1.35, f"phase heading {a['phase']}px -> {b['phase']}px"
+    assert b["sub"] > a["sub"]
+    if width >= 768:
+        assert b["chord"] >= 26 and b["phase"] >= 22, "not readable from the back of a room"
+    assert b["svgW"] <= b["cardW"] + 1
+    over = pg.evaluate(OVERFLOW_JS)
+    assert not over, over
+    assert pg.get_attribute("#present", "aria-pressed") == "true"
+    pg.click("#playGig")                     # the enlarged chart still follows the band
+    pg.wait_for_function("()=>document.querySelector('#v-gig .rm-bar.now')", timeout=8000)
+    pg.click("#playGig")
+    pg.click("#present")
+    c = pg.evaluate(PRESENT_JS)
+    assert abs(c["chord"] - a["chord"]) < 0.5 and c["phase"] == a["phase"], "leaving Present mode should restore the sizes"
+    assert not pg.evaluate(OVERFLOW_JS) and not pg.errors
+
+
+def test_R3_present_mode_does_not_touch_the_path_chart(app):
+    pg = app(width=1280, state={}, hash_="gig")
+    go(pg, "path")
+    before = pg.evaluate("()=>document.querySelectorAll('#stage .rmap .rm-bar').length+':'+document.querySelector('#stage .rmap').getAttribute('viewBox')")
+    go(pg, "gig")
+    pg.click("#present")
+    go(pg, "path")
+    assert not pg.evaluate("()=>document.body.classList.contains('present')")
+    assert pg.evaluate("()=>document.querySelectorAll('#stage .rmap .rm-bar').length+':'+document.querySelector('#stage .rmap').getAttribute('viewBox')") == before
+
+
+# --------------------------------------------------------------------- R4
+
+SEEN_JS = "()=>document.body.innerText+' '+[...document.querySelectorAll('[aria-label],[title],[placeholder]')].map(e=>(e.getAttribute('aria-label')||'')+' '+(e.getAttribute('title')||'')+' '+(e.getAttribute('placeholder')||'')).join(' ')"
+
+
+def walk(pg):
+    """Every stage on the Path, then every other tab (each gig song opened): yields (where, visible text + labels)."""
+    for s in ST:
+        go(pg, s["id"])
+        yield s["id"], pg.evaluate(SEEN_JS)
+    for tab in TABS[1:]:
+        go(pg, tab)
+        yield tab, pg.evaluate(SEEN_JS)
+        if tab == "gig":
+            for g in GIGS:
+                pg.click(f'[data-gopen="{g["id"]}"][data-gview]')
+                yield "gig/" + g["id"], pg.evaluate(SEEN_JS)
+
+
+@pytest.mark.parametrize("inst", INSTS)
+def test_R4_quavers_not_eighths(app, inst):
+    bad = []
+    for fin in [f["k"] for f in D["FIN"]]:
+        pg = app(state={"inst": inst, "finish": fin, "useFin": True, "gig": {"useFin": True}})
+        for where, t in walk(pg):
+            for m in re.finditer(r".{0,30}\b(eighth|sixteenth|quarter note|half note)s?\b.{0,20}", t, re.I):
+                bad.append(f"{inst}/{fin}/{where}: {m.group(0)!r}")
+        assert not pg.errors
+        pg.context.close()
+    assert not bad, "\n".join(bad[:20])
+    names = [p["n"] for p in PAT.values()] + [p["n"] for f in D["FIN"] for p in f["p"].values()]
+    assert not [n for n in names if re.search(r"eighth", n, re.I)], names
+    assert PAT["eighths"]["n"] == "Straight quavers"
+
+
+# --------------------------------------------------------------------- R5
+
+def changes_card(pg):
+    return pg.evaluate("()=>{const c=[...document.querySelectorAll('#side .card')].find(c=>/One-minute changes/.test(c.textContent));return c?c.innerText:''}")
+
+
+@pytest.mark.parametrize("inst", ["bass", "keys"])
+def test_R5_changes_card_follows_capo(app, inst):
+    pg = app(state={"inst": inst, "stage": "a-e"})
+    assert "A ↔ E" in changes_card(pg)
+    for capo, pair in [(1, "B♭ ↔ F"), (2, "B ↔ F♯"), (3, "C ↔ G")]:
+        pg.click('[data-capo="1"]')
+        card = changes_card(pg)                       # read straight away: no tab change, no reload
+        assert pair in card and "A ↔ E" not in card, f"capo {capo}: card reads {card[:60]!r}"
+    for _ in range(3):
+        pg.click('[data-capo="-1"]')
+    assert "A ↔ E" in changes_card(pg)
+    go(pg, "beyond")
+    pg.click('[data-capo="1"]')
+    assert "Cm ↔ G" in changes_card(pg), "B minor / F♯ up one fret is C minor / G"
+    assert not pg.errors
+
+
+def test_R5_guitar_changes_card_keeps_shapes(app):
+    pg = app(state={"stage": "a-e"})
+    pg.click('[data-capo="1"]')
+    assert "A ↔ E" in changes_card(pg), "the guitarist still fingers A and E with a capo on"
+    pg.fill("#cnt", "33")
+    pg.click("#logChg")
+    pg.click('[data-capo="1"]')
+    assert "Best: 33" in changes_card(pg), "logged changes lost on capo change"
+
+
+# --------------------------------------------------------------------- R7
+
+COL_JS = r"""()=>{const p=document.createElement('i');document.body.appendChild(p);const v=n=>{p.style.color='var('+n+')';return getComputedStyle(p).color};
+ const out={dom:v('--dom'),sub:v('--sub'),ton:v('--ton'),pre:v('--pre'),sec:v('--sec'),card:getComputedStyle(document.querySelector('.card')).backgroundColor,box:{},map:{},rows:[]};p.remove();
+ document.querySelectorAll('#stage .cb[data-strum]').forEach(b=>{out.box[b.dataset.strum]={rn:getComputedStyle(b.querySelector('.rn')).color,name:getComputedStyle(b.querySelector('svg text')).fill,dot:getComputedStyle(b.querySelector('svg circle[r="5.6"]')||b.querySelector('svg text')).fill,label:b.querySelector('.rn').innerText}});
+ document.querySelectorAll('#stage .rmap text').forEach(t=>{const s=t.textContent.trim();if(/^[A-G][♯♭]?m?7?$/.test(s))out.map[s]=getComputedStyle(t).fill});
+ document.querySelectorAll('#side .fk > div').forEach(d=>out.rows.push([d.innerText.trim(),getComputedStyle(d.querySelector('.sw')).backgroundColor]));return out}"""
+
+
+@pytest.mark.parametrize("scheme,dom", [("dark", "rgb(208, 87, 75)"), ("light", "rgb(168, 53, 43)")])
+@pytest.mark.parametrize("stage,sub,dominant", [("six-eight", "G", "E"), ("beyond", "A", "F#")])
+def test_R7_subtonic_not_coloured_dominant(app, scheme, dom, stage, sub, dominant):
+    pg = app(scheme=scheme, state={"stage": stage}, hash_=stage)
+    c = pg.evaluate(COL_JS)
+    assert c["dom"] == dom, "the dominant colour itself must not change (Q2 is still open)"
+    assert c["sub"] not in (c["dom"], c["ton"], c["pre"], c["sec"])
+    b = c["box"][sub]
+    assert b["rn"] == b["name"] == b["dot"] == c["sub"], f"{sub} (VII) should be the subtonic colour everywhere on its box: {b}"
+    assert "VII" in b["label"] and "subtonic" in b["label"] and "dominant" not in b["label"]
+    d = c["box"][dominant]
+    assert d["rn"] == d["name"] == d["dot"] == c["dom"] and "dominant" in d["label"], f"{dominant} is the true dominant: {d}"
+    pretty = lambda n: n.replace("#", "♯")
+    assert c["map"][pretty(sub)] == c["sub"] and c["map"][pretty(dominant)] == c["dom"], "chart colours disagree with the boxes"
+    rows = dict((r[0].split(":")[0], r) for r in c["rows"])
+    assert rows["Subtonic"][0] == "Subtonic: " + pretty(sub) and rows["Subtonic"][1] == c["sub"]
+    assert pretty(dominant) in pretty(rows["Dominant"][0]) and pretty(sub) not in rows["Dominant"][0].split(":")[1] and rows["Dominant"][1] == c["dom"]
+    assert contrast(c["sub"], c["card"]) >= 4.5, "subtonic colour too faint"
+    assert not pg.errors
+
+
+def test_R7_true_dominant_E7_still_dominant(app):
+    pg = app(state={"stage": "am-e7"}, hash_="am-e7")
+    c = pg.evaluate(COL_JS)
+    assert c["box"]["E7"]["rn"] == c["dom"] and c["map"]["E7"] == c["dom"]
+    assert not [r for r in c["rows"] if r[0].startswith("Subtonic")]
+
+
+def test_R6_greensleeves_chart_and_band_agree(app):
+    """Bar 3 of the verse reads Am on the chart, and the band's bass plays A (not F) in that bar."""
+    bpm = 120
+    pg = app(state={"stage": "six-eight", "bpm": bpm}, hash_="six-eight")
+    label = pg.get_attribute("#stage .rmap", "aria-label")
+    assert "Verse, 8 bars: Am G Am E Am G Am E Am" in label
+    shown = pg.evaluate("()=>[...document.querySelectorAll('#stage .rmap text')].map(t=>t.textContent.trim()).filter(s=>/^[A-G][♯♭]?m?7?$/.test(s))")
+    assert shown[:4] == ["Am", "G", "Am", "E"] and "F" not in shown
+    boxes = pg.evaluate("()=>[...document.querySelectorAll('#stage .cb[data-strum]')].map(b=>b.dataset.strum)")
+    assert boxes == ["Am", "G", "E", "C"], "the stage should teach exactly the chords on its chart"
+    pg.click("#playMap")
+    pg.wait_for_timeout(3600)
+    pg.click("#playMap")
+    beat = 60 / bpm
+    bass = sorted((s["when"], s["freq"]) for s in starts(pg) if s["type"] == "triangle")
+    t0 = bass[0][0]
+    by_bar = {}
+    for when, f in bass:
+        by_bar.setdefault(int((when - t0) / (2 * beat) + 0.05), f)
+    a1, g1, f1, e1 = 55.0, 48.999, 43.654, 41.203
+    assert abs(by_bar[0] - a1) < 0.3 and abs(by_bar[1] - g1) < 0.3
+    assert abs(by_bar[2] - a1) < 0.3, f"bar 3 bass is {by_bar[2]:.2f} Hz (F would be {f1})"
+    assert abs(by_bar[3] - e1) < 0.3
+    go(pg, "technique")
+    assert pg.locator('#v-technique .cb[data-strum="F"]').count() >= 1, "the Andalusian cadence keeps its F"
+    assert not pg.errors
+
+
+# --------------------------------------------------------------------- R8
+
+DRUM_JS = "()=>[...document.querySelectorAll('#stage .dg, #stage .dgw + p.note, #gigPart .dg, #gigPart .dgw + p.note')].map(e=>(e.getAttribute('aria-label')||'')+' '+e.innerText).join(' ')"
+STRUM_WORDS = r"\bstrum|\bdowns?\b|\bups?\b|\bDU\b|\bUDU\b|D ·|thumb|palm|\bchords (on|between)|\bbass, |\beighth|compás"
+
+
+def test_R8_drum_panel_uses_drum_words(app):
+    bad, seen = [], set()
+    for fin, use in [("bossa", False)] + [(f["k"], True) for f in D["FIN"]]:
+        pg = app(state={"inst": "drums", "finish": fin, "useFin": use, "gig": {"useFin": use}})
+        spots = [s["id"] for s in ST] + ["gig"]
+        for where in spots:
+            go(pg, where)
+            t = pg.evaluate(DRUM_JS)
+            seen.add(t)
+            if not re.search(r"\bhats\b", t) or not re.search(r"\bkick on 1\b", t):
+                bad.append(f"{fin}/{use}/{where}: groove not described in drum words: {t[-200:]!r}")
+            for m in re.finditer(STRUM_WORDS, t, re.I):
+                bad.append(f"{fin}/{use}/{where}: {m.group(0)!r} in {t[max(0, m.start() - 40):m.end() + 20]!r}")
+        assert not pg.errors
+        pg.context.close()
+    assert not bad, "\n".join(bad[:20])
+    pg = app(state={"inst": "drums"})
+    want = {"a-e": "hats on every beat, snare on 2 and 4, kick on 1 and 3",
+            "twelve-bar": "hats in swung quavers, snare on 2 and 4, kick on 1 and 3",
+            "c-g-f": "hats on every beat, rim click on 2 and 3, kick on 1",
+            "six-eight": "hats on all six quavers, snare on 4, kick on 1"}
+    for sid, words in want.items():
+        go(pg, sid)
+        assert words in pg.evaluate(DRUM_JS), f"{sid}: {pg.evaluate(DRUM_JS)[-220:]!r}"
+        assert words in pg.get_attribute("#stage .dg", "aria-label")
+
+
+# --------------------------------------------------------------------- R9
+
+def test_R9_f_sharp_uses_the_proper_sign(app):
+    bad = []
+    for inst in ["guitar", "bass"]:
+        pg = app(state={"inst": inst, "stage": "beyond"}, hash_="beyond")
+        fk = text(pg, "#side .fk")
+        assert "Dominant: F♯" in fk, fk
+        for where, t in walk(pg):
+            if where == "invent":
+                assert re.search(r"Pool: .*F♯", t), "Invent pool should list F♯"
+            for m in re.finditer(r".{0,25}[A-G]#.{0,10}", t):
+                bad.append(f"{inst}/{where}: {m.group(0)!r}")
+        pg.context.close()
+    assert not bad, "\n".join(bad[:20])
+    pg = app(state={"stage": "beyond"}, hash_="invent")
+    for _ in range(40):                                     # roll until F♯ comes up, then save the loop
+        pg.click("#roll")
+        if pg.locator('#v-invent .cb[data-strum="F#"]').count():
+            break
+    assert pg.locator('#v-invent .cb[data-strum="F#"]').count(), "F♯ never rolled"
+    pg.click("#keepLoop")
+    go(pg, "record")
+    j = text(pg, "#v-record .log")
+    assert "F♯" in j and "#" not in j, j
+
+
+def test_R9_la_bamba_bar_reference_fits_its_loop(app):
+    pg = app(state={}, hash_="gig")
+    pg.click('[data-gopen="g-bamba"][data-gview]')
+    t = text(pg, "#gigSong")
+    assert "Loop, 4 bars" in pg.get_attribute("#gigSong .rmap", "aria-label")
+    assert not re.search(r"bars? (10|12)|bars 10 and 12", t), "La Bamba's loop has four bars"
+    assert re.search(r"same four bars", t)
+    for g in [x for x in GIGS if x["id"] != "g-bamba"]:     # the 12-bar songs keep their real caveat
+        pg.click(f'[data-gopen="{g["id"]}"][data-gview]')
+        assert "bars 10 and 12" in text(pg, "#gigSong"), g["id"]
+    assert not pg.errors
+
+
+@pytest.mark.parametrize("inst", INSTS)
+def test_R9_bpm_label_is_tidy(app, inst):
+    pg = app(state={"inst": inst})
+    for sid in ["six-eight", "hallelujah", "a-e"]:
+        go(pg, sid)
+        t = pg.evaluate("()=>document.body.innerText")
+        assert "(bpm (" not in t and "))" not in t, sid
+        nested = re.findall(r"\([^()\n]*\([^()\n]*\)[^()\n]*\)", t)
+        assert not nested, f"{sid}: nested brackets {nested[:3]}"
+        row = pg.evaluate("()=>document.getElementById('playMap').parentElement.innerText")
+        if sid == "a-e":
+            assert "dotted crotchet" not in row
+        else:
+            assert "counts the dotted crotchet" in row, row
+            assert "bpm (dotted crotchet)" in pg.inner_text(".mbar"), "the metronome bar still names the unit"
+
+
+# --------------------------------------------------------------------- R10
+
+def lit_black(pg, chord):
+    k = pg.evaluate(KBD_JS, chord)
+    lb = [x for x in k["labels"] if not x["white"] and re.fullmatch(r"[A-G][♯♭]", x["s"])]
+    assert lb, "no lit black key on " + chord
+    return lb[0], k
+
+
+@pytest.mark.parametrize("chord", ["A", "E"])
+def test_R10_lit_black_key_contrast_in_light_mode(app, chord):
+    light = app(scheme="light", state={"inst": "keys"})
+    dark = app(scheme="dark", state={"inst": "keys"})
+    l, kl = lit_black(light, chord)
+    d, kd = lit_black(dark, chord)
+    assert d["key"] == "rgb(240, 212, 138)", "dark mode keeps its light gold"
+    assert l["key"] != d["key"], "light mode should use a darker gold on lit black keys"
+    assert _lum([float(x) for x in re.findall(r"[\d.]+", l["key"])[:3]]) < _lum([float(x) for x in re.findall(r"[\d.]+", d["key"])[:3]])
+    assert l["key"] != kl["unlitWhite"]
+    cw = contrast(l["key"], kl["unlitWhite"])
+    assert cw >= 3, f"lit black key {l['key']} vs cream white key {kl['unlitWhite']}: contrast {cw:.2f} < 3"
+    assert contrast(l["key"], kl["unlitBlack"]) >= 3, "lit black key must still stand out from the unlit black keys"
+    assert contrast(l["fill"], l["key"]) >= 4.5, "note name on the lit black key"
+    was = contrast("rgb(240, 212, 138)", kl["unlitWhite"])
+    assert cw > was * 2, f"contrast against the white keys should be clearly better than 0.6's {was:.2f}"
+
+
+def test_R10_follows_the_page_theme_not_just_the_os(app):
+    pg = app(scheme="dark", state={"inst": "keys"})
+    pg.evaluate("()=>{document.documentElement.dataset.theme='light'}")
+    l, _ = lit_black(pg, "A")
+    assert l["key"] != "rgb(240, 212, 138)"
+
+
+# --------------------------------------------------------------------- R11
+
+ODD_NOTES = {"C♭": "B", "F♭": "E", "B♯": "C", "E♯": "F"}
+SPELL_JS = r"""()=>{const st=document.getElementById('stage'),n=[...st.querySelectorAll('.spell-note')].filter(e=>e.getClientRects().length);
+ const shown=[...st.querySelectorAll('svg.kb')].map(s=>s.getAttribute('aria-label')).join(' ')+' '+[...st.querySelectorAll('.bcard, .solfa')].map(e=>e.innerText).join(' ');
+ return {notes:n.map(e=>e.innerText),count:n.length,lines:n.map(e=>Math.round(e.getBoundingClientRect().height/parseFloat(getComputedStyle(e).lineHeight))),shown}}"""
+
+
+@pytest.mark.parametrize("inst", ["keys", "bass", "vocals"])
+def test_R11_spelling_note_only_when_needed(app, inst):
+    bad, hits = [], 0
+    for capo in range(0, 8):
+        pg = app(width=1280, state={"inst": inst, "capo": {s["id"]: capo for s in ST} if capo else {}})
+        for s in ST:
+            go(pg, s["id"])
+            r = pg.evaluate(SPELL_JS)
+            odd = sorted(set(re.findall(r"C♭|F♭|B♯|E♯", r["shown"])))
+            where = f"{inst} {s['id']} capo {capo}"
+            if odd and r["count"] != 1:
+                bad.append(f"{where}: {odd} shown but {r['count']} notes")
+            elif not odd and r["count"]:
+                bad.append(f"{where}: note with nothing to explain: {r['notes']}")
+            elif odd:
+                hits += 1
+                for o in odd:
+                    if f"{o} is the same pitch as {ODD_NOTES[o]}" not in r["notes"][0]:
+                        bad.append(f"{where}: note does not explain {o}: {r['notes'][0]!r}")
+                if inst == "keys" and r["lines"][0] > 2:
+                    bad.append(f"{where}: note runs to {r['lines'][0]} lines")
+        assert not pg.errors
+        pg.context.close()
+    assert not bad, "\n".join(bad[:20])
+    assert hits, "no case exercised"
+
+
+def test_R11_b_minor_capo_4_explains_c_flat(app):
+    pg = app(state={"inst": "keys", "stage": "beyond", "capo": {"beyond": 4}}, hash_="beyond")
+    assert "sounds in E♭ minor" in text(pg, "#stage")
+    note = text(pg, "#stage .spell-note")
+    assert "C♭ is the same pitch as B" in note and "E♭ minor" in note
+    for _ in range(4):
+        pg.click('[data-capo="-1"]')
+    assert pg.locator("#stage .spell-note").count() == 0, "no note in plain B minor"
+    pg2 = app(state={"stage": "beyond", "capo": {"beyond": 4}}, hash_="beyond")
+    assert pg2.locator("#stage .spell-note").count() == 0, "guitar shows shapes, so no spelling note"

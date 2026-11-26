@@ -3,22 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>The Guitar Lab 0.6</title>
+<title>The Guitar Lab 0.7</title>
 <style>
 /* VOICE: a patient guitar teacher in the Shmungfroi family: warm, exact, unhurried.
    IDEA: the guitar neck is the map; each fret is a stage, the inlays are the gates you earn.
    PICTURE: a rosewood neck across the top, chord boxes and fretboards coloured by harmonic function.
    COLOUR and TYPE: Garden black, ivory, gold; function colours reserved; Poiret One display, Outfit text (Garden font files).
-   LAYOUT: tabs (Path, Warm-up, Rudiments, Technique, Invent, Record); Path = neck, next-up line, stage beside a practice column. */
+   LAYOUT: tabs (Path, Warm-up, Rudiments, Technique, Invent, Gig, Record); Path = neck, next-up line, stage beside a practice column. */
 @font-face{font-family:'G Outfit';src:url(fonts/Outfit-Regular.ttf) format('truetype');font-weight:400;font-display:swap}
 @font-face{font-family:'G Outfit';src:url(fonts/Outfit-Bold.ttf) format('truetype');font-weight:500 700;font-display:swap}
 @font-face{font-family:'G Poiret';src:url(fonts/PoiretOne-Regular.ttf) format('truetype');font-display:swap}
 :root{--bg:#0b0906;--card:#12100b;--ink:#ece2c8;--mut:#9c927c;--rule:#2a2418;--hi:#f0d48a;--ok:#d9cfb6;
---ton:#8fbf6a;--pre:#c9a24a;--dom:#d0574b;--sec:#a493d8;--wood:#2b1a12;--fret:#b9b4a8;--ivory:#ece2c8;--inlay:#c9a24a;--fin:#2f9e9b;color-scheme:dark}
+--ton:#8fbf6a;--pre:#c9a24a;--dom:#d0574b;--sec:#a493d8;--sub:#b3a98f;--kbl:#f0d48a;--wood:#2b1a12;--fret:#b9b4a8;--ivory:#ece2c8;--inlay:#c9a24a;--fin:#2f9e9b;color-scheme:dark}
 @supports (color:light-dark(#000,#fff)){:root{color-scheme:light dark;
 --bg:light-dark(#f7f1e3,#0b0906);--card:light-dark(#fffaf0,#12100b);--ink:light-dark(#2a2216,#ece2c8);--mut:light-dark(#6f634c,#9c927c);
 --rule:light-dark(#d9cdb2,#2a2418);--hi:light-dark(#7a5c12,#f0d48a);--ok:light-dark(#3d3426,#d9cfb6);
---ton:light-dark(#4a7434,#8fbf6a);--pre:light-dark(#8a6a22,#c9a24a);--dom:light-dark(#a8352b,#d0574b);--sec:light-dark(#6b55b0,#a493d8)}
+--ton:light-dark(#4a7434,#8fbf6a);--pre:light-dark(#8a6a22,#c9a24a);--dom:light-dark(#a8352b,#d0574b);--sec:light-dark(#6b55b0,#a493d8);--sub:light-dark(#5e5340,#b3a98f);--kbl:light-dark(#a47510,#f0d48a)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 'G Outfit',Outfit,system-ui,sans-serif;overflow-x:clip}
@@ -72,7 +72,7 @@ background-image:repeating-linear-gradient(180deg,transparent 0 13px,rgba(236,22
 .cb .rn{font-size:13px}
 .kb{width:100%;max-width:170px;display:block;margin:6px auto}.dg{border-collapse:collapse;margin:8px 0;font-size:15px;width:auto}.dg th,.dg td{border:1px solid var(--rule);padding:6px 8px;text-align:center;min-width:30px}.dg th{color:var(--mut);font-weight:400}.dgw{overflow-x:auto;max-width:100%}
 .gt{font:500 clamp(56px,12vw,140px)/1 'G Outfit',system-ui,sans-serif;font-variant-numeric:tabular-nums}.present .gt{font-size:clamp(90px,22vw,240px)}.present #v-gig{font-size:20px}
-.present .gsetup,.present header .row,.present .foot{display:none}.present .wrap{max-width:none}.present #v-gig .two{grid-template-columns:minmax(0,1fr)}.present #v-gig table{font-size:clamp(20px,2.4vw,34px)}.present #v-gig .pd{font-size:clamp(34px,4.5vw,68px)!important}.present #v-gig .rm{padding:18px}
+.present .gsetup,.present header .row,.present .foot{display:none}.present .wrap{max-width:none}.present #v-gig .two{grid-template-columns:minmax(0,1fr)}.present #v-gig table{font-size:clamp(20px,2.4vw,34px)}.present #v-gig .pd{font-size:clamp(34px,4.5vw,68px)!important}.present #v-gig .rm{padding:18px}.present #gigRun h3{font-size:clamp(22px,2.6vw,38px);line-height:1.2;margin-top:22px!important}.present #gigRun h3 .note,.present #v-gig .rm .note,.present #v-gig .formstrip{font-size:clamp(15px,1.5vw,22px)}.present #v-gig .fs small{font-size:.8em}.present #v-gig .card>h3{font-size:22px}
 .step{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:start;padding:12px 0;border-top:1px solid var(--rule)}
 .step .n{font:24px 'G Poiret','Poiret One',sans-serif;color:var(--mut)}
 .step.up .n{color:var(--hi)}
@@ -105,6 +105,7 @@ table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px
 .chk input{width:24px;height:24px;min-height:0;margin-top:2px;accent-color:var(--fin)}
 .hide{display:none!important}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;max-width:92vw;background:var(--card);border:1px solid var(--hi);border-radius:12px;padding:12px 16px;font-size:15px;z-index:20}
+.bkmsg{border-left:3px solid var(--hi);padding:4px 0 4px 12px;margin:12px 0 0;font-size:14px}.bkmsg.bad{border-left-color:var(--dom)}.bkta{display:block;width:100%;margin-top:10px;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace}.bkask{margin-top:12px}.bkask p{margin:6px 0 10px;font-size:14px}
 .gate{border:1px solid var(--inlay);border-radius:16px;padding:14px 18px;background:color-mix(in srgb,var(--inlay) 10%,transparent)}
 @media(max-width:900px){.cols,.two{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:480px){.dg{font-size:13px}.dg th,.dg td{padding:5px 3px;min-width:22px}}
@@ -120,7 +121,7 @@ table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px
 <div class="wrap">
 <header>
 <div class="top">
-<div><h1>The Guitar Lab</h1><div class="sub">version 0.6 · a Shmungfroi instrument</div></div>
+<div><h1>The Guitar Lab</h1><div class="sub">version 0.7 · a Shmungfroi instrument</div></div>
 <div class="sp"></div>
 <div class="chips" role="group" aria-label="Finish" id="finishes"></div>
 </div>
@@ -148,7 +149,7 @@ table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px
 <section id="v-invent" class="view hide"></section>
 <section id="v-gig" class="view hide"></section>
 <section id="v-record" class="view hide"></section>
-<p class="note foot" style="padding-bottom:28px">Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. Progress is saved in this browser only. Fonts: Outfit and Poiret One, SIL Open Font License.</p>
+<p class="note foot" style="padding-bottom:28px">Popular songs are shown as chord maps with a link to find the original recording; lyrics and scores are not reproduced. Traditional songs are in the public domain. Progress is saved in this browser only: <a href="#record">keep a backup from the Record tab</a>. Fonts: Outfit and Poiret One, SIL Open Font License.</p>
 </div>
 <div id="toast" class="toast hide" role="status" aria-live="polite"></div>
 
@@ -170,23 +171,23 @@ const KEYS={
  A:{name:'A major',m:{A:['I','T'],D:['IV','P'],E:['V','D'],Amaj7:['Imaj7','T'],E7:['V7','D']}},
  Am:{name:'A minor',m:{Am:['i','T'],E7:['V7','D']}},
  C:{name:'C major',m:{C:['I','T'],F:['IV','P'],Fmaj7:['IVmaj7','P'],G:['V','D'],Am:['vi','T'],E7:['V7/vi','S']}},
- Am6:{name:'A minor (relative of C)',m:{Am:['i','T'],C:['III','T'],F:['VI','P'],G:['VII','D','subtonic'],E:['V','D']}},
- Bm:{name:'B minor',m:{Bm:['i','T'],'F#':['V','D'],A:['VII','D','subtonic'],E:['IV','P'],G:['VI','P'],D:['III','T'],Em:['iv','P']}}};
-const FN={T:['tonic','--ton'],P:['predominant','--pre'],D:['dominant','--dom'],S:['secondary dominant','--sec']};
+ Am6:{name:'A minor (relative of C)',m:{Am:['i','T'],C:['III','T'],F:['VI','P'],G:['VII','N','subtonic'],E:['V','D']}},
+ Bm:{name:'B minor',m:{Bm:['i','T'],'F#':['V','D'],A:['VII','N','subtonic'],E:['IV','P'],G:['VI','P'],D:['III','T'],Em:['iv','P']}}};
+const FN={T:['tonic','--ton'],P:['predominant','--pre'],D:['dominant','--dom'],S:['secondary dominant','--sec'],N:['subtonic','--sub']};
 const yt=q=>'https://www.youtube.com/results?search_query='+encodeURIComponent(q);
 const PAT={
  four:{n:'Four downs',m:4,b:4,s:1,c:'DDDD',a:[0]},
  shuffle:{n:'Boogie shuffle, swung',m:4,b:4,s:2,c:'DUDUDUDU',a:[2,6],sw:1},
- eighths:{n:'Straight eighths',m:4,b:4,s:2,c:'DUDUDUDU',a:[0,4]},
+ eighths:{n:'Straight quavers',m:4,b:4,s:2,c:'DUDUDUDU',a:[0,4]},
  waltz:{n:'Bass, strum, strum',m:3,b:3,s:1,c:'BDD',a:[0]},
  pop:{n:'D · DU · UDU',m:4,b:4,s:2,c:'D.DU.UDU',a:[0]},
  six:{n:'Six-eight sway',m:6,b:2,s:3,c:'DDUDDU',a:[0,3]}};
 PAT.click={n:'Plain click',m:4,b:4,s:1,c:'1234',a:[0]};const C12=['1','2','3','4','5','6','7','8','9','10','11','12'];
 const FIN=[
- {k:'rock',n:'Rock and roll',col:'#e0a24a',lc:'#9a5a12',p:{4:{n:'Backbeat eighths',b:4,s:2,c:'DUDUDUDU',a:[2,6]},3:{n:'Rock waltz eighths',b:3,s:2,c:'DUDUDU',a:[0]},6:{n:'Rock and roll ballad triplets',b:2,s:3,c:'DDDDDD',a:[0,3]}}},
+ {k:'rock',n:'Rock and roll',col:'#e0a24a',lc:'#9a5a12',p:{4:{n:'Backbeat quavers',b:4,s:2,c:'DUDUDUDU',a:[2,6]},3:{n:'Rock waltz quavers',b:3,s:2,c:'DUDUDU',a:[0]},6:{n:'Rock and roll ballad triplets',b:2,s:3,c:'DDDDDD',a:[0,3]}}},
  {k:'flam',n:'Flamenco',col:'#d8b878',lc:'#7d5f1f',p:{4:{n:'Tangos: four, beat 1 light, weight on 2, 3 and 4',b:4,s:1,c:'DDDD',a:[1,2,3]},3:{n:'12-beat compás, counted across the bars',b:12,s:1,c:C12,a:[2,5,7,9,11]},6:{n:'12-beat compás across two bars of 6/8',b:4,s:3,c:C12,a:[2,5,7,9,11]}}},
  {k:'bossa',n:'Bossa',col:'#2f9e9b',lc:'#1f6f6d',p:{4:{n:'Simplified bossa: thumb on 1 and 3, chords on the and of 2 and on 4',b:4,s:2,c:'B..CB.C.',a:[0,3,6]},3:{n:'Bossa waltz: thumb on 1, chords on 2 and 3',b:3,s:1,c:'BCC',a:[0]},6:{n:'Thumb on 1 and 4, chords between',b:2,s:3,c:'B.CB.C',a:[0,3]}}},
- {k:'metal',n:'Hair metal',col:'#ff3d81',lc:'#b3184f',p:{4:{n:'Palm-muted eighths',b:4,s:2,c:'DDDDDDDD',a:[0,4]},3:{n:'Palm-muted eighths in three',b:3,s:2,c:'DDDDDD',a:[0]},6:{n:'Palm-muted quavers in six',b:2,s:3,c:'DDDDDD',a:[0,3]}}}];
+ {k:'metal',n:'Hair metal',col:'#ff3d81',lc:'#b3184f',p:{4:{n:'Palm-muted quavers',b:4,s:2,c:'DDDDDDDD',a:[0,4]},3:{n:'Palm-muted quavers in three',b:3,s:2,c:'DDDDDD',a:[0]},6:{n:'Palm-muted quavers in six',b:2,s:3,c:'DDDDDD',a:[0,3]}}}];
 const KNOW={
  strings:['The six strings','Thickest to thinnest: E A D G B E. One way to remember it: Eddie Ate Dynamite, Good Bye Eddie. The thick E is string 6; the thin E is string 1.'],
  parts:['Parts of the guitar','Headstock and tuners, nut, neck and fretboard, frets, body, then the soundhole on an acoustic or the pickups on an electric, and the bridge and saddle.'],
@@ -216,8 +217,8 @@ const ST=[
  {id:'four-chords',fret:'I V vi IV',title:'C–G–Am–F',key:'C',ch:['C','G','Am','F'],pat:'pop',know:['four'],pair:['Am','F'],tgt:76,
   song:{t:'Let It Be',by:'The Beatles (1970)',pd:0,time:'4/4',map:[{s:'Verse',b:['C G','Am F','C G','F C']},{s:'Chorus',b:['Am G','F C','C G','F C']}],q:'The Beatles Let It Be official'},
   also:[['Riptide, Vance Joy (2013): Am–G–C, from your Guitar Book; capo 1 matches the recording','Vance Joy Riptide official'],['4 Chords, The Axis of Awesome','Axis of Awesome 4 Chords']]},
- {id:'six-eight',fret:'6/8',title:'Six-eight feel',key:'Am6',ch:['Am','G','F','E','C'],pat:'six',know:['six','vii'],pair:['Am','E'],tgt:50,
-  song:{t:'Greensleeves',by:'Traditional English, 16th century',pd:1,time:'6/8',q:'Greensleeves traditional',pick:'The melody starts on the last quaver of the count-in: a pickup into bar 1, and again at the end of each section.',map:[{s:'Verse',b:['Am','G','F','E','Am','G','Am E','Am']},{s:'Refrain',b:['C','G','Am','E','C','G','Am E','Am']}]},also:[]},
+ {id:'six-eight',fret:'6/8',title:'Six-eight feel',key:'Am6',ch:['Am','G','E','C'],pat:'six',know:['six','vii'],pair:['Am','E'],tgt:50,
+  song:{t:'Greensleeves',by:'Traditional English, 16th century',pd:1,time:'6/8',q:'Greensleeves traditional',pick:'The melody starts on the last quaver of the count-in: a pickup into bar 1, and again at the end of each section.',map:[{s:'Verse',b:['Am','G','Am','E','Am','G','Am E','Am']},{s:'Refrain',b:['C','G','Am','E','C','G','Am E','Am']}]},also:[]},
  {id:'hallelujah',fret:'Hallelujah',title:'Hallelujah',key:'C',ch:['C','Am','F','G','E7'],pat:'six',know:['sec'],pair:['G','E7'],tgt:50,
   song:{t:'Hallelujah',by:'Leonard Cohen (1984)',pd:0,time:'6/8 (felt as 12/8)',map:[{s:'Verse',b:['C','Am','C','Am','F','G','C','G','C','F G','Am','F','G','E7','Am','Am']},{s:'Chorus',b:['F','F','Am','Am','F','F','C','G','C','G']}],q:'Leonard Cohen Hallelujah 1984 official',note:'Chord order shown; bar lengths approximate the recording, so check them against it. Add a capo to suit your voice: the shapes stay the same.'},
   also:[['Jeff Buckley\'s version (1994)','Jeff Buckley Hallelujah official']]},
@@ -239,7 +240,7 @@ const TECH=[
  {id:'cscale',f:'core',n:'C major scale, open position',w:'From the Guitar Book, position 1. Say the note names as you play, then sing them in sol-fa: do re mi fa so la ti do.',fb:'cscale',st:3},
  {id:'triads',f:'core',n:'I–IV–V triads up the neck',w:'C, F and G as three-note shapes on the top strings, in root position and both inversions: the Guitar Book\'s chord practical skills. The root is ringed.',fb:['ctri','ftri','gtri'],st:4},
  {id:'shuffle',f:'rock',n:'Boogie shuffle',w:'Root and fifth, then root and sixth, swung. The 12-bar riff on your Path stage 2 is this technique.',st:1},
- {id:'backbeat',f:'rock',n:'Backbeat accents',w:'Strum eighths but dig in on beats 2 and 4, where the snare sits in a rock band.',st:1},
+ {id:'backbeat',f:'rock',n:'Backbeat accents',w:'Strum quavers but dig in on beats 2 and 4, where the snare sits in a rock band.',st:1},
  {id:'rasg',f:'flam',n:'Four-finger rasgueado',w:'Curl your fingers into your palm, then flick them out one at a time across the strings, little finger first (c, a, m, i), to make one rolling strum.',st:3},
  {id:'golpe',f:'flam',n:'Golpe',w:'A tap of the ring finger on the tap plate (golpeador) beside the strings, on the accented beats of the compás.',st:3},
  {id:'andaluz',f:'flam',n:'Andalusian cadence',w:'Am, G, F, E: four chords stepping down to E. Heard in A minor they are i–VII–VI–V. Flamenco hears E as home, in the Phrygian mode on E, where the same chords are iv–III–II–I. Every chord here is one you already know.',ch:['Am','G','F','E'],k:'Am6',st:5},
@@ -284,7 +285,10 @@ const PSTEPS=s=>{const p=PAT[s.pat],six=p.m===6,u=six?' bpm (dotted crotchet)':'
 const DEF={finish:'bossa',stage:'a-e',nsw:false,teacher:false,lv:{},sign:{},marks:{},changes:[],journal:[],bpm:70,useFin:false,gates:{},warm:{},best:{},capo:{},mute:{},inst:'guitar',gig:{}};
 const IK=['guitar','bass','drums','keys','vocals'];
 let S=JSON.parse(JSON.stringify(DEF));
-try{const L=JSON.parse(localStorage.getItem('shredder')||'{}');if(L&&typeof L==='object'&&!Array.isArray(L))for(const k in DEF){const v=L[k],d=DEF[k];if(v===undefined||v===null)continue;const ok=Array.isArray(d)?Array.isArray(v):typeof d==='object'?(typeof v==='object'&&!Array.isArray(v)):typeof v===typeof d;if(ok)S[k]=v}}catch(e){}
+const kindOK=(d,v)=>Array.isArray(d)?Array.isArray(v):typeof d==='object'?(typeof v==='object'&&!Array.isArray(v)):typeof v===typeof d;
+/* one way in for saved data: the page load and a backup import (0.7) both come through here, so an import is treated exactly like a reload */
+function loadState(L){S=JSON.parse(JSON.stringify(DEF));
+if(L&&typeof L==='object'&&!Array.isArray(L))for(const k in DEF){const v=L[k],d=DEF[k];if(v===undefined||v===null)continue;if(kindOK(d,v))S[k]=v}
 S.bpm=Math.min(200,Math.max(30,Math.round(+S.bpm)||70));S.teacher=false;if(!['guitar','bass','drums','keys','vocals'].includes(S.inst))S.inst='guitar';
 for(const k in S.lv){const v=S.lv[k];if(!(v>=0&&v<=3))delete S.lv[k];else S.lv[k]=Math.round(v)}
 S.changes=S.changes.filter(c=>c&&typeof c.n==='number'&&typeof c.pair==='string');S.journal=S.journal.filter(j=>j&&typeof j.d==='number');
@@ -292,9 +296,11 @@ for(const k in S.warm)if(!Array.isArray(S.warm[k]))delete S.warm[k];for(const k 
 for(const o of ['marks','best','gates','sign'])for(const k in S[o]){const v=+S[o][k];if(!isFinite(v))delete S[o][k];else S[o][k]=v}for(const k in S.mute)S.mute[k]=!!S.mute[k];S.changes=S.changes.filter(c=>typeof c.d==='number');
 /* 0.6: changes and journal entries carry their instrument; anything saved before 0.6 was guitar's. Rudiment, technique and best-tempo keys without an @instrument suffix are guitar's too. */
 S.changes.forEach(c=>{if(!IK.includes(c.inst))c.inst='guitar'});S.journal.forEach(j=>{if(!IK.includes(j.inst))j.inst='guitar'});
-if(!FIN.some(f=>f.k===S.finish))S.finish='bossa';if(!ST.some(s=>s.id===S.stage))S.stage='a-e';if(!Array.isArray(S.changes))S.changes=[];if(!Array.isArray(S.journal))S.journal=[];
+if(!FIN.some(f=>f.k===S.finish))S.finish='bossa';if(!ST.some(s=>s.id===S.stage))S.stage='a-e';if(!Array.isArray(S.changes))S.changes=[];if(!Array.isArray(S.journal))S.journal=[]}
+{let L=null;try{L=JSON.parse(localStorage.getItem('shredder')||'{}')}catch(e){}loadState(L)}
 const save=()=>{try{localStorage.setItem('shredder',JSON.stringify(S))}catch(e){}};
 const $=id=>document.getElementById(id);
+const shp=c=>String(c).replace(/#/g,'♯');
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const toast=(m,ms)=>{const t=$('toast');t.textContent=m;t.classList.remove('hide');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.add('hide'),ms||3200)};
 const audDate=d=>new Date(d).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
@@ -331,7 +337,7 @@ function stopAll(){runId++;live.forEach(s=>{try{s.stop()}catch(e){}});live=[];la
 function click(t,acc,dest){const a=A();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.frequency.value=acc?1500:1000;g.gain.setValueAtTime(acc?.25:.12,t);g.gain.exponentialRampToValueAtTime(.001,t+.05);o.connect(g).connect(dest||a.destination);o.start(t);o.stop(t+.06);track(o)}
 /* drawing */
 function box(name,k){const c=CH[name];const [rn,fn,lab]=fnOf(k,name);const col=fn?`var(${FN[fn][1]})`:'currentColor';const x=i=>12+i*13.2,top=Math.max(1,...[...c.f].filter(v=>v!=='x'&&v!=='0').map(Number))>4?Math.min(...[...c.f].filter(v=>/[1-9]/.test(v)).map(Number)):1;
- const yf=v=>26+(v-top+.5)*17;let s=`<svg viewBox="-10 0 100 106" role="img" aria-label="${name} chord, frets ${c.f}"><text x="45" y="12" text-anchor="middle" font-size="14" font-weight="500" style="fill:${col}" font-family="G Outfit, Outfit, system-ui, sans-serif">${esc(c.name||name)}</text>`;
+ const yf=v=>26+(v-top+.5)*17;let s=`<svg viewBox="-10 0 100 106" role="img" aria-label="${esc(c.name||name)} chord, frets ${c.f}"><text x="45" y="12" text-anchor="middle" font-size="14" font-weight="500" style="fill:${col}" font-family="G Outfit, Outfit, system-ui, sans-serif">${esc(c.name||name)}</text>`;
  s+=top===1?`<rect x="12" y="24" width="66" height="3.5" fill="currentColor"/>`:`<text x="-2" y="${yf(top)+4}" font-size="11" fill="currentColor">${top}</text>`;
  for(let r=0;r<=4;r++)s+=`<line x1="12" x2="78" y1="${26+r*17}" y2="${26+r*17}" stroke="currentColor" stroke-opacity=".45"/>`;
  for(let i=0;i<6;i++)s+=`<line x1="${x(i)}" x2="${x(i)}" y1="26" y2="94" stroke="currentColor" stroke-opacity=".7" stroke-width="${1.6-i*.15}"/>`;
@@ -355,26 +361,33 @@ const KFONT='font-family="G Outfit, Outfit, system-ui, sans-serif"';
 function kbd(n,K){K=K||{from:'C',to:'C'};const sp=spellAt(n,K),by={};sp.forEach(x=>{by[pcN(x)]=x});const r=pcN(sp[0]),W=[0,2,4,5,7,9,11],B=[1,3,6,8,10],ww=22;
  let s=`<svg viewBox="0 0 ${7*ww+2} 70" class="kb" role="img" aria-label="${esc(nameAt(n,K))}: ${sp.join(' ')}, root ${sp[0]}">`;
  W.forEach((pc,i)=>{const on=by[pc],x=1+i*ww;s+=`<rect class="${on?'k-on':'k-off'}" x="${x}" y="1" width="${ww}" height="66" rx="2" style="fill:${on?'#7a5c12':'#ece2c8'};stroke:#12100b"/>`+(on?`<text x="${x+ww/2}" y="60" text-anchor="middle" font-size="11" font-weight="700" ${KFONT} style="fill:#fffaf0">${on}</text>`:'')+(on&&pc===r?`<circle cx="${x+ww/2}" cy="45" r="3.2" style="fill:#fffaf0"/>`:'')});
- const bx={1:1,3:2,6:4,8:5,10:6};B.forEach(pc=>{const on=by[pc],x=1+bx[pc]*ww-7;s+=`<rect class="${on?'k-on':'k-off'}" x="${x}" y="1" width="14" height="40" rx="2" style="fill:${on?'#f0d48a':'#12100b'};stroke:#12100b;stroke-width:${on?1.5:1}"/>`+(on?`<text x="${x+7}" y="35" text-anchor="middle" font-size="8.5" font-weight="700" ${KFONT} style="fill:#12100b">${on}</text>`:'')+(on&&pc===r?`<circle cx="${x+7}" cy="16" r="2.8" style="fill:#12100b"/>`:'')});return s+'</svg>'}
+ const bx={1:1,3:2,6:4,8:5,10:6};B.forEach(pc=>{const on=by[pc],x=1+bx[pc]*ww-7;s+=`<rect class="${on?'k-on':'k-off'}" x="${x}" y="1" width="14" height="40" rx="2" style="fill:${on?'var(--kbl)':'#12100b'};stroke:#12100b;stroke-width:${on?1.5:1}"/>`+(on?`<text x="${x+7}" y="35" text-anchor="middle" font-size="8.5" font-weight="700" ${KFONT} style="fill:#12100b">${on}</text>`:'')+(on&&pc===r?`<circle cx="${x+7}" cy="16" r="2.8" style="fill:#12100b"/>`:'')});return s+'</svg>'}
 /* one bar of the band's drum part, by strum cell. playSeq plays exactly this, and drumGrid draws it. */
 function drumPat(p){const cs=cells(p),bd=[],sn=[],rim=[];for(let k=0;k<p.b;k++){const i=k*p.s;if(k===0||(p.m===4&&k===2))bd.push(i);if((p.m===4&&(k===1||k===3))||(p.m===6&&k===1))sn.push(i);if(p.m===3&&k>0)rim.push(i)}
  return {n:cs.length,lab:cs.map((_,i)=>p.s===2?(i%2?'&':String(i/2+1)):String(i+1)),hh:cs.map((_,i)=>i),bd,sn,rim}}
-function drumGrid(s){const p=bandPat(s),d=drumPat(p),fin=p!==PAT[s.pat],mt=p.m===6?'6/8':p.m+'/4';
+const andList=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
+/* the groove in a drummer's words (hats, snare, kick), read off the same drumPat the band plays */
+function drumWords(p,d){const on=h=>andList(h.map(i=>d.lab[i]==='&'?'the and of '+d.lab[i-1]:d.lab[i])),every=d.hh.length===d.n;
+ const hats=!every?'hats on '+on(d.hh):p.m===6?'hats on all six quavers':p.s===2?(p.sw?'hats in swung quavers':'hats in quavers'):'hats on every beat';
+ return [hats].concat(d.sn.length?['snare on '+on(d.sn)]:[],d.rim.length?['rim click on '+on(d.rim)]:[],['kick on '+on(d.bd)]).join(', ')}
+function drumGrid(s){const p=bandPat(s),d=drumPat(p),fin=p!==PAT[s.pat],mt=p.m===6?'6/8':p.m+'/4',dw=drumWords(p,d);
  const rows=[['Hi-hat (closed)',d.hh]].concat(d.sn.length?[['Snare',d.sn]]:[],d.rim.length?[['Rim click',d.rim]]:[],[['Kick',d.bd]]);
- return `<div class="dgw"><table class="dg" aria-label="Drum groove, one bar of ${mt}: ${esc(p.n)}"><tr><th>Count</th>${d.lab.map(l=>`<th>${l}</th>`).join('')}</tr>${rows.map(([n,hits])=>`<tr><th style="text-align:left;white-space:nowrap">${n}</th>${d.lab.map((_,i)=>`<td>${hits.includes(i)?'●':''}</td>`).join('')}</tr>`).join('')}</table></div><p class="note">One bar of ${mt}, read left to right. A dot means play. This is the part the band's drummer plays${fin?' in the '+FIN.find(f=>f.k===S.finish).n+' feel':''}: ${esc(p.n.toLowerCase())}. ${p.sw?'Swing the hi-hat quavers. ':''}${d.rim.length?'Rim click: lay the stick across the snare and tap the rim. ':''}Play a one-bar fill into each new section; end with a crash on the home chord.</p>`}
+ return `<div class="dgw"><table class="dg" aria-label="Drum groove, one bar of ${mt}: ${esc(dw)}"><tr><th>Count</th>${d.lab.map(l=>`<th>${l}</th>`).join('')}</tr>${rows.map(([n,hits])=>`<tr><th style="text-align:left;white-space:nowrap">${n}</th>${d.lab.map((_,i)=>`<td>${hits.includes(i)?'●':''}</td>`).join('')}</tr>`).join('')}</table></div><p class="note">One bar of ${mt}, read left to right. A dot means play. This is the part the band's drummer plays${fin?' in the '+FIN.find(f=>f.k===S.finish).n+' feel':''}: ${esc(dw)}. ${p.sw?'Swing the hi-hat quavers: long, short. ':''}${d.rim.length?'Rim click: lay the stick across the snare and tap the rim. ':''}Play a one-bar fill into each new section; end with a crash on the home chord.</p>`}
 const bassHow=p=>p.m===3?'In 3/4, start with one root on beat 1 of each bar and let it ring. Then add the fifth on beat 3.':p.m===6?'In 6/8, count 1 2 3 4 5 6. Start with roots on 1, then on 1 and 4, then root on 1 and fifth on 4.':'Start with roots on beat 1, then beats 1 and 3, then root and fifth.';
 const invName=sp=>{if(sp.length<3)return '';const lo=sp.slice().sort((a,b)=>pcN(a)-pcN(b)),i=sp.indexOf(lo[0]);return 'Low to high: '+lo.join(' ')+' · '+['root position','1st inversion','2nd inversion','3rd inversion'][i]};
+const ODD={'C♭':'B','F♭':'E','B♯':'C','E♯':'F'};
+function spellNote(notes,K){const odd=[...new Set(notes.filter(n=>ODD[n]))];return odd.length?`<p class="note spell-note">Not a misprint: ${andList(odd.map(n=>n+' is the same pitch as '+ODD[n]))}. In ${K.to} ${K.md} each letter name is used once, so ${odd.length>1?'they are':'it is'} written this way.</p>`:''}
 function partPanel(s,cp){cp=cp||0;const I=S.inst,uniq=[...new Set(s.ch)],K=keyAt(s,cp),p=PAT[s.pat],fcol=c=>{const [,fn]=fnOf(s.key,c);return fn?`var(${FN[fn][1]})`:'var(--ink)'};
  const cn=cp?`<p class="note capo-note">Capo ${cp}: the chart shows the guitar's shapes. Your part is written where it sounds, in ${K.to} ${K.md}.</p>`:'';
- if(I==='bass')return cn+`<div class="boxes" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">${uniq.map(c=>{const sp=spellAt(c,K),b=bassPos(pcN(sp[0])),fi=sp[2]||sp[1];return `<div class="card bcard"><div class="bname" style="font-size:20px;font-weight:600;color:${fcol(c)}">${esc(nameAt(c,K))}</div>${cp?`<div class="note">Chart shows ${esc(c.replace('#','♯'))}</div>`:''}<div>Root ${sp[0]}: ${b.r[0]} string, ${b.r[1]?'fret '+b.r[1]:'open'}</div><div class="note">Fifth ${fi}: ${b.f[0]} string, fret ${b.f[1]}</div>${b.alt?`<div class="note">Or play the open D string, with the fifth (${fi}) on the G string, fret 2.</div>`:''}</div>`}).join('')}</div><p class="note">Bass notes come from the chord's root. ${bassHow(p)}</p>`;
+ if(I==='bass')return cn+`<div class="boxes" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">${uniq.map(c=>{const sp=spellAt(c,K),b=bassPos(pcN(sp[0])),fi=sp[2]||sp[1];return `<div class="card bcard"><div class="bname" style="font-size:20px;font-weight:600;color:${fcol(c)}">${esc(nameAt(c,K))}</div>${cp?`<div class="note">Chart shows ${esc(c.replace('#','♯'))}</div>`:''}<div>Root ${sp[0]}: ${b.r[0]} string, ${b.r[1]?'fret '+b.r[1]:'open'}</div><div class="note">Fifth ${fi}: ${b.f[0]} string, fret ${b.f[1]}</div>${b.alt?`<div class="note">Or play the open D string, with the fifth (${fi}) on the G string, fret 2.</div>`:''}</div>`}).join('')}</div>${spellNote(uniq.flatMap(c=>{const sp=spellAt(c,K);return [sp[0],sp[2]||sp[1]]}),K)}<p class="note">Bass notes come from the chord's root. ${bassHow(p)}</p>`;
  if(I==='drums')return drumGrid(s);
- if(I==='keys')return cn+`<div class="boxes" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">${uniq.map(c=>{const sp=spellAt(c,K),nm=nameAt(c,K);return `<button class="cb" data-strum="${esc(c)}" aria-label="Play ${esc(nm)}: ${sp.join(' ')}"><div class="kname" style="font-size:16px;font-weight:600;color:${fcol(c)}">${esc(nm)} — ${sp.join(' ')}</div>${kbd(c,K)}<div class="note">${invName(sp)}${c.includes('maj7')?'<br>Right hand can leave the root to the left hand':''}</div></button>`}).join('')}</div><p class="note">Right hand: the lit keys, each with its note name; the dot marks the root. Left hand: the root, an octave lower. The same notes in any order are the same chord, so use the inversion nearest your hand.</p>`;
+ if(I==='keys')return cn+`<div class="boxes" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">${uniq.map(c=>{const sp=spellAt(c,K),nm=nameAt(c,K);return `<button class="cb" data-strum="${esc(c)}" aria-label="Play ${esc(nm)}: ${sp.join(' ')}"><div class="kname" style="font-size:16px;font-weight:600;color:${fcol(c)}">${esc(nm)} — ${sp.join(' ')}</div>${kbd(c,K)}<div class="note">${invName(sp)}${c.includes('maj7')?'<br>Right hand can leave the root to the left hand':''}</div></button>`}).join('')}</div>${spellNote(uniq.flatMap(c=>spellAt(c,K)),K)}<p class="note">Right hand: the lit keys, each with its note name; the dot marks the root. Left hand: the root, an octave lower. The same notes in any order are the same chord, so use the inversion nearest your hand.</p>`;
  if(I==='vocals'){const md=K.md,sf=c=>(SOLFA[s.key]||{})[c]||'?',seen=[],rl=[];uniq.forEach(c=>{const r=spellAt(c,K)[0];if(!seen.includes(r)){seen.push(r);rl.push(sf(c)+' = '+r)}});
   const entry=s.song.pick||(s.song.pd?'Come in after the count-in.':'Listen for the entry: the recording shows where the voice comes in.');
-  return `<div class="card"><h3>Cue sheet</h3><p>Home note (${md==='minor'?'la':'do'}): ${K.to}. Sounds in ${K.to} ${md}.</p><p class="solfa"><b style="font-weight:500">Roots in sol-fa:</b> ${rl.join(' · ')}</p>${s.song.map.map(m=>`<p class="note solfa-sec" style="margin:2px 0">${esc(m.s)}: ${m.b.map(b=>b.split(' ').map(sf).join(' ')).join(' | ')}</p>`).join('')}<p class="note">${md==='minor'?'Minor key, so home is la. ':''}Each | is a barline. Sing each chord's root on its sol-fa name while the band plays.${cp?' The capo moves the pitch, not the sol-fa names.':''}</p><p>${entry}</p><ol>${(FORM[s.id]||s.song.form||s.song.map.map(m=>[m.s,1])).map(([n,r])=>{const sec=s.song.map.find(m=>m.s===n);return `<li>${esc(n)}${r>1?' ×'+r:''}: ${sec?sec.b.length:'?'} bars</li>`}).join('')}<li>Outro: hold the last note with the home chord</li></ol><p class="note">Lyrics aren't reproduced here: learn them from the recording.</p></div>`}
+  return `<div class="card"><h3>Cue sheet</h3><p>Home note (${md==='minor'?'la':'do'}): ${K.to}. Sounds in ${K.to} ${md}.</p><p class="solfa"><b style="font-weight:500">Roots in sol-fa:</b> ${rl.join(' · ')}</p>${spellNote(seen.concat(K.to),K)}${s.song.map.map(m=>`<p class="note solfa-sec" style="margin:2px 0">${esc(m.s)}: ${m.b.map(b=>b.split(' ').map(sf).join(' ')).join(' | ')}</p>`).join('')}<p class="note">${md==='minor'?'Minor key, so home is la. ':''}Each | is a barline. Sing each chord's root on its sol-fa name while the band plays.${cp?' The capo moves the pitch, not the sol-fa names.':''}</p><p>${entry}</p><ol>${(FORM[s.id]||s.song.form||s.song.map.map(m=>[m.s,1])).map(([n,r])=>{const sec=s.song.map.find(m=>m.s===n);return `<li>${esc(n)}${r>1?' ×'+r:''}: ${sec?sec.b.length:'?'} bars</li>`}).join('')}<li>Outro: hold the last note with the home chord</li></ol><p class="note">Lyrics aren't reproduced here: learn them from the recording.</p></div>`}
  return ''}
 /* road map chart */
-function roadmap(s){const sg=s.song,p=PAT[s.pat],beats=p.m===4?4:p.m===3?3:2,narrow=window.innerWidth<700,bpl=narrow?4:8,W=narrow?340:1000,x0=44,bw=(W-x0-12)/bpl,LH=84;
+function roadmap(s){const sg=s.song,p=PAT[s.pat],beats=p.m===4?4:p.m===3?3:2,narrow=window.innerWidth<700,big=view==='gig'&&document.body.classList.contains('present'),bpl=big?(narrow?2:4):narrow?4:8,W=big?(narrow?196:520):narrow?340:1000,x0=44,bw=(W-x0-12)/bpl,LH=84;
  let y=6,gi=0,prev='',body='',lines=0;const cnt=p.m===4?'1 · 2 · 1 2 3 4':p.m===3?'1 2 3':'1 2 3 4 5 6';const total=sg.map.reduce((a,m)=>a+m.b.length,0);
  const bp=bandPat(s),fe=bp!==p?FIN.find(f=>f.k===S.finish).n:'',miss=feelMiss(s);const head=`<div class="row" style="margin:0 0 6px"><span class="note">Target ${s.tgt} ${unit(p)} · count in: ${cnt} · whole band, ${p.m===6?'6/8':p.m+'/4'}${p.sw&&!fe?' · swing the quavers':''}${fe?' · band plays the '+fe+' feel':''}</span><button data-tgt="${s.tgt}">Set metronome to target</button></div>${miss?`<p class="note feel-miss" style="margin:0 0 6px"><b style="font-weight:500;color:var(--ink)">${esc(miss)}</b></p>`:''}${sg.pick?`<p class="note" style="margin:0 0 6px">${sg.pick}</p>`:''}`;
  sg.map.forEach((sec,si)=>{for(let li=0;li*bpl<sec.b.length;li++){const row=sec.b.slice(li*bpl,li*bpl+bpl);const top=y;prev='';
@@ -386,7 +399,7 @@ function roadmap(s){const sg=s.song,p=PAT[s.pat],beats=p.m===4?4:p.m===3?3:2,nar
    for(let k=0;k<beats;k++){const sx=bx+bw*(k+.5)/beats;body+=`<line x1="${sx-5}" x2="${sx+5}" y1="${sy+7}" y2="${sy-7}" stroke-width="3" style="stroke:var(--ink)"/>`+(p.m===6?`<circle cx="${sx+9}" cy="${sy+5}" r="2.2" style="fill:var(--ink)"/>`:'')}
    body+=gi===total-1?`<line x1="${bx+bw-6}" x2="${bx+bw-6}" y1="${sy-12}" y2="${sy+12}" style="stroke:var(--ink)"/><line x1="${bx+bw-1}" x2="${bx+bw-1}" y1="${sy-12}" y2="${sy+12}" stroke-width="4" style="stroke:var(--ink)"/>`:`<line x1="${bx+bw}" x2="${bx+bw}" y1="${sy-12}" y2="${sy+12}" style="stroke:var(--mut)"/>`;gi++});
   body+=`<line x1="${x0}" x2="${x0}" y1="${sy-12}" y2="${sy+12}" style="stroke:var(--mut)"/>`;y+=LH;lines++}});
- const H=y+6;const svg=`<svg class="rmap" viewBox="0 0 ${W} ${H}" role="img" aria-label="Road map chart: ${sg.map.map(m=>m.s+', '+m.b.length+' bars: '+m.b.join(' ')).join('; ')}">${body}</svg>`;
+ const H=y+6;const svg=`<svg class="rmap" viewBox="0 0 ${W} ${H}" role="img" aria-label="Road map chart: ${sg.map.map(m=>esc(m.s)+', '+m.b.length+' bars: '+shp(m.b.join(' '))).join('; ')}">${body}</svg>`;
  const form=(FORM[s.id]||sg.form||sg.map.map(m=>[m.s,1])).map(([n,r])=>{const sec=sg.map.find(m=>m.s===n);return `<span class="fs">${esc(n)}${r>1?' ×'+r:''}<small>${sec?sec.b.length+' bars':''}</small></span>`}).join('<span class="arr">→</span>')+'<span class="arr">→</span><span class="fs fs-outro">Outro<small>hold the home chord for two bars</small></span>';
  return `<div class="rm">${head}${svg}<div class="formstrip" role="group" aria-label="Practice form">${form}</div>${sg.pd?'':'<p class="note">Practice form for the chart. The recording\'s form is longer: follow it when you play along.</p>'}</div>`}
 /* backing band */
@@ -421,7 +434,7 @@ function renderStage(){const s=stage(),sg=s.song,steps=STEPS(s);const link=sg.q?
  ${S.inst==='guitar'?`<div class="boxes">${s.ch.map(c=>box(c,s.key)).join('')}</div><p class="note">Tap a chord box to hear it. Sing the root in sol-fa as you strum.${s.tip?' '+s.tip:''}</p>`:partPanel(s,capoOf(s))}
  <div class="card"><div class="row"><div><div class="pd" style="font-size:30px">${esc(sg.t)}</div><div class="meta">${esc(sg.by)} · ${sg.time}${sg.pd?' · public domain':''}</div></div><div class="sp"></div>${link}</div>
  ${map}${sg.riff?`<p class="note">${sg.riff.title}</p><div class="tab">${esc(mkTab(sg.riff.ev))}</div>`:''}${sg.note?`<p class="note">${sg.note}</p>`:''}
- <div class="row"><button id="playMap">${playing==='map'?'Stop':'Play the chart'}</button><span class="note">Count-in, then the band plays the practice form at the metronome tempo (${unit(PAT[s.pat])}) and ends on the home chord.</span></div>
+ <div class="row"><button id="playMap">${playing==='map'?'Stop':'Play the chart'}</button><span class="note">Count-in, then the band plays the practice form at the metronome tempo${PAT[s.pat].s===3?', which counts the dotted crotchet,':''} and ends on the home chord.</span></div>
  <div class="row" role="group" aria-label="Band parts" style="margin-top:8px"><span class="note">Band:</span>${PARTS.map(([k,n])=>`<button data-mute="${k}" aria-pressed="${!S.mute[k]}">${n}</button>`).join('')}<span class="note">Turn your own part off and play along.</span></div>
  <div class="row" style="margin-top:8px"><span class="note">${S.inst==='guitar'?'Higher voice:':'Guitar capo, for a higher voice:'}</span><button data-capo="-1" aria-label="Capo down">−</button><span>${capo()?'Capo '+capo():'No capo'}</span><button data-capo="1" aria-label="Capo up">+</button><span class="note">${S.inst==='guitar'?'Same shapes; sounds in '+sounds(s)+'.':'The guitar keeps its shapes and the band sounds in '+sounds(s)+'.'+(capo()&&['bass','keys','vocals'].includes(S.inst)?' Your part above is already written there.':'')} Lower voices: sing an octave lower.</span></div></div>
  <div><h3>Five steps: ${{guitar:'hear, shape, change, rehearse, perform',bass:'hear, find the roots, groove, rehearse, perform',drums:'hear, groove, mark the form, rehearse, perform',keys:'hear, voice, change, rehearse, perform',vocals:'hear, pitch, enter, rehearse, perform'}[S.inst]}</h3><p class="note" style="margin:0 0 6px">Work in order. The gate opens when all five reach Consistent.</p>${stepsH}</div>${rub}
@@ -432,7 +445,7 @@ function metroCard(){const s=stage(),f=FIN.find(f=>f.k===S.finish),p=curPat();re
  <div class="note" style="margin-top:8px">${esc(p.n)}</div>${feelMiss(s)?`<div class="note feel-miss">${esc(feelMiss(s))}</div>`:''}<div class="grid">${cells(p).map((c,i)=>`<div class="cell${p.a.includes(i)?' acc':''}">${c==='.'?'·':esc(c)}</div>`).join('')}</div>
  <div class="row"><input type="range" min="30" max="200" step="1" class="m-bpm" value="${S.bpm}" aria-label="Tempo" style="flex:1"><span class="big m-out">${S.bpm}</span></div><div class="note">${unit(p)}</div><div class="row" style="margin-top:8px"><button class="m-toggle" aria-pressed="${!!metro}">Metronome</button><span class="note">${S.inst==='guitar'?'D down · U up · B thumb bass · C chord':'The letters are the guitar\'s strum: D down, U up, B thumb bass, C chord. On your instrument, follow the count and lean on the shaded cells.'}</span></div></div>`}
 function renderSide(){const s=stage();
- const keyRows=[...new Set(s.ch.map(c=>fnOf(s.key,c)[1]).filter(Boolean))].map(f=>`<div><span class="sw" style="background:var(${FN[f][1]})"></span>${FN[f][0][0].toUpperCase()+FN[f][0].slice(1)}: ${s.ch.filter(c=>fnOf(s.key,c)[1]===f).map(esc).join(', ')}</div>`).join('');
+ const keyRows=[...new Set(s.ch.map(c=>fnOf(s.key,c)[1]).filter(Boolean))].map(f=>`<div><span class="sw" style="background:var(${FN[f][1]})"></span>${FN[f][0][0].toUpperCase()+FN[f][0].slice(1)}: ${s.ch.filter(c=>fnOf(s.key,c)[1]===f).map(c=>esc(shp(c))).join(', ')}</div>`).join('');
  const pk=s.pair.join('-'),K=keyAt(s,capoOf(s)),pn=c=>S.inst==='guitar'?c.replace('#','♯'):nameAt(c,K),iname=INST.find(x=>x[0]===S.inst)[1];const chg=myChg().filter(c=>c.pair===pk);const mine=chg.slice(-5).reverse();const best=Math.max(0,...chg.map(c=>c.n));
  $('side').innerHTML=`<div class="card"><h3>Function in this stage</h3><div class="fk">${keyRows}</div></div>${metroCard()}
  ${['drums','vocals'].includes(S.inst)?'':`<div class="card"><h3>One-minute changes · ${iname}</h3><p class="note" style="margin:0 0 8px">${s.pair.map(c=>esc(pn(c))).join(' ↔ ')}: change back and forth for one minute, then count. Consistent is ${CPM(s)[0]}, Applied is ${CPM(s)[1]}.</p>
@@ -472,10 +485,10 @@ let loopChg='';
 function renderInvent(){const s=stage();const k=s.key;const L=learned();const pool=L.filter(c=>KEYS[k].m[c]);
  $('v-invent').innerHTML=`<h2 style="font-size:40px">Invent</h2><p class="note">Roll a loop from the chords you've learned, in ${KEYS[k].name}. Play it, change exactly one thing, play it again and keep the better version.</p>
  <div class="row"><button id="roll">Roll four chords</button>${loop.length?`<button id="playLoop">${playing==='loop'?'Stop':'Play the loop ×4'}</button>`:''}</div>
- ${loop.length?`<div class="boxes" style="margin-top:12px">${loop.map(c=>box(c,k)).join('')}</div><p><b style="font-weight:500">Change one thing:</b> <span id="chg">${loopChg}</span></p><button id="keepLoop">Save to record</button>`:`<p class="note">Pool: ${pool.map(esc).join(', ')||'learn a stage first'}.</p>`}`;
+ ${loop.length?`<div class="boxes" style="margin-top:12px">${loop.map(c=>box(c,k)).join('')}</div><p><b style="font-weight:500">Change one thing:</b> <span id="chg">${loopChg}</span></p><button id="keepLoop">Save to record</button>`:`<p class="note">Pool: ${pool.map(c=>esc(shp(c))).join(', ')||'learn a stage first'}.</p>`}`;
  $('roll').onclick=()=>{if(!pool.length)return;if(playing)stopAll();const t=pool.find(c=>/^(I|i)$/.test(KEYS[k].m[c][0]))||pool[0];loop=[t];let g=0;while(loop.length<4&&g++<50){const c=pool[Math.floor(Math.random()*pool.length)];if(c!==loop[loop.length-1])loop.push(c)}while(loop.length<4)loop.push(t);const ok2=CHG.filter(c=>(!c[1]||(c[1].every(x=>L.includes(x))&&loop.includes(c[1][0])))&&(c[0].indexOf('3/4')<0||PAT[s.pat].m===4));loopChg=ok2[Math.floor(Math.random()*ok2.length)][0];renderInvent();refocus('#roll')};
  if($('playLoop'))$('playLoop').onclick=()=>{if(playing==='loop'){stopAll();return}playSeq([0,1,2,3].flatMap(()=>loop.map(c=>({c}))),'loop')};
- if($('keepLoop'))$('keepLoop').onclick=()=>{S.journal.push({d:Date.now(),st:s.id,inst:S.inst,tag:'Invent',h:'',o:'Loop: '+loop.join(' – '),w:$('chg').textContent});save();toast('Saved to your record')}}
+ if($('keepLoop'))$('keepLoop').onclick=()=>{S.journal.push({d:Date.now(),st:s.id,inst:S.inst,tag:'Invent',h:'',o:'Loop: '+loop.map(shp).join(' – '),w:$('chg').textContent});save();toast('Saved to your record')}}
 /* gig */
 const TB=['A','A','A','A','D','D','A','A','E','D','A','E'];
 const GIG=[
@@ -493,7 +506,7 @@ const gigS=()=>{let G=S.gig;if(!G||typeof G!=='object'||Array.isArray(G))G=S.gig
  if(!Array.isArray(G.songs))G.songs=GDEF.slice();else{const ok=[...new Set(G.songs.filter(id=>typeof id==='string'&&GIG.some(g=>g.id===id)))].slice(0,4);G.songs=G.songs.length&&!ok.length?GDEF.slice():ok}
  G.bands=(Array.isArray(G.bands)?G.bands:[]).filter(b=>b&&typeof b==='object'&&!Array.isArray(b)).slice(0,12).map((b,i)=>{const m={},src=b.m&&typeof b.m==='object'?b.m:{};IK.forEach(r=>{const v=src[r];if(typeof v==='string'&&v.trim())m[r]=v.slice(0,40)});return {name:typeof b.name==='string'&&b.name.trim()?b.name.slice(0,40):'Band '+(i+1),m}});
  if(!G.bands.length)G.bands=[{name:'Band 1',m:{}}];
- G.block=typeof G.block==='number'&&G.block>=5&&G.block<=60?Math.round(G.block):20;if(typeof G.rotate!=='boolean')G.rotate=true;
+ G.block=typeof G.block==='number'&&G.block>=5&&G.block<=60?Math.round(G.block):20;if(typeof G.rotate!=='boolean')G.rotate=true;G.useFin=G.useFin===true;
  if(!GIG.some(g=>g.id===G.open))G.open=G.songs[0]||GIG[0].id;
  G.bpm=typeof G.bpm==='number'&&G.bpm>=30&&G.bpm<=200?Math.round(G.bpm):GIG.find(g=>g.id===G.open).tgt;return G};
 const gigOpen=()=>GIG.find(x=>x.id===gigS().open)||GIG[0];
@@ -511,7 +524,7 @@ function renderGig(){const G=gigS();save();const g=gigOpen();
  <div class="stk"><div class="card"><h3>Timer</h3><div class="gt" id="gtime" role="timer" aria-live="off">${gt?'':'0:00'}</div><div class="row"><button id="gblock" data-gtime="${G.block}">Whole block: ${G.block} min</button>${[5,10,15,20].map(m=>`<button data-gtime="${m}">${m} min</button>`).join('')}<button id="gstop">Stop</button><button id="present" aria-pressed="${document.body.classList.contains('present')}">Present</button></div><p class="note">Typical block: 10 minutes to set up, the rehearsal, then pack up. You'll hear a tick when the timer starts and three beeps when it ends.</p></div>
  <div class="card"><h3>3. Run sheet</h3><div id="gigRun">${gigRunH(G)}</div></div></div></div>
  <div class="card" id="gigSong" style="margin-top:16px;scroll-margin-top:120px"><div class="row"><div><div class="pd" style="font-size:30px">${esc(g.t)}</div><div class="meta">${esc(g.by)}${g.yr?' · '+g.yr:''}</div></div><div class="sp"></div>${g.q?`<a class="lk" href="${yt(g.q)}" target="_blank" rel="noopener">Find the original recording</a>`:''}</div>
- <p>${esc(g.story)}</p><div class="row" role="group" aria-label="Your instrument"><span class="note">Your part:</span>${INST.map(([k,n])=>`<button data-inst="${k}" aria-pressed="${S.inst===k}">${n}</button>`).join('')}</div><div id="gigPart" style="margin:10px 0">${S.inst==='guitar'?`<div class="boxes">${g.ch.map(c=>box(c,g.key)).join('')}</div>`:partPanel(g,0)}</div>${roadmap(g)}<div class="row"><button id="playGig">${playing==='gig'?'Stop':'Play the chart'}</button><span class="note">The whole band always plays here, whatever is switched off on the Path; charted in A for the gig. Recordings vary in key and in bars 10 and 12: listen and adjust.</span></div><p class="note" id="gigTempoNote">${g.tgt} bpm is a practice tempo. ${g.q?'The recording is quicker: work up to it once the changes are clean.':'Push it up once the changes are clean.'}</p></div>`}
+ <p>${esc(g.story)}</p><div class="row" role="group" aria-label="Your instrument"><span class="note">Your part:</span>${INST.map(([k,n])=>`<button data-inst="${k}" aria-pressed="${S.inst===k}">${n}</button>`).join('')}</div><div id="gigPart" style="margin:10px 0">${S.inst==='guitar'?`<div class="boxes">${g.ch.map(c=>box(c,g.key)).join('')}</div>`:partPanel(g,0)}</div>${roadmap(g)}<div class="row" role="group" aria-label="Gig feel" style="margin-bottom:8px"><span class="note">Gig feel:</span><button data-gpat="0" aria-pressed="${!G.useFin}">Song's own feel</button><button data-gpat="1" aria-pressed="${G.useFin}">${FIN.find(f=>f.k===S.finish).n} feel</button><span class="note">Each gig song plays in its own feel unless you switch here. This switch is the Gig's own: the Path keeps its setting.</span></div><div class="row"><button id="playGig">${playing==='gig'?'Stop':'Play the chart'}</button><span class="note">The whole band always plays here, whatever is switched off on the Path; charted in A for the gig. ${g.loop?'Recordings vary in key; the loop is the same four bars all the way through: listen and adjust.':'Recordings vary in key and in bars 10 and 12: listen and adjust.'}</span></div><p class="note" id="gigTempoNote">${g.tgt} bpm is a practice tempo. ${g.q?'The recording is quicker: work up to it once the changes are clean.':'Push it up once the changes are clean.'}</p></div>`}
 /* record */
 const JPH={guitar:['Listened for the pull from E7 to Am','Changes at 70 bpm, two clean runs','The small F buzzes on the B string'],bass:['Listened for the bass under the chord changes','Roots on 1 and 3 at 70 bpm, two clean runs','I rush into the D bar'],drums:['Listened for where the snare sits','Four bars of the grid at 70 bpm, twice','My fill into the next section runs long'],keys:['Listened for the pull from E7 to Am','Changes at 70 bpm, two clean runs','I lose the F chord when I look up'],vocals:['Listened for where the voice comes in','Roots in sol-fa through the chart, twice','I go flat on fa when the band gets loud']};
 function renderRecord(){const s=stage(),iname=INST.find(x=>x[0]===S.inst)[1],mc=myChg();const rows=ST.map((x,i)=>`<tr><td>${i+1}. ${esc(x.title)}</td><td>${done(x)} / 5</td><td>${passed(x)?'Gate passed'+(S.gates[gk(x)]?', '+audDate(S.gates[gk(x)]):''):'–'}</td></tr>`).join('');
@@ -520,17 +533,59 @@ function renderRecord(){const s=stage(),iname=INST.find(x=>x[0]===S.inst)[1],mc=
  <div class="card"><h3>Rudiments and techniques at Consistent or better: ${iname}</h3><p>${rd.length?rd.join(', '):'None yet.'}</p></div>
  <div class="card"><h3>Best tempos: ${iname}</h3><p>${RUD.map(r=>{const v=S.best[ik('r:'+r.id)];return v?esc(r.n)+': '+v+' bpm':''}).filter(Boolean).join(' · ')||'None logged yet.'}</p><h3 style="margin-top:12px">One-minute changes, best: ${iname}</h3><p>${[...new Set(mc.map(c=>c.pair))].map(pk=>esc(pk.replace('-',' ↔ ').replace('#','♯'))+': '+Math.max(...mc.filter(c=>c.pair===pk).map(c=>c.n))).join(' · ')||'None logged yet.'}</p></div>
  <div class="card"><h3>Teacher: ${iname}</h3><p><span id="signCount">${Object.keys(S.sign).filter(mineKey).length}</span> step${Object.keys(S.sign).filter(mineKey).length===1?'':'s'} signed off on ${iname.toLowerCase()}.${ST.filter(x=>[0,1,2,3,4].some(i=>S.marks[kk(x,i)]!==undefined)).map(x=>' '+esc(x.title)+': '+[0,1,2,3,4].reduce((a,i)=>a+(S.marks[kk(x,i)]||0),0)+' / 10.').join('')}</p></div>
- <div class="card"><h3>Warm-ups (all instruments)</h3><p>${Object.values(S.warm).filter(v=>v.length>=5).length} full warm-ups recorded.</p></div></div>
+ <div class="card"><h3>Warm-ups (all instruments)</h3><p>${Object.values(S.warm).filter(v=>v.length>=5).length} full warm-ups recorded.</p></div>${backupCard()}</div>
  <div><h3 style="font-size:18px;margin-top:8px">Journal</h3><p class="note">Hear, do, write: what you listened for, what you played, what you noticed. Each entry is tagged with the instrument you are on (${iname} now).</p><form id="jf" class="stk"><label>Hear<br><input id="jh" style="width:100%" placeholder="${JPH[S.inst][0]}"></label><label>Do<br><input id="jd" style="width:100%" placeholder="${JPH[S.inst][1]}"></label><label>Write<br><textarea id="jw" rows="2" style="width:100%" placeholder="${JPH[S.inst][2]}"></textarea></label><button>Save entry</button></form>
  <ul class="log">${S.journal.slice().sort((a,b)=>b.d-a.d).slice(0,12).map(j=>`<li><b style="font-weight:500">${audDate(j.d)}, ${esc((ST.find(x=>x.id===j.st)||{}).title||'')}</b><span class="tag jtag">${(INST.find(x=>x[0]===j.inst)||INST[0])[1]}</span>${typeof j.tag==='string'&&j.tag?`<span class="tag jtag">${esc(j.tag)}</span>`:''}: ${[j.h,j.o,j.w].filter(Boolean).map(esc).join(' · ')}</li>`).join('')}</ul></div></div>`;
  $('jf').onsubmit=e=>{e.preventDefault();const h=$('jh').value.trim(),o=$('jd').value.trim(),w=$('jw').value.trim();if(!h&&!o&&!w){toast('Write something in one of the three fields first');return}S.journal.push({d:Date.now(),st:s.id,inst:S.inst,h,o,w});save();renderRecord();refocus('#jh');toast('Entry saved')}}
+/* backup (0.7): the whole saved state out as JSON, and back in. Nothing here uses a browser pop-up or the network. */
+let bk={note:null,pend:null,inTxt:'',out:''},dlCap;
+/* a claude.ai artifact can hand files to its viewer; anywhere else this stays empty and the plain download link is used */
+const dlFind=()=>{if(dlCap!==undefined)return Promise.resolve(dlCap);try{const c=window.claude;if(c&&typeof c.use==='function')return Promise.resolve(c.use('downloads')).then(d=>dlCap=(d&&typeof d.save==='function')?d:null,()=>dlCap=null)}catch(e){}return Promise.resolve(null)};
+const backupObj=()=>{gigS();return {app:'The Guitar Lab',format:1,version:'0.7',saved:new Date().toISOString(),state:JSON.parse(JSON.stringify(S))}};
+const backupText=()=>JSON.stringify(backupObj(),null,1);
+const bkName=()=>'guitar-lab-backup-'+today()+'.json';
+const NOCHG=' Nothing has been changed.';
+/* returns {st,saved} for a usable backup, or {err} with a message for the page */
+function readBackup(txt){txt=String(txt||'').replace(/^﻿/,'').trim();if(!txt)return {err:'Nothing to import yet: choose a backup file, or paste the backup text into the box first.'};
+ if(txt.length>4e6)return {err:'That is too big to be a Guitar Lab backup.'+NOCHG};let o;
+ try{o=JSON.parse(txt)}catch(e){return {err:'That isn\'t a Guitar Lab backup: the text can\'t be read as JSON, so part of it may be missing or changed. Copy the whole backup, from the first { to the last }, and try again.'+NOCHG}}
+ const isO=v=>!!v&&typeof v==='object'&&!Array.isArray(v);if(!isO(o))return {err:'That isn\'t a Guitar Lab backup: a backup is one block of text that starts with { and ends with }.'+NOCHG};
+ const wrapped=isO(o.state)&&('format' in o||'app' in o),st=wrapped?o.state:o;
+ if(wrapped&&typeof o.format==='number'&&o.format>1)return {err:'That backup was made by a newer version of The Guitar Lab than this one (0.7), so it can\'t be read here.'+NOCHG};
+ const known=Object.keys(DEF).filter(k=>st[k]!==undefined&&st[k]!==null);if(!known.length)return {err:'That JSON isn\'t a Guitar Lab backup: it has none of the things this app saves (levels, journal, gig plan and so on).'+NOCHG};
+ const bad=known.filter(k=>!kindOK(DEF[k],st[k]));if(bad.length)return {err:'That backup is damaged: '+bad.map(k=>'"'+k+'"').join(', ')+(bad.length>1?' are':' is')+' not in the form this app saves.'+NOCHG};
+ if(Array.isArray(st.changes)&&st.changes.some(c=>!isO(c))||Array.isArray(st.journal)&&st.journal.some(j=>!isO(j)))return {err:'That backup is damaged: its practice log or journal has entries this app can\'t read.'+NOCHG};
+ return {st,saved:wrapped&&typeof o.saved==='string'&&isFinite(Date.parse(o.saved))?Date.parse(o.saved):0}}
+const bkCount=st=>{const n=(v,one,many)=>v+' '+(v===1?one:many),o=v=>v&&typeof v==='object'?v:{};return [n(Object.keys(o(st.lv)).filter(k=>st.lv[k]>0).length,'level set','levels set'),n((st.journal||[]).length,'journal entry','journal entries'),n((st.changes||[]).length,'one-minute log','one-minute logs'),n(Object.keys(o(st.warm)).length,'warm-up day','warm-up days')].join(', ')};
+function backupCard(){const q=bk.pend;return `<div class="card" id="backup"><h3>Backup</h3><p class="note" style="margin:0 0 10px">Your progress lives in this browser only. A backup holds all of it: every instrument's levels, gates and marks, the journal, the gig plan (with any names typed there) and your settings. Keep one somewhere safe, and use it to move to another device.</p>
+ <div class="row"><button id="bkDown">Download backup</button><button id="bkCopy">Copy backup</button></div>
+ <textarea id="bkOut" class="bkta${bk.out?'':' hide'}" rows="6" readonly aria-label="Backup text, to select and copy">${esc(bk.out)}</textarea>
+ <h3 style="margin:18px 0 6px">Bring a backup back</h3><div class="row"><button id="bkPick">Choose a backup file</button><input type="file" id="bkFile" class="sr" accept=".json,.txt,application/json,text/plain" tabindex="-1" aria-label="Backup file"><span class="note">or paste the backup text here:</span></div>
+ <textarea id="bkIn" class="bkta" rows="3" spellcheck="false" autocomplete="off" aria-label="Backup text to import" placeholder="{ … }">${esc(bk.inTxt)}</textarea>
+ <div class="row" style="margin-top:8px"><button id="bkImport">Import pasted backup</button><span class="note">You'll be asked before anything is replaced.</span></div>
+ <div id="bkAsk">${q?`<div class="gate bkask" role="group" aria-labelledby="bkQ"><b id="bkQ" style="font-weight:500">Replace your progress with this backup?</b><p>${q.saved?'Backup made '+audDate(q.saved)+': ':'This backup has '}${esc(bkCount(q.st))}. Everything saved in this browser now (${esc(bkCount(S))}) will be replaced, and that can't be undone.</p><div class="row"><button id="bkYes">Replace my progress</button><button id="bkNo">Cancel</button></div></div>`:''}</div>
+ <div id="bkMsg" role="status" aria-live="polite">${bk.note?`<p class="bkmsg${bk.note[1]?' bad':''}">${esc(bk.note[0])}</p>`:''}</div></div>`}
+function bkSay(m,bad){bk.note=m?[m,!!bad]:null;const el=$('bkMsg');if(el)el.innerHTML=m?`<p class="bkmsg${bad?' bad':''}">${esc(m)}</p>`:''}
+function bkShowOut(txt){bk.out=txt;const ta=$('bkOut');if(!ta)return null;ta.value=txt;ta.classList.remove('hide');return ta}
+function bkBlob(txt){try{const u=URL.createObjectURL(new Blob([txt],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download=bkName();a.rel='noopener';a.style.display='none';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>{try{URL.revokeObjectURL(u)}catch(e){}},4000);return true}catch(e){return false}}
+function bkDownload(){const txt=backupText(),viaLink=()=>{if(bkBlob(txt))bkSay('Backup file made: '+bkName()+'. Look in your downloads. If no file appeared, this page isn\'t allowed to download here: use Copy backup instead.');else{bkShowOut(txt);bkSay('Downloading isn\'t available here. The backup is in the box above: select all of it, copy it, and paste it somewhere safe.',1)}};
+ dlFind().then(d=>{if(!d){viaLink();return}let pr;try{pr=Promise.resolve(d.save({filename:bkName(),data:txt}))}catch(e){pr=Promise.reject(e)}
+  pr.then(()=>bkSay('Backup saved as '+bkName()+'.'),e=>{const c=e&&e.code;if(c==='declined')bkSay('Download cancelled, so no backup file was made. Your progress is untouched.');else if(c==='rate_limited')bkSay('A download is already waiting for your answer. Finish that one, then try again.',1);else viaLink()})})}
+function bkCopy(){const txt=backupText(),done=()=>bkSay('Backup copied. Paste it into a note or an email to yourself and keep it safe.'),
+ box=()=>{const ta=bkShowOut(txt);let ok=false;if(ta){ta.focus();ta.select();try{ok=document.execCommand('copy')}catch(e){}}if(ok)bkSay('Backup copied. It is also shown in the box above. Paste it into a note or an email to yourself and keep it safe.');else bkSay('Copying is blocked here. The backup is in the box above, already selected: copy it (Ctrl or ⌘ and C, or press and hold), then paste it somewhere safe.')};
+ try{navigator.clipboard.writeText(txt).then(done,box)}catch(e){box()}}
+function bkOffer(txt){const r=readBackup(txt);if(r.err){bk.pend=null;const a=$('bkAsk');if(a)a.innerHTML='';bkSay(r.err,1);return}bk.pend=r;bk.note=null;renderRecord();const no=$('bkNo');if(no)no.focus()}
+function bkApply(){const q=bk.pend;if(!q)return;const old=S,tch=S.teacher;try{loadState(JSON.parse(JSON.stringify(q.st)));S.teacher=tch;gigS();checkGates()}catch(e){S=old;bk.pend=null;renderRecord();bkSay('That backup couldn\'t be loaded.'+NOCHG,1);return}
+ stopAll();if(metro)stopMetro();loop=[];loopChg='';for(const k in bus)bus[k].gain.value=S.mute[k]?0:1;bk={note:['Backup imported: '+bkCount(S)+'. Your progress has been replaced and saved in this browser.',false],pend:null,inTxt:'',out:''};save();all();mUI();toast('Backup imported');const h=$('backup');if(h){h.setAttribute('tabindex','-1');h.focus({preventScroll:true})}}
 /* sequencing */
 let metro=null,timerLeft=0,tmr=null,seqT=[],playing=false,confirmLower=null;
 const home=s=>s.ch.find(c=>/^(I|i)$/.test(fnOf(s.key,c)[0]))||s.ch[0];
 function formBars(s){const sg=s.song,idx=[];let off=0;const start={};sg.map.forEach(m=>{start[m.s]=off;off+=m.b.length});
  (FORM[s.id]||sg.form||sg.map.map(m=>[m.s,1])).forEach(([n,r])=>{const m=sg.map.find(x=>x.s===n);if(!m)return;for(let k=0;k<r;k++)m.b.forEach((b,i)=>idx.push({c:b,i:start[n]+i}))});return idx}
-function feelMiss(s){if(!S.useFin)return '';const f=FIN.find(f=>f.k===S.finish),fp=finPat(s),sp=PAT[s.pat];return fp&&fp.b===sp.b?'':`The band can't follow the ${f.n} feel on this song: its count doesn't fit one bar of ${sp.m===6?'6/8':sp.m+'/4'}. The band keeps the stage pattern; the metronome still plays the feel.`}
-function bandPat(s){const sp=PAT[s.pat];if(!S.useFin)return sp;const fp=finPat(s);return fp&&fp.b===sp.b?Object.assign({},fp,{m:sp.m}):sp}
+/* the Path and the Gig each keep their own feel switch (0.7): a gig song plays its own feel unless the Gig switch is on */
+const finOn=s=>GIG.includes(s)?!!gigS().useFin:S.useFin;
+function feelMiss(s){if(!finOn(s))return '';const f=FIN.find(f=>f.k===S.finish),fp=finPat(s),sp=PAT[s.pat];return fp&&fp.b===sp.b?'':`The band can't follow the ${f.n} feel on this song: its count doesn't fit one bar of ${sp.m===6?'6/8':sp.m+'/4'}. The band keeps the stage pattern; the metronome still plays the feel.`}
+function bandPat(s){const sp=PAT[s.pat];if(!finOn(s))return sp;const fp=finPat(s);return fp&&fp.b===sp.b?Object.assign({},fp,{m:sp.m}):sp}
 async function playSeq(bars,kind,s){const a=A();if(!a)return;stopAll();const my=++runId;if(metro)stopMetro();try{await a.resume()}catch(e){}if(my!==runId)return;s=s||stage();playing=kind;const p=bandPat(s),beat=60/bpm(),cs=cells(p),n=cs.length,free=kind==='loop';
  const P=k=>free||kind==='gig'?out():part(k),dp=drumPat(p);let t=a.currentTime+.15;
  if(p.m===4){[0,2].forEach(k=>click(t+k*beat,k===0));t+=4*beat;for(let k=0;k<4;k++)click(t+k*beat,k===0);t+=4*beat}
@@ -555,12 +610,12 @@ function restartMetro(){if(metro){stopMetro();startMetro()}}
 function checkGates(){ST.forEach(s=>{if(passed(s)&&!S.gates[gk(s)]){S.gates[gk(s)]=Date.now();toast(`Gate passed: stage ${ST.indexOf(s)+1}, ${s.title}.${[2,4,6].includes(ST.indexOf(s))?' Its inlay is now gold.':''}`)}else if(!passed(s)&&S.gates[gk(s)])delete S.gates[gk(s)]})}
 const VIEWS=['path','warm-up','rudiments','technique','invent','gig','record'];let view='path';
 function route(){let h='';try{h=location.hash.slice(1)}catch(e){}const before=view+S.stage;if(ST.some(s=>s.id===h)){if(S.stage!==h){S.stage=h;loop=[];save();stopAll()}view='path'}else if(VIEWS.includes(h))view=h;else view='path';
- if(before!==view+S.stage&&playing)stopAll();if(view!=='gig')document.body.classList.remove('present');VIEWS.forEach(v=>{$('v-'+v).classList.toggle('hide',v!==view);if(v!==view&&v!=='path')$('v-'+v).innerHTML=''});document.querySelectorAll('#tabs a').forEach(a=>a.setAttribute('aria-current',a.getAttribute('href')==='#'+view?'page':'false'));all();restartMetro();mUI();if(pendingFocus){refocus(pendingFocus);pendingFocus=null}else if(focusView){const hd=view==='path'?$('next'):$('v-'+view).querySelector('h2');if(hd){hd.setAttribute('tabindex','-1');hd.focus()}}focusView=false}
+ if(before!==view+S.stage&&playing)stopAll();if(view!=='gig')document.body.classList.remove('present');if(view!=='record'){bk.pend=null;bk.note=null;bk.out=''}VIEWS.forEach(v=>{$('v-'+v).classList.toggle('hide',v!==view);if(v!==view&&v!=='path')$('v-'+v).innerHTML=''});document.querySelectorAll('#tabs a').forEach(a=>a.setAttribute('aria-current',a.getAttribute('href')==='#'+view?'page':'false'));all();restartMetro();mUI();if(pendingFocus){refocus(pendingFocus);pendingFocus=null}else if(focusView){const hd=view==='path'?$('next'):$('v-'+view).querySelector('h2');if(hd){hd.setAttribute('tabindex','-1');hd.focus()}}focusView=false}
 function all(){renderFinish();if(view==='path'){renderNext();renderNeck();renderStage();renderSide()}else if(view==='warm-up')renderWarm();else if(view==='rudiments')renderRud();else if(view==='technique')renderTech();else if(view==='invent')renderInvent();else if(view==='gig')renderGig();else renderRecord()}
 function refocus(sel){const el=document.querySelector(sel);if(el)el.focus()}
 let focusView=false,pendingFocus=null;
 document.addEventListener('click',e=>{if(e.target.closest('#tabs a')||e.target.closest('#next a'))focusView=true;const t=e.target.closest('button');if(!t)return;if(!(t.dataset.lv&&t.dataset.lv===confirmLower&&t.dataset.dir==='-1'))confirmLower=null;
- if(t.dataset.fin){if(t.dataset.fin===S.finish)return;const was=playing&&S.useFin&&playing!=='loop';S.finish=t.dataset.fin;save();if(was)stopAll();all();restartMetro();refocus(`[data-fin="${t.dataset.fin}"]`);const ms=view==='path'?feelMiss(stage()):'';if(was||ms)toast((was?'Feel changed, so the band has stopped. Press Play again. ':'')+ms,ms?7000:0)}
+ if(t.dataset.fin){if(t.dataset.fin===S.finish)return;const was=playing==='gig'?gigS().useFin:playing==='map'&&S.useFin;S.finish=t.dataset.fin;save();if(was)stopAll();all();restartMetro();refocus(`[data-fin="${t.dataset.fin}"]`);const ms=view==='path'?feelMiss(stage()):'';if(was||ms)toast((was?'Feel changed, so the band has stopped. Press Play again. ':'')+ms,ms?7000:0)}
  else if(t.dataset.st&&t.dataset.st===S.stage&&view==='path'){t.focus()}
  else if(t.dataset.st){pendingFocus=`[data-st="${t.dataset.st}"]`;try{location.hash=t.dataset.st}catch(err){S.stage=t.dataset.st;all()}}
  else if(t.dataset.strum)strum(t.dataset.strum)
@@ -570,6 +625,7 @@ document.addEventListener('click',e=>{if(e.target.closest('#tabs a')||e.target.c
   confirmLower=null;const sg=ST.find(x=>k.split(/[:@]/)[0]===x.id),wasP=sg&&passed(sg);S.lv[k]=n;if(n<o&&S.sign[k]){delete S.sign[k];toast('Level lowered: teacher sign-off cleared')}else if(wasP&&!passed(sg))toast(`Stage ${ST.indexOf(sg)+1}'s gate closes until this step is back at Consistent.`);checkGates();save();all();refocus(`[data-lv="${k}"][data-dir="${d}"]`)}
  else if(t.dataset.sign){const k=t.dataset.sign;if(S.sign[k])delete S.sign[k];else S.sign[k]=Date.now();save();renderStage();refocus(`[data-sign="${k}"]`)}
  else if(t.dataset.pat){const nf=t.dataset.pat==='1',chg=nf!==S.useFin,was=chg&&playing;S.useFin=nf;save();if(was)stopAll();const r=!!metro;stopMetro();all();if(r)startMetro();mUI();refocus(`[data-pat="${t.dataset.pat}"]`);const ms=feelMiss(stage());if(was||(chg&&ms))toast((was?'Feel changed, so the band has stopped. Press Play again. ':'')+ms,ms?7000:0)}
+ else if(t.dataset.gpat){const G=gigS(),nf=t.dataset.gpat==='1',chg=nf!==G.useFin,was=chg&&playing;G.useFin=nf;save();if(was)stopAll();renderGig();restartMetro();mUI();refocus(`[data-gpat="${t.dataset.gpat}"]`);if(was)toast('Feel changed, so the band has stopped. Press Play again.')}
  else if(t.id==='nswBtn'){S.nsw=!S.nsw;save();all()}
  else if(t.id==='tchBtn'){S.teacher=!S.teacher;save();all()}
  else if(t.classList.contains('m-toggle')){if(metro)stopMetro();else{if(playing)stopAll();startMetro()}mUI()}
@@ -582,20 +638,27 @@ document.addEventListener('click',e=>{if(e.target.closest('#tabs a')||e.target.c
  else if(t.id==='delBand'){const G=gigS();if(G.bands.length>1)G.bands.pop();save();renderGig();refocus('#addBand')}
  else if(t.dataset.gtime){const m=+t.dataset.gtime;if(!(m>0&&m<=60))return;clearInterval(gt);const a0=A();if(a0){try{a0.resume()}catch(err){}click(a0.currentTime+.03,0)}gtEnd=Date.now()+m*60000;const tk=()=>{const r=Math.max(0,Math.ceil((gtEnd-Date.now())/1000));const el=$('gtime');if(el)el.textContent=Math.floor(r/60)+':'+String(r%60).padStart(2,'0');if(!r){clearInterval(gt);gt=null;const a=A();if(a){const beep=()=>[0,.3,.6].forEach(x=>click(a.currentTime+x,1));if(a.state==='running')beep();else{try{a.resume().then(beep,()=>{})}catch(err){}}}toast('Time: change over.')}};tk();gt=setInterval(tk,250)}
  else if(t.id==='gstop'){clearInterval(gt);gt=null;const el=$('gtime');if(el)el.textContent='0:00'}
- else if(t.id==='present'){const on=document.body.classList.toggle('present');t.setAttribute('aria-pressed',on);toast(on?'Present mode: setup is hidden, run sheet and chart are enlarged. Press Present again to go back.':'Present mode off')}
+ else if(t.id==='present'){const on=document.body.classList.toggle('present');renderGig();refocus('#present');toast(on?'Present mode: setup is hidden; the run sheet, its phase headings and the chart are enlarged. Press Present again to go back.':'Present mode off')}
  else if(t.id==='copyGig'){const txt=gigText(gigS());try{navigator.clipboard.writeText(txt).then(()=>toast('Gig list copied'),()=>{$('gigTxt').classList.remove('hide');toast('Copy isn\'t available here: select the text below instead.')})}catch(err){$('gigTxt').classList.remove('hide')}}
+ else if(t.id==='bkDown')bkDownload()
+ else if(t.id==='bkCopy')bkCopy()
+ else if(t.id==='bkPick'){const f=$('bkFile');if(f){f.value='';f.click()}}
+ else if(t.id==='bkImport')bkOffer($('bkIn').value)
+ else if(t.id==='bkYes')bkApply()
+ else if(t.id==='bkNo'){bk.pend=null;renderRecord();bkSay('Import cancelled. Your progress is unchanged.');refocus('#bkImport')}
  else if(t.dataset.inst){S.inst=t.dataset.inst;save();all();refocus(`[data-inst="${S.inst}"]`);toast(INST.find(x=>x[0]===S.inst)[1]+': your steps, gates and record are now for this instrument.')}
  else if(t.dataset.mute){const k=t.dataset.mute;S.mute[k]=!S.mute[k];save();t.setAttribute('aria-pressed',!S.mute[k]);if(bus[k])bus[k].gain.value=S.mute[k]?0:1}
  else if(t.dataset.tgt){setBpm(t.dataset.tgt);mUI();if(!tempoStop())toast('Metronome set to '+bpm()+' bpm')}
- else if(t.dataset.capo){if(playing)stopAll();const s=stage();S.capo[s.id]=Math.max(0,Math.min(7,capo()+(+t.dataset.capo)));if(!S.capo[s.id])delete S.capo[s.id];save();renderStage();refocus(`[data-capo="${t.dataset.capo}"]`);toast((capo()?'Capo '+capo():'No capo')+': sounds in '+sounds(s)+'.')}
+ else if(t.dataset.capo){if(playing)stopAll();const s=stage();S.capo[s.id]=Math.max(0,Math.min(7,capo()+(+t.dataset.capo)));if(!S.capo[s.id])delete S.capo[s.id];save();renderStage();renderSide();refocus(`[data-capo="${t.dataset.capo}"]`);toast((capo()?'Capo '+capo():'No capo')+': sounds in '+sounds(s)+'.')}
  else if(t.id==='timer'){if(tmr){clearInterval(tmr);tmr=null;timerLeft=0;t.textContent='Start 60 s';toast('Timer cancelled');return}A();timerLeft=60;t.textContent='60 s';const end=Date.now()+60000;tmr=setInterval(()=>{timerLeft=Math.max(0,Math.ceil((end-Date.now())/1000));const b=$('timer');if(b)b.textContent=timerLeft?timerLeft+' s':'Start 60 s';if(!timerLeft){clearInterval(tmr);tmr=null;const a=A();if(a){click(a.currentTime,1);click(a.currentTime+.15,1)}toast('Time. Count your changes and log them.');if($('cnt'))$('cnt').focus()}},250)}
  else if(t.id==='logChg'){const v=parseInt($('cnt').value,10);if(!(v>=0&&v<=200)){toast('Enter the number of changes, 0 to 200');return}const s=stage();S.changes.push({d:Date.now(),st:s.id,inst:S.inst,pair:s.pair.join('-'),n:v});save();renderSide();refocus('#logChg');toast('Logged '+v+' changes'+(v>=CPM(s)[1]?': Applied target met':v>=CPM(s)[0]?': Consistent target met':''))}});
-document.addEventListener('input',e=>{const t=e.target,d=t.dataset;if(t.classList.contains('m-bpm')){setBpm(t.value);mUI();tempoStop()}
+document.addEventListener('input',e=>{const t=e.target,d=t.dataset;if(t.id==='bkIn'){bk.inTxt=t.value;return}if(t.classList.contains('m-bpm')){setBpm(t.value);mUI();tempoStop()}
  else if(d.bname!==undefined){const b=gigS().bands[+d.bname];if(b){b.name=t.value.slice(0,40)||'Band '+(+d.bname+1);save();renderRun()}}
  else if(d.bm){const [bi,r]=d.bm.split(':'),b=gigS().bands[+bi];if(b){const v=t.value.slice(0,40);if(v.trim())b.m[r]=v;else delete b.m[r];save();renderRun()}}});
 function tempoStop(){if(playing){stopAll();toast('Tempo changed: press Play again to hear the band at '+bpm()+' bpm.');return true}return false}
 function mUI(){const p=curPat();const bp=bpm();document.querySelectorAll('.m-out').forEach(o=>o.textContent=bp);document.querySelectorAll('.m-bpm').forEach(o=>{if(+o.value!==bp)o.value=bp});document.querySelectorAll('.m-toggle').forEach(b=>b.setAttribute('aria-pressed',!!metro));document.querySelectorAll('.m-name').forEach(n=>n.textContent=p.n);document.querySelectorAll('.m-unit').forEach(n=>n.textContent=unit(p))}
 document.addEventListener('change',e=>{const d=e.target.dataset;
+ if(e.target.id==='bkFile'){const f=e.target.files&&e.target.files[0];if(!f)return;if(f.size>4e6){bk.pend=null;const a=$('bkAsk');if(a)a.innerHTML='';bkSay('That file is too big to be a Guitar Lab backup.'+NOCHG,1);return}const rd=new FileReader();rd.onload=()=>bkOffer(String(rd.result||''));rd.onerror=()=>bkSay('That file couldn\'t be read.'+NOCHG,1);rd.readAsText(f);return}
  if(d.gsong){const G=gigS(),id=d.gsong;if(e.target.checked){if(G.songs.length>=4){e.target.checked=false;toast('Four songs per gig: untick one first.');return}G.songs.push(id)}else G.songs=G.songs.filter(x=>x!==id);save();renderGig();refocus(`[data-gsong="${id}"]`);return}
  if(d.bname!==undefined){const b=gigS().bands[+d.bname];if(b){b.name=e.target.value.trim().slice(0,40)||'Band '+(+d.bname+1);e.target.value=b.name;save();renderRun()}return}
  if(d.bm){const [bi,r]=d.bm.split(':'),b=gigS().bands[+bi];if(b){const v=e.target.value.trim().slice(0,40);if(v)b.m[r]=v;else delete b.m[r];e.target.value=v;save();renderRun()}return}
@@ -606,7 +669,7 @@ document.addEventListener('change',e=>{const d=e.target.dataset;
  else if(d.best){const v=parseInt(e.target.value,10);if(v>=30&&v<=300){S.best[d.best]=v;save();toast('Best tempo saved: '+v+' bpm')}else{e.target.value=S.best[d.best]||'';toast('Enter a tempo from 30 to 300')}}});
 window.addEventListener('hashchange',route);let wasNarrow=window.innerWidth<700;window.addEventListener('resize',()=>{const nw=window.innerWidth<700;if(nw!==wasNarrow){wasNarrow=nw;if(view==='path')renderStage();else if(view==='gig')renderGig()}});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if(metro)stopMetro();if(playing)stopAll()}});
-gigS();checkGates();route();
+gigS();checkGates();route();dlFind();
 }
 </script>
 </body>

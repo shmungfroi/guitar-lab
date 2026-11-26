@@ -287,7 +287,9 @@ def test_roman_numerals_and_functions(k):
         if ext:
             assert (ext == "maj7") == (q == "maj7") and (ext == "7") == (q == "7")
         deg = ROMAN[num.upper()]
-        expected = {1: "T", 3: "T", 6: "T" if mode == "major" else "P", 2: "P", 4: "P", 5: "D", 7: "D"}[deg]
+        # 0.7 (R7): the minor-key subtonic VII is its own neutral function "N", not a dominant
+        expected = {1: "T", 3: "T", 6: "T" if mode == "major" else "P", 2: "P", 4: "P", 5: "D",
+                    7: "N" if mode == "minor" else "D"}[deg]
         assert fn == expected, f"{k}: {chord} ({rn}) function {fn}, expected {expected}"
         if deg == 7 and mode == "minor":
             assert len(info) > 2 and info[2] == "subtonic", "minor VII should be labelled subtonic"
@@ -481,3 +483,37 @@ def test_capo_sounding_key_and_spelling(sid):
         assert md == mode
         allowed = (MAJOR_KEYS if mode == "major" else MINOR_KEYS)[(tp + c) % 12]
         assert name in allowed, f"{sid} capo {c}: {got}, expected one of {allowed}"
+
+
+# ---------------------------------------------------------------- register 0.7 (tests/reports/spec07/SPEC_07.md)
+
+def test_R6_greensleeves_verse_bar_3_is_A_minor():
+    """Traditional harmony: the melody's G♯ in bar 3 sits against Am, not F."""
+    s = next(x for x in ST if x["id"] == "six-eight")
+    verse = next(m for m in s["song"]["map"] if m["s"] == "Verse")
+    assert verse["b"] == ["Am", "G", "Am", "E", "Am", "G", "Am E", "Am"]
+    assert verse["b"][2] == "Am"
+    assert numerals("Am6", verse["b"][:4]) == ["i", "VII", "i", "V"]
+    refrain = next(m for m in s["song"]["map"] if m["s"] == "Refrain")
+    assert refrain["b"] == ["C", "G", "Am", "E", "C", "G", "Am E", "Am"]
+    # nothing in the stage is left over from the old bar: chords taught == chords charted
+    assert "F" not in map_chords(s["song"])
+    assert set(s["ch"]) == set(map_chords(s["song"])) == {"Am", "G", "E", "C"}
+    assert s["pair"] == ["Am", "E"]
+    # the Andalusian cadence card still has its F, with a function and a sol-fa root in A minor
+    assert KEYS["Am6"]["m"]["F"][:2] == ["VI", "P"] and SOLFA["Am6"]["F"] == "fa"
+
+
+def test_R7_subtonic_is_not_a_dominant():
+    FN = D["FN"]
+    for k, chord, dom in [("Am6", "G", "E"), ("Bm", "A", "F#")]:
+        rn, fn, lab = KEYS[k]["m"][chord]
+        assert (rn, lab) == ("VII", "subtonic")
+        assert fn != "D" and FN[fn][0] == "subtonic"
+        assert FN[fn][1] not in (FN["D"][1], FN["T"][1], FN["P"][1], FN["S"][1]), "subtonic needs its own colour"
+        assert KEYS[k]["m"][dom][1] == "D", f"{dom} is the true dominant in {k}"
+    assert KEYS["Am"]["m"]["E7"][1] == "D" and KEYS["A"]["m"]["E"][1] == "D"
+    # only a subtonic carries the neutral function
+    for k, v in KEYS.items():
+        for chord, info in v["m"].items():
+            assert (info[1] == "N") == (len(info) > 2 and info[2] == "subtonic"), f"{k}: {chord}"

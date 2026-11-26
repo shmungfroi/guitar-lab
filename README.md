@@ -2,7 +2,7 @@
 
 A Shmungfroi instrument: a browser-based guitar and band teacher. Same two chords, four Finishes (rock and roll, flamenco, bossa, hair metal), and a learning path from A and E to I–V–vi–IV and Hallelujah in C. Band mode covers guitar, bass, drums, keys and vocals, and Gig mode runs a class or a private band through a four-song set.
 
-Open `index.html` in a browser (keep `fonts/` next to it). Progress saves in the browser it's used in.
+Open `index.html` in a browser (keep `fonts/` next to it). Progress saves in the browser it's used in; the Record tab has a Backup card to download, copy and re-import it.
 
 ## Repo layout
 | Path | What it is |
@@ -11,6 +11,7 @@ Open `index.html` in a browser (keep `fonts/` next to it). Progress saves in the
 | `fonts/` | Poiret One and Outfit (SIL Open Font License). |
 | `tests/` | Regression suites: chord and theory data, UI matrix, playback timing. See `tests/README.md`. |
 | `tests/reports/spec06/` | Approved spec, build report, test baseline and independent check for 0.6. |
+| `tests/reports/spec07/` | Approved spec and build report (self-check) for 0.7. |
 
 ## Rules for editing
 1. Work on a branch per build; push as you go; merge to `main` after the independent check.
