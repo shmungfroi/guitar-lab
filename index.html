@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>The Guitar Lab 0.9</title>
+<title>The Guitar Lab 0.10</title>
 <style>
 /* VOICE: a patient guitar teacher in the Shmungfroi family: warm, exact, unhurried.
    IDEA: the guitar neck is the map; each fret is a stage, the inlays are the gates you earn.
@@ -125,7 +125,7 @@ table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px
 <div class="wrap">
 <header>
 <div class="top">
-<div><h1>The Guitar Lab</h1><div class="sub">version 0.9 · a Shmungfroi instrument</div></div>
+<div><h1>The Guitar Lab</h1><div class="sub">version 0.10 · a Shmungfroi instrument</div></div>
 <div class="sp"></div>
 <div class="chips" role="group" aria-label="Finish" id="finishes"></div>
 </div>
@@ -625,7 +625,7 @@ function renderRecord(){const s=stage(),iname=INST.find(x=>x[0]===S.inst)[1],mc=
 let bk={note:null,pend:null,inTxt:'',out:''},dlCap;
 /* a claude.ai artifact can hand files to its viewer; anywhere else this stays empty and the plain download link is used */
 const dlFind=()=>{if(dlCap!==undefined)return Promise.resolve(dlCap);try{const c=window.claude;if(c&&typeof c.use==='function')return Promise.resolve(c.use('downloads')).then(d=>dlCap=(d&&typeof d.save==='function')?d:null,()=>dlCap=null)}catch(e){}return Promise.resolve(null)};
-const backupObj=()=>{gigS();return {app:'The Guitar Lab',format:1,version:'0.9',saved:new Date().toISOString(),state:JSON.parse(JSON.stringify(S))}};
+const backupObj=()=>{gigS();return {app:'The Guitar Lab',format:1,version:'0.10',saved:new Date().toISOString(),state:JSON.parse(JSON.stringify(S))}};
 const backupText=()=>JSON.stringify(backupObj(),null,1);
 const bkName=()=>'guitar-lab-backup-'+today()+'.json';
 const NOCHG=' Nothing has been changed.';
@@ -635,7 +635,7 @@ function readBackup(txt){txt=String(txt||'').replace(/^﻿/,'').trim();if(!txt)r
  try{o=JSON.parse(txt)}catch(e){return {err:'That isn\'t a Guitar Lab backup: the text can\'t be read as JSON, so part of it may be missing or changed. Copy the whole backup, from the first { to the last }, and try again.'+NOCHG}}
  const isO=v=>!!v&&typeof v==='object'&&!Array.isArray(v);if(!isO(o))return {err:'That isn\'t a Guitar Lab backup: a backup is one block of text that starts with { and ends with }.'+NOCHG};
  const wrapped=isO(o.state)&&('format' in o||'app' in o),st=wrapped?o.state:o;
- if(wrapped&&typeof o.format==='number'&&o.format>1)return {err:'That backup was made by a newer version of The Guitar Lab than this one (0.9), so it can\'t be read here.'+NOCHG};
+ if(wrapped&&typeof o.format==='number'&&o.format>1)return {err:'That backup was made by a newer version of The Guitar Lab than this one (0.10), so it can\'t be read here.'+NOCHG};
  const known=Object.keys(DEF).filter(k=>st[k]!==undefined&&st[k]!==null);if(!known.length)return {err:'That JSON isn\'t a Guitar Lab backup: it has none of the things this app saves (levels, journal, gig plan and so on).'+NOCHG};
  const bad=known.filter(k=>!kindOK(DEF[k],st[k]));if(bad.length)return {err:'That backup is damaged: '+bad.map(k=>'"'+k+'"').join(', ')+(bad.length>1?' are':' is')+' not in the form this app saves.'+NOCHG};
  if(Array.isArray(st.changes)&&st.changes.some(c=>!isO(c))||Array.isArray(st.journal)&&st.journal.some(j=>!isO(j)))return {err:'That backup is damaged: its practice log or journal has entries this app can\'t read.'+NOCHG};

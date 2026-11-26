@@ -1,11 +1,12 @@
 # Tests for The Guitar Lab (index.html)
 
-Three pytest suites. They read `index.html` and never edit it.
+Four pytest suites. They read `index.html` and never edit it.
 
 | Suite | What it checks | Time |
 |---|---|---|
 | `test_chords.py` | The 18 chord shapes (frets, fingers, barres, the notes they sound against their spelling), fretboard diagrams, key spellings, roman numerals and functions, sol-fa roots, bass root/fifth positions, song maps vs keys and labelled progressions, strum and Finish patterns, capo sounding keys | ~1 s |
 | `test_ui.py` | Render matrix (8 stages x 7 tabs x 5 instruments x 360/768/1280 px x light/dark: no console errors, no page-level horizontal overflow, key panels present); functional tests (gates, sign-off, grading, playback start/stop, capo, mute, gig max four, gig timer, roles); one or more tests per register item M1-M5, S1-S15 in `reports/spec06/SPEC_06.md` R1-R11 in `reports/spec07/SPEC_07.md` (`test_R<n>_...`; R6 and R7 also have data tests in `test_chords.py`) T1-T5 in `reports/spec08/SPEC_08.md` (`test_T<n>_...`) and U1, U3 in `reports/spec09/SPEC_09.md` (`test_U<n>_...`) | ~4 min |
+| `test_r13.py` | R13 (0.10) per-instrument content, tests X1-X10, X12, X13 of `reports/r13/SPEC_R13.md` for guitar and bass: guitar (and drums, keys, vocals until their batches ship) rendered exactly as on 0.9, bass sees only bass items and cards, no guitar-only wording, four-line TAB on stage 2, save key and shape, old stray ticks, gates per instrument, the instrument switch, bass Invent, content policy, clean rendering at 320-1280 px. X11 (every bass note, string and fret; boogie walk, approach notes, bossa and tangos rhythms) is in `test_chords.py` | ~2 min |
 | `test_timing.py` | Records every WebAudio source start via an init script and checks the schedule against the beat grid (4/4 at two tempos, swung shuffle, 3/4, 6/8), that nothing is scheduled late, and that a double tap on Play can't stack two bands (S2) | ~30 s |
 
 ## Setup (fresh session)
@@ -89,3 +90,18 @@ SHREDDER_INDEX=/tmp/shredder05/index.html python3 -m pytest tests -q -p no:cache
   browser build may need them re-measured with `SHREDDER_INDEX` pointed at 0.8.
 - 0.9 version: `test_version_0_9_...` import 0.7, 0.8 and 0.9 wrappers and a bare state, and check the newer-version message.
 - Results for each build go in `reports/<spec>/TEST_BASELINE.md` or that spec's `BUILD_REPORT.md`.
+- X1 (0.10): `x1snap.py` walks an instrument through Rudiments, Technique, Invent (before a roll, and after one with `Math.random` pinned)
+  and the side panel and song TAB of all eight stages, in a first-visit save and an all-gates-passed save, and `x1_0_9.json` holds the
+  hash and length of each as rendered by 0.9 (main 90719f9). The file's docstring says how to re-make it and how to dump both builds
+  to folders for a diff. Bass is in the file too but is no longer compared, because bass now has its own content. When drums, keys or
+  vocals get theirs, take that instrument out of `test_X1_snapshot_matches_0_9`.
+- X2 (0.10): two bass drills keep the same name as guitar's (the pulse and the spider); the ids are different (`bs-...`), which is what the test checks.
+- X3 (0.10): `X3_DENY` is guitar-only technique and book wording. "fret", "string", "TAB", "pickup" and "hammer-on" are bass words too.
+  It is read on Rudiments, Technique, Invent, the stage cards, the stage-2 part note and Also try, not on the Path's capo and metronome
+  lines, which are unchanged from 0.9 and speak about the guitar on purpose.
+- X10 (0.10): waits four seconds at 200 bpm because the count-in is two bars; bass notes are the triangle oscillators.
+- X11 (0.10): bass data is read straight from the `instData` JSON block. `ev` is `[string, fret]` with string 0 = low E, `evn` the note
+  names in the same order, `pos` the `[note, string, fret]` places a card's wording names, `bt` a count line with what is played on it.
+- 0.10 version: `test_version_0_10_...` import 0.7, 0.8, 0.9 and 0.10 wrappers and a bare state, and check the newer-version message.
+- The render matrix reads each instrument's own card counts (`panel_counts` in `test_ui.py`): bass has 8 rudiments, core + rock + the
+  current Finish on Technique, and no fretboard diagrams.
