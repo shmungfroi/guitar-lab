@@ -22,6 +22,16 @@ ST, PAT, GIGS = D["ST"], D["PAT"], D["GIG"]
 TABS = ["path", "warm-up", "rudiments", "technique", "invent", "gig", "record"]
 INSTS = ["guitar", "bass", "drums", "keys", "vocals"]
 NRUD, NTECH = len(D["RUD"]), len(D["TECH"])
+# R13 (0.10): an instrument with its own content (instData) shows its own lists; the others still show guitar's.
+INSTC = appdata.load().get("INSTC") or {}
+
+
+def panel_counts(inst, finish="bossa"):
+    """Rudiment cards, Technique cards and fretboard diagrams the instrument should see."""
+    c = INSTC.get(inst) if inst != "guitar" else None
+    if not c:
+        return {"nrud": NRUD, "ntech": NTECH, "nfb": 4}
+    return {"nrud": len(c["rud"]), "ntech": len([t for t in c["tech"] if t["f"] in ("core", "rock", finish)]), "nfb": 0}
 FAST = {"bpm": 200}
 
 
@@ -51,7 +61,7 @@ def test_render_matrix(app, width, scheme, inst):
             if tab != "path":
                 go(pg, tab)
             where = f"{s['id']}/{tab}"
-            for p in pg.evaluate(PANELS_JS, {"view": tab, "inst": inst, "nch": nch, "nrud": NRUD, "ntech": NTECH}):
+            for p in pg.evaluate(PANELS_JS, dict({"view": tab, "inst": inst, "nch": nch}, **panel_counts(inst))):
                 problems.append(where + ": " + p)
             for p in pg.evaluate(OVERFLOW_JS):
                 problems.append(where + ": overflow " + p)

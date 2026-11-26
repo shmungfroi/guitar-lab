@@ -18,7 +18,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 INDEX = pathlib.Path(os.environ.get("SHREDDER_INDEX") or ROOT / "index.html").resolve()
 
 NAMES = ["CH", "FB", "SOLFA", "KEYS", "FN", "PAT", "FIN", "ST", "FORM", "TON", "PCN",
-         "OPEN", "TB", "GIG", "INST", "RUD", "TECH", "KNOW"]
+         "OPEN", "TB", "GIG", "INST", "RUD", "TECH", "KNOW", "INSTC"]
 
 COLLECT = r"""
 ()=>{const g=n=>{try{return __APP(n)}catch(e){return undefined}};const out={};

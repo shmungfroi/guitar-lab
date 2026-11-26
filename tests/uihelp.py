@@ -85,7 +85,7 @@ OVERFLOW_JS = r"""
 
 # Checks that the key panels for the current view rendered. Returns a list of problems.
 PANELS_JS = r"""
-({view,inst,nch,nrud,ntech})=>{const P=[];const q=s=>document.querySelectorAll(s);const vis=el=>!!el&&el.getClientRects().length>0;
+({view,inst,nch,nrud,ntech,nfb=4})=>{const P=[];const q=s=>document.querySelectorAll(s);const vis=el=>!!el&&el.getClientRects().length>0;
  const sec=document.getElementById('v-'+view);if(!vis(sec))P.push('section v-'+view+' not visible');
  const cur=document.querySelector('#tabs a[aria-current=page]');if(!cur||cur.getAttribute('href')!=='#'+view)P.push('tab not marked current');
  if(view==='path'){if(!vis(document.querySelector('#stage h2')))P.push('no stage title');if(q('#neck .fr').length!==8)P.push('neck frets '+q('#neck .fr').length);
@@ -98,7 +98,7 @@ PANELS_JS = r"""
   if(inst==='vocals'&&!/cue sheet/i.test(st.textContent))P.push('no cue sheet')}
  if(view==='warm-up'){if(q('input[data-warm]').length!==5)P.push('warm-up items');if(q('button[data-ref]').length!==6)P.push('reference strings')}
  if(view==='rudiments'&&q('#v-rudiments .card').length!==nrud)P.push('rudiment cards '+q('#v-rudiments .card').length);
- if(view==='technique'){if(q('#v-technique .card').length!==ntech)P.push('technique cards '+q('#v-technique .card').length);if(q('#v-technique svg.fb').length!==4)P.push('fretboards')}
+ if(view==='technique'){if(q('#v-technique .card').length!==ntech)P.push('technique cards '+q('#v-technique .card').length);if(q('#v-technique svg.fb').length!==nfb)P.push('fretboards')}
  if(view==='invent'&&!document.getElementById('roll'))P.push('no roll button');
  if(view==='gig'){if(q('input[data-gsong]').length!==6)P.push('gig songs');if(!document.getElementById('playGig'))P.push('no gig play');if(!q('#v-gig .rmap').length)P.push('no gig chart')}
  if(view==='record'&&!document.getElementById('jf'))P.push('no journal');

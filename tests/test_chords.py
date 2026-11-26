@@ -517,3 +517,201 @@ def test_R7_subtonic_is_not_a_dominant():
     for k, v in KEYS.items():
         for chord, info in v["m"].items():
             assert (info[1] == "N") == (len(info) > 2 and info[2] == "subtonic"), f"{k}: {chord}"
+
+
+# --------------------------------------------------------------------- R13 X11: bass content (instData)
+# Read straight from the JSON block in index.html: every note the bass pages name, with its string and fret.
+
+import json as _json
+
+from appdata import INDEX as _INDEX
+
+_m = re.search(r'<script type="application/json" id="instData">(.*?)</script>', _INDEX.read_text(encoding="utf-8"), re.S)
+INSTDATA = _json.loads(_m.group(1)) if _m else {}
+BS = INSTDATA.get("bass") or {}
+needs_bass = pytest.mark.skipif(not BS, reason="no bass content in this build (before 0.10)")
+BS_OPEN = [28, 33, 38, 43]          # E1 A1 D2 G2, string 0 = low E
+BS_STR = {"E": 0, "A": 1, "D": 2, "G": 3}
+BS_ITEMS = (BS.get("rud") or []) + (BS.get("tech") or [])
+BS_BY = {i["id"]: i for i in BS_ITEMS}
+
+
+def bs_events(it):
+    """[(string index, [frets], [note names])] for an item's TAB, bar lines dropped."""
+    ev = [e for e in it.get("ev", []) if e != "|"]
+    names = it.get("evn", [])
+    assert len(ev) == len(names), f"{it.get('id', 'part2')}: {len(ev)} TAB events but {len(names)} note names"
+    out = []
+    for (s, f), n in zip(ev, names):
+        frets = [int(x) for x in re.findall(r"\d+", str(f))]
+        ns = n if isinstance(n, list) else [n]
+        assert len(frets) == len(ns), f"{it.get('id')}: {f!r} vs {n!r}"
+        out.append((s, frets, ns))
+    return out
+
+
+def bs_pitches(it):
+    return [BS_OPEN[s] + f for s, frets, _ in bs_events(it) for f in frets]
+
+
+@needs_bass
+def test_X11_bass_data_shape_and_ids():
+    assert BS["strings"] == ["E", "A", "D", "G"] and BS["open"] == BS_OPEN
+    ids = [i["id"] for i in BS_ITEMS]
+    assert len(ids) == len(set(ids)) and all(i.startswith("bs-") for i in ids), ids
+    guitar = {r["id"] for r in D["RUD"]} | {t["id"] for t in D["TECH"]}
+    assert not guitar & set(ids)
+    assert len(BS["rud"]) == 8 and len(BS["tech"]) == 10
+    for it in BS_ITEMS:
+        assert 0 <= it["st"] <= len(ST) - 1 and it["n"] and it["w"], it["id"]
+    for r in BS["rud"]:
+        assert r["u"] in ("quavers", "crotchets") and 40 <= r["c"] < r["a"] <= 140, r["id"]
+    groups = {t["f"] for t in BS["tech"]}
+    assert groups == {"core"} | {f["k"] for f in FIN}, groups
+    assert [t["id"] for t in BS["tech"] if t["f"] == "flam"] == ["bs-compas"] and BS_BY["bs-compas"].get("opt"), "flamenco bass is one optional item"
+    assert set(BS["know"]) == {s["id"] for s in ST} and all(BS["know"][s["id"]] for s in ST), "bass cards on every stage"
+    assert BS["invent"]["kind"] == "bassbar" and len(BS["invent"]["prompts"]) >= 6
+
+
+@needs_bass
+@pytest.mark.parametrize("it", [i for i in BS_ITEMS if i.get("ev")] + list((BS.get("part2") or {}).values()),
+                         ids=lambda i: i.get("id", "stage-2-walk"))
+def test_X11_bass_tab_frets_sound_the_named_notes(it):
+    assert it.get("tab") == 4, "bass TAB is drawn on four lines"
+    for s, frets, names in bs_events(it):
+        assert 0 <= s <= 3
+        for f, n in zip(frets, names):
+            assert 0 <= f <= 12 and (BS_OPEN[s] + f) % 12 == pc(n), f"{BS['strings'][s]} string fret {f} is not {n}"
+
+
+@needs_bass
+def test_X11_bass_positions_named_in_the_wording():
+    """Each [note, string, fret] listed beside a card or item is right, and the wording names that string and fret."""
+    rows = [(i["id"], i["w"], p) for i in BS_ITEMS for p in i.get("pos", [])]
+    rows += [(sid + "/" + c["t"], c["b"], p) for sid, cs in BS["know"].items() for c in cs for p in c.get("pos", [])]
+    assert len(rows) >= 25
+    for where, textv, (n, s, f) in rows:
+        assert (BS_OPEN[BS_STR[s]] + f) % 12 == pc(n), f"{where}: {s} string fret {f} is not {n}"
+        assert s + " string" in textv and (("fret " + str(f)) in textv or re.search(rf"frets [\d, and]*\b{f}\b", textv) if f else "open" in textv), f"{where}: wording does not name {s} string {'fret ' + str(f) if f else 'open'}"
+        assert n in textv, f"{where}: wording does not name {n}"
+
+
+@needs_bass
+def test_X11_boogie_walk_is_root_third_fifth_sixth_in_A_D_and_E():
+    w = BS["part2"]["twelve-bar"]
+    assert w["chords"] == ["A", "D", "E"] and w["deg"] == ["R", "3", "5", "6"]
+    bars, cur = [], []
+    for e in w["ev"]:
+        if e == "|":
+            bars.append(cur)
+            cur = []
+        else:
+            cur.append(e)
+    bars.append(cur)
+    assert len(bars) == 3 and all(len(b) == 4 for b in bars)
+    for ch, b in zip(w["chords"], bars):
+        ps = [BS_OPEN[s] + f for s, f in b]
+        assert ps[0] % 12 == pc(ch) and [p - ps[0] for p in ps] == [0, 4, 7, 9], f"{ch}: {ps}"
+        assert [f for _, f in b] == [0, 4, 2, 4], "the same shape on every chord"
+    assert w["evn"][:4] == ["A", "C♯", "E", "F♯"]
+    a, d, e = ([s for s, _ in b] for b in bars)
+    assert d == [s + 1 for s in a] and e == [s - 1 for s in a], "D is the shape one string up, E one string down"
+    # the stage really is a 12-bar on A, D and E, and the guitar riff on the same stage is in A too
+    assert set(ST[1]["ch"]) == set(w["chords"])
+    up = BS_BY["bs-shuffle"]
+    ps = bs_pitches(up)
+    assert up["deg"] == ["R", "3", "5", "6", "8", "6", "5", "3"] and [p - ps[0] for p in ps] == [0, 4, 7, 9, 12, 9, 7, 4] and ps[0] % 12 == pc(up["root"])
+    assert up["f"] == "rock" and up["st"] == 1
+
+
+@needs_bass
+def test_X11_approach_notes_are_a_semitone_below_the_next_root():
+    ap = BS_BY["bs-approach"]
+    ps = bs_pitches(ap)
+    pairs = list(zip(ps[0::2], ps[1::2]))
+    assert len(pairs) == len(ap["appr"]) == 4
+    for (lo, hi), (frm, to) in zip(pairs, ap["appr"]):
+        assert hi - lo == 1 and lo % 12 == pc(frm) and hi % 12 == pc(to), (frm, to)
+    assert {to for _, to in ap["appr"]} == {"C", "G", "A", "F"}, "the four roots of stage 5 (C G Am F)"
+    assert ap["st"] == 4 and set(ST[4]["ch"]) == {"C", "G", "Am", "F"}
+    wk = BS_BY["bs-walk"]
+    ps = bs_pitches(wk)
+    assert [p - ps[0] for p in ps[:4]] == [0, 4, 7, 8] and ps[0] % 12 == pc("C"), "root, third, fifth of C, then the approach"
+    assert ps[4] - ps[3] == 1 and ps[4] % 12 == pc("A"), "the approach note lands a semitone up, on A"
+    assert wk["walk"] == {"chord": "C", "next": "Am", "deg": ["R", "3", "5", "ap"]} and wk["bt"]["p"] == ["R", "3", "5", "↗"]
+
+
+@needs_bass
+def test_X11_root_fifth_positions_agree_with_bassPos():
+    for iid in ("bs-rootfifth", "bs-bossa"):
+        it = BS_BY[iid]
+        evs = bs_events(it)
+        where = [[BS["strings"][s], frets[0], names[0]] for s, frets, names in evs]
+        step = 1 if iid == "bs-rootfifth" else 2      # bossa sounds each note twice
+        for k, (root, fifth) in enumerate(it["rf"]):
+            b = D["bass"][root]
+            r, f = where[2 * step * k], where[2 * step * k + step]
+            assert r == b["r"] + [root] and f == b["f"] + [fifth], f"{iid} {root}: {r}, {f} vs bassPos {b}"
+            assert (pc(fifth) - pc(root)) % 12 == 7
+            assert BS_STR[b["f"][0]] == BS_STR[b["r"][0]] + 1 and b["f"][1] == b["r"][1] + 2, "one string higher, two frets along"
+    for iid in ("bs-oct", "bs-octaves"):
+        evs = bs_events(BS_BY[iid])
+        for (s1, f1, n1), (s2, f2, n2) in zip(evs[0::2], evs[1::2]):
+            assert s2 == s1 + 2 and f2[0] == f1[0] + 2 and n1 == n2, f"{iid}: octave shape is two strings up, two frets along"
+            assert BS_OPEN[s2] + f2[0] - BS_OPEN[s1] - f1[0] == 12
+    x = bs_pitches(BS_BY["bs-cross"])
+    assert x[1] - x[0] == 12
+    r = bs_events(BS_BY["bs-roots"])
+    assert [n[0] for _, _, n in r] == ["A", "D", "E"] and all([BS["strings"][s], f[0]] == D["bass"][n[0]]["r"] for s, f, n in r)
+    # every position a stage card gives for a stage root is the one the part panel gives (or its open-string twin)
+    for sid, cs in BS["know"].items():
+        s = next(x for x in ST if x["id"] == sid)
+        for c in cs:
+            for n, strg, f in c.get("pos", []):
+                for chn in s["ch"]:
+                    if D["root"][chn] == pc(n) and BS_OPEN[BS_STR[strg]] + f < 40:
+                        b = D["bass"][chn]["r"]
+                        assert BS_OPEN[BS_STR[strg]] + f == BS_OPEN[BS_STR[b[0]]] + b[1], f"{sid}: {n} at {strg} {f} is not the panel's root {b}"
+
+
+@needs_bass
+def test_X11_rhythm_grids_say_what_the_wording_says():
+    def hits(iid, tok):
+        return [i for i, v in enumerate(BS_BY[iid]["bt"]["p"]) if v == tok]
+    for it in BS_ITEMS:
+        if "bt" in it:
+            assert len(it["bt"]["c"]) == len(it["bt"]["p"]) and it["bt"]["say"], it["id"]
+    # bossa: root on 1, fifth on 3, each sounded again a quaver before the next (dotted crotchet, quaver)
+    assert BS_BY["bs-bossa"]["bt"]["c"] == ["1", "&", "2", "&", "3", "&", "4", "&"]
+    assert hits("bs-bossa", "R") == [0, 3] and hits("bs-bossa", "5") == [4, 7]
+    assert BS_BY["bs-bossa"]["f"] == "bossa" and "tum-ti" in BS_BY["bs-bossa"]["w"]
+    bossa4 = next(f for f in FIN if f["k"] == "bossa")["p"]["4"]
+    assert [i for i, c in enumerate(bossa4["c"]) if c == "B"] == [0, 4], "the Finish's own thumb notes are on 1 and 3 too"
+    # tangos: binary, in four; beat 1 rested, weight on 2, 3 and 4; never the 12-count
+    t = BS_BY["bs-compas"]
+    assert t["bt"]["c"] == ["1", "2", "3", "4"] and t["bt"]["p"] == ["–", "R", "R", "R"]
+    flam4 = next(f for f in FIN if f["k"] == "flam")["p"]["4"]
+    assert t["bt"]["a"] == flam4["a"] == [1, 2, 3]
+    assert "counted in four" in t["w"] and not re.search(r"\b12\b|twelve", t["w"])
+    ps = bs_pitches(t)
+    assert [p % 12 for p in ps] == [pc(n) for n in "AGFE"] and ps == sorted(ps, reverse=True), "roots A G F E, stepping down"
+    # locking with the kick: the root sits where this band's kick drum plays in 4/4 (beats 1 and 3)
+    assert hits("bs-kicklock", "R")[:2] == [0, 4] and "beats 1 and 3" in BS_BY["bs-kicklock"]["w"]
+    # gallop: quaver, two semiquavers
+    assert hits("bs-gallop", "E") == [0, 2, 3, 4, 6, 7]
+    assert hits("bs-rootfifth", "R") == [0] and hits("bs-rootfifth", "5") == [2]
+    assert hits("bs-octaves", "R") == [0, 2, 4, 6] and hits("bs-octaves", "8") == [1, 3, 5, 7]
+
+
+@needs_bass
+def test_X11_bass_solfa_claims():
+    """Sol-fa named in the bass wording agrees with the app's SOLFA table (do-based major, la-based minor)."""
+    assert "do, fa and so" in BS_BY["bs-roots"]["w"] and [SOLFA["A"][c] for c in ("A", "D", "E")] == ["do", "fa", "so"]
+    card = lambda sid, i: BS["know"][sid][i]["b"]
+    assert "A is do and E is so" in card("a-e", 2)
+    assert "mi to la" in card("am-e7", 1) and SOLFA["Am"] == {"Am": "la", "E7": "mi"}
+    assert "do, fa and so" in card("c-g-f", 1) and [SOLFA["C"][c] for c in ("C", "F", "G")] == ["do", "fa", "so"]
+    assert "do, so, la, fa" in card("four-chords", 0) and [SOLFA["C"][c] for c in ST[4]["ch"]] == ["do", "so", "la", "fa"]
+    assert "mi to la" in card("beyond", 1) and SOLFA["Bm"]["F#"] == "mi" and SOLFA["Bm"]["Bm"] == "la"
+    assert "do, mi, so, la" in card("twelve-bar", 1), "root, third, fifth, sixth of the tonic chord"
+    assert INSTDATA["shared"]["func"][0] == D["KNOW"]["func"][0] and "chord box" not in INSTDATA["shared"]["func"][1]
