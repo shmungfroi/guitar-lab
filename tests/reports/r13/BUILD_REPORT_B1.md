@@ -200,5 +200,5 @@ Invent playback: root = the band's own bass pitch for the chord (E1 to E♭2); f
 - Beat grids and TAB are plain text blocks. A screen reader gets a spoken description of each beat grid (`aria-label`), but the TAB blocks have none, the same as guitar's.
 - Invent's bar is one bar for all four chords, with no rest symbol (a note rings until the next one or the bar line), and it is kept only until the stage or instrument changes, like guitar's loop.
 - The bass Invent swing follows the stage (long-short quavers on stage 2). With a Finish feel on, the cells follow that feel's grid.
-- Not checked on a real Chromebook or phone; `index.html` grew from 126 KB to about 152 KB.
+- Not checked on a real Chromebook or phone; `index.html` grew from 126 KB to 149 KB.
 - Musical accuracy has had only this self-check and the X11 data tests. The Opus theory check and Justin's review are still to come.
