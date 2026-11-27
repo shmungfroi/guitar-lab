@@ -647,7 +647,7 @@ def test_X11_root_fifth_positions_agree_with_bassPos():
         it = BS_BY[iid]
         evs = bs_events(it)
         where = [[BS["strings"][s], frets[0], names[0]] for s, frets, names in evs]
-        step = 1 if iid == "bs-rootfifth" else 2      # bossa sounds each note twice
+        step = 1                                       # root then fifth, in that order, in both items
         for k, (root, fifth) in enumerate(it["rf"]):
             b = D["bass"][root]
             r, f = where[2 * step * k], where[2 * step * k + step]
@@ -681,9 +681,9 @@ def test_X11_rhythm_grids_say_what_the_wording_says():
     for it in BS_ITEMS:
         if "bt" in it:
             assert len(it["bt"]["c"]) == len(it["bt"]["p"]) and it["bt"]["say"], it["id"]
-    # bossa: root on 1, fifth on 3, each sounded again a quaver before the next (dotted crotchet, quaver)
+    # bossa (R13-2 fix): root on 1, fifth anticipated on the and of 2 and played on 3, root anticipated on the and of 4
     assert BS_BY["bs-bossa"]["bt"]["c"] == ["1", "&", "2", "&", "3", "&", "4", "&"]
-    assert hits("bs-bossa", "R") == [0, 3] and hits("bs-bossa", "5") == [4, 7]
+    assert hits("bs-bossa", "R") == [0, 7] and hits("bs-bossa", "5") == [3, 4]
     assert BS_BY["bs-bossa"]["f"] == "bossa" and "tum-ti" in BS_BY["bs-bossa"]["w"]
     bossa4 = next(f for f in FIN if f["k"] == "bossa")["p"]["4"]
     assert [i for i, c in enumerate(bossa4["c"]) if c == "B"] == [0, 4], "the Finish's own thumb notes are on 1 and 3 too"
@@ -715,3 +715,250 @@ def test_X11_bass_solfa_claims():
     assert "mi to la" in card("beyond", 1) and SOLFA["Bm"]["F#"] == "mi" and SOLFA["Bm"]["Bm"] == "la"
     assert "do, mi, so, la" in card("twelve-bar", 1), "root, third, fifth, sixth of the tonic chord"
     assert INSTDATA["shared"]["func"][0] == D["KNOW"]["func"][0] and "chord box" not in INSTDATA["shared"]["func"][1]
+
+
+# --------------------------------------------------------------------- R13-2 X11b: bass theory from first principles
+# Written by the theory checker, independent of the builder's helpers: a bass in E1 A1 D2 G2, string 0 = low E.
+
+_B_OPEN = {0: ("E", 1, 28), 1: ("A", 1, 33), 2: ("D", 2, 38), 3: ("G", 2, 43)}
+_B_LET = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
+
+
+def _midi(s, f):
+    return _B_OPEN[s][2] + f
+
+
+def _npc(n):
+    return (_B_LET[n[0]] + n.count("♯") - n.count("♭")) % 12
+
+
+def _letter_step(a, b):
+    return ("CDEFGAB".index(b[0]) - "CDEFGAB".index(a[0])) % 7
+
+
+def _scale(tonic, minor=False, raised7=False):
+    steps = [2, 1, 2, 2, 1, 2, 2] if minor else [2, 2, 1, 2, 2, 2, 1]
+    li, p, out = "CDEFGAB".index(tonic[0]), _npc(tonic), []
+    for k in range(7):
+        letter = "CDEFGAB"[(li + k) % 7]
+        d = (p - _B_LET[letter]) % 12
+        out.append(letter + {0: "", 1: "♯", 11: "♭"}[d])
+        p = (p + steps[k]) % 12
+    if raised7:
+        out[6] = out[6][0] + ("♯" if len(out[6]) == 1 else "")
+    return out
+
+
+def _flat_events(it):
+    ev = [e for e in it["ev"] if e != "|"]
+    out = []
+    for (s, f), n in zip(ev, it["evn"]):
+        fr = [int(x) for x in re.findall(r"\d+", str(f))]
+        out += list(zip([s] * len(fr), fr, n if isinstance(n, list) else [n]))
+    return out
+
+
+def _bars(ev):
+    bars, cur = [], []
+    for e in ev:
+        if e == "|":
+            bars.append(cur)
+            cur = []
+        else:
+            cur.append(e)
+    return bars + [cur]
+
+
+def _lowest_root(pcl):
+    """The position a bassist reaches for first: E string frets 0-4, otherwise A string frets 0-6."""
+    e = (pcl - 4) % 12
+    return (0, e) if e <= 4 else (1, e - 5)
+
+
+_ALL_TABS = [i for i in BS_ITEMS if i.get("ev")] + list((BS.get("part2") or {}).values())
+
+# the key each TAB is heard in (None = chromatic drill)
+_KEY_OF = {"bs-pulse": _scale("A"), "bs-alt": _scale("A"), "bs-cross": _scale("A"), "bs-spider": None,
+           "bs-slide": _scale("A"), "bs-oct": _scale("C"), "bs-roots": _scale("A"), "bs-rootfifth": _scale("A", True, True),
+           "bs-octaves": _scale("C"), "bs-approach": _scale("C") + ["F♯", "G♯"], "bs-walk": _scale("C") + ["G♯"],
+           "bs-shuffle": _scale("A"), "bs-bossa": _scale("C"), "bs-compas": _scale("A", True), "stage-2-walk": _scale("A")}
+
+
+@needs_bass
+def test_X11b_scales_helper_is_right():
+    assert _scale("A") == ["A", "B", "C♯", "D", "E", "F♯", "G♯"]
+    assert _scale("A", True, True) == ["A", "B", "C", "D", "E", "F", "G♯"]
+    assert _scale("B", True) == ["B", "C♯", "D", "E", "F♯", "G", "A"]
+
+
+@needs_bass
+@pytest.mark.parametrize("it", _ALL_TABS, ids=lambda i: i.get("id", "stage-2-walk"))
+def test_X11b_every_string_and_fret_is_the_named_note_spelt_for_the_key(it):
+    iid = it.get("id", "stage-2-walk")
+    evs = _flat_events(it)
+    assert evs and len([e for e in it["ev"] if e != "|"]) == len(it["evn"])
+    key = _KEY_OF[iid]
+    for s, f, n in evs:
+        assert re.fullmatch(r"[A-G]♯?", n), f"{iid}: {n!r}: bass names here are naturals or sharps, never flats"
+        assert _midi(s, f) % 12 == _npc(n), f"{iid}: {'EADG'[s]} string fret {f} sounds pc {_midi(s, f) % 12}, not {n}"
+        if key:
+            assert n in key, f"{iid}: {n} is not spelt for the key {key}"
+    if iid == "bs-spider":
+        ps = [_midi(s, f) for s, f, _ in evs]
+        assert [f for _, f, _ in evs] == [1, 2, 3, 4] * 4 and [s for s, _, _ in evs] == sorted(s for s, _, _ in evs)
+        for k in range(4):
+            q = ps[4 * k:4 * k + 4]
+            assert [b - a for a, b in zip(q, q[1:])] == [1, 1, 1]
+
+
+@needs_bass
+def test_X11b_pos_lists_sound_their_names():
+    rows = [p for i in BS_ITEMS for p in i.get("pos", [])] + [p for cs in BS["know"].values() for c in cs for p in c.get("pos", [])]
+    for n, strg, f in rows:
+        assert _midi("EADG".index(strg), f) % 12 == _npc(n), (n, strg, f)
+
+
+@needs_bass
+def test_X11b_boogie_walk_and_the_12_bar():
+    w = BS["part2"]["twelve-bar"]
+    bars = _bars(w["ev"])
+    names = [w["evn"][4 * k:4 * k + 4] for k in range(3)]
+    assert names == [["A", "C♯", "E", "F♯"], ["D", "F♯", "A", "B"], ["E", "G♯", "B", "C♯"]]
+    want = {"A": [(1, 0), (1, 4), (2, 2), (2, 4)], "D": [(2, 0), (2, 4), (3, 2), (3, 4)], "E": [(0, 0), (0, 4), (1, 2), (1, 4)]}
+    for ch, b, nm in zip(w["chords"], bars, names):
+        assert [tuple(e) for e in b] == want[ch]
+        ps = [_midi(s, f) for s, f in b]
+        assert [p - ps[0] for p in ps] == [0, 4, 7, 9], "root, major third, fifth, major sixth"
+        assert [_letter_step(nm[0], x) for x in nm] == [0, 2, 4, 5], "letters 1, 3, 5, 6 above the root"
+    assert ST[1]["song"]["map"][0]["b"] == ["A", "A", "A", "A", "D", "D", "A", "A", "E", "D", "A", "E"], "the 12-bar: I I I I IV IV I I V IV I V"
+    up = BS_BY["bs-shuffle"]
+    assert [_midi(s, f) for s, f, _ in _flat_events(up)] == [33, 37, 40, 42, 45, 42, 40, 37]
+
+
+@needs_bass
+def test_X11b_root_fifth_and_octave_shapes():
+    # root-fifth: root where bassPos puts it, fifth one string up, two frets along, seven semitones higher
+    for iid in ("bs-rootfifth", "bs-bossa"):
+        evs = _flat_events(BS_BY[iid])
+        for root, fifth in BS_BY[iid]["rf"]:
+            k = next(j for j in range(len(evs) - 1) if evs[j][2] == root and evs[j + 1][2] == fifth)
+            (rs, rf, _), (fs, ff, fn) = evs[k], evs[k + 1]
+            assert (rs, rf) == _lowest_root(_npc(root)) and fn == fifth
+            assert fs == rs + 1 and ff == rf + 2 and _midi(fs, ff) - _midi(rs, rf) == 7
+            assert D["bass"][root]["r"] == ["EADG"[rs], rf] and D["bass"][root]["f"] == ["EADG"[fs], ff]
+    # the same rule across the whole bassPos table, every pitch class
+    for n in ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"]:
+        s, f = _lowest_root(_npc(n))
+        assert _midi(s, f) % 12 == _npc(n) and _midi(s + 1, f + 2) - _midi(s, f) == 7
+    for iid in ("bs-oct", "bs-octaves", "bs-cross"):
+        evs = _flat_events(BS_BY[iid])
+        for (s1, f1, n1), (s2, f2, n2) in zip(evs[0::2], evs[1::2]):
+            assert n1 == n2 and s2 == s1 + 2 and f2 == f1 + 2 and _midi(s2, f2) - _midi(s1, f1) == 12, iid
+
+
+@needs_bass
+def test_X11b_approach_notes_semitone_and_spelling():
+    pairs = [(a, b) for a, b in BS_BY["bs-approach"]["appr"]]
+    evs = _flat_events(BS_BY["bs-approach"])
+    for (s1, f1, n1), (s2, f2, n2), (a, b) in zip(evs[0::2], evs[1::2], pairs):
+        assert (n1, n2) == (a, b) and s1 == s2 and f2 - f1 == 1 and _midi(s2, f2) - _midi(s1, f1) == 1
+        assert _letter_step(a, b) == 1, f"{a} into {b}: a semitone approach is spelt on the letter below"
+        assert (s2, f2) == _lowest_root(_npc(b)) or (s2, f2) == (0, 5), "the target is a playable root position"
+    hal = {n: (s, f) for n, s, f in BS["know"]["hallelujah"][0]["pos"]}
+    for ap, tgt in (("G♯", "A"), ("B", "C")):
+        s, f = hal[ap]
+        assert (_npc(tgt) - _npc(ap)) % 12 == 1 and _letter_step(ap, tgt) == 1
+        assert _midi("EADG".index(s), f) % 12 == _npc(ap)
+    assert "si rising to la" in BS["know"]["hallelujah"][0]["b"] and "ti rising to do" in BS["know"]["hallelujah"][0]["b"]
+
+
+@needs_bass
+def test_X11b_walking_four_C_to_A_minor():
+    it = BS_BY["bs-walk"]
+    evs = _flat_events(it)
+    names, ps = [n for _, _, n in evs], [_midi(s, f) for s, f, _ in evs]
+    assert names == ["C", "E", "G", "G♯", "A"]
+    assert ps[:3] == [36, 40, 43], "C major triad, root position, C2 E2 G2"
+    assert ps[3] == ps[4] - 1 and _letter_step("G♯", "A") == 1, "G♯ a chromatic semitone below the A it lands on"
+    assert ps[4] % 12 == _npc("A") and it["walk"]["next"] == "Am"
+    assert len(it["bt"]["c"]) == 4 and it["bt"]["p"][3] == "↗"
+
+
+@needs_bass
+def test_X11b_bossa_is_the_standard_root_fifth_figure():
+    it = BS_BY["bs-bossa"]
+    p = it["bt"]["p"]
+    on = [i for i, v in enumerate(p) if v]
+    assert on == [0, 3, 4, 7] and [p[i] for i in on] == ["R", "5", "5", "R"], "dotted crotchet + quaver, twice: R . . 5 | 5 . . R"
+    gaps = [b - a for a, b in zip(on, on[1:] + [8])]
+    assert gaps == [3, 1, 3, 1], "long (three quavers), short (one quaver), long, short"
+    names = [n for _, _, n in _flat_events(it)]
+    assert names == ["A", "E", "E", "A"], "each short note anticipates the pitch of the next strong beat"
+    assert "tum-ti" in it["w"] and "fifth below" in it["w"] and "open E string" in it["w"]
+
+
+@needs_bass
+def test_X11b_tangos_is_binary():
+    t = BS_BY["bs-compas"]
+    assert t["bt"]["c"] == ["1", "2", "3", "4"] and t["bt"]["p"][0] == "–" and t["bt"]["p"][1:] == ["R", "R", "R"]
+    assert "12" not in " ".join(t["bt"]["c"]) and not re.search(r"\b12\b|twelve|compás", t["w"])
+    assert [n for _, _, n in _flat_events(t)] == ["A", "G", "F", "E"], "Am–G–F–E, the Andalusian cadence, roots only"
+
+
+def _grid_shape(labels):
+    """(beats, cells per beat) from a count line like 1 & 2 & or 1 e & a 2 e & a; None if the line is uneven."""
+    starts = [i for i, c in enumerate(labels) if c.isdigit()]
+    per = {b - a for a, b in zip(starts, starts[1:] + [len(labels)])}
+    return (len(starts), per.pop()) if len(per) == 1 and starts[0] == 0 else None
+
+
+@needs_bass
+def test_X11b_rhythm_grids_fit_the_metre_and_the_syllables():
+    sub = {1: [], 2: ["&"], 4: ["e", "&", "a"]}
+    for it in BS_ITEMS:
+        if "bt" not in it:
+            continue
+        c = it["bt"]["c"]
+        shape = _grid_shape(c)
+        assert shape, f"{it['id']}: uneven count line {c}"
+        beats, per = shape
+        assert per in sub and beats in (2, 4, 8), it["id"]
+        for k in range(beats):
+            assert c[k * per + 1:(k + 1) * per] == sub[per], f"{it['id']}: subdivision names"
+        assert [x for x in c if x.isdigit()] in (["1", "2", "3", "4"], ["1", "2"], ["1", "2", "3", "4"] * 2), it["id"]
+        assert len(it["bt"]["p"]) == beats * per
+    # syllables against the grid: gallop ti-tika = quaver + two semiquavers in each beat
+    g = BS_BY["bs-gallop"]["bt"]["p"]
+    assert [bool(x) for x in g] == [True, False, True, True] * 2 and "ti-tika" in BS_BY["bs-gallop"]["w"]
+    assert "ta, ta, ta, ta" in BS_BY["bs-pulse"]["w"] and "ti-ti" in BS_BY["bs-pulse"]["w"]
+    assert "ti-ti-ti" in BS["know"]["six-eight"][0]["b"] and "1 and 4" in BS["know"]["six-eight"][0]["b"]
+    # Invent's bar of bass: 8 quavers in 4/4 (straight or swung), 6 quavers in 3/4, 6 quavers in 6/8
+    src = _INDEX.read_text(encoding="utf-8")
+    lab = re.search(r"const bbarLab=p=>p\.m===6\?(\[.*?\]):p\.m===3\?(\[.*?\]):(\[.*?\]);", src)
+    six, three, four = (_json.loads(x.replace("'", '"')) for x in lab.groups())
+    assert six == ["1", "2", "3", "4", "5", "6"] and three == ["1", "&", "2", "&", "3", "&"] and len(four) == 8
+    for s in ST:
+        m = PAT[s["pat"]]["m"]
+        n = {6: len(six), 3: len(three), 4: len(four)}[m]
+        assert n == {4: 8, 3: 6, 6: 6}[m], s["id"]
+    assert PAT["shuffle"]["m"] == 4 and PAT["shuffle"].get("sw"), "the shuffle stage is 4/4 swung: 8 cells, long-short"
+
+
+@needs_bass
+def test_X11b_solfa_from_first_principles():
+    def solfa(note, tonic, minor):
+        names = ["la", "ti", "do", "re", "mi", "fa", "so"] if minor else ["do", "re", "mi", "fa", "so", "la", "ti"]
+        sc = _scale(tonic, minor)
+        if note in sc:
+            return names[sc.index(note)]
+        if minor and note == sc[6][0] + "♯":
+            return "si"
+        raise AssertionError(note)
+    assert [solfa(n, "A", False) for n in ("A", "D", "E")] == ["do", "fa", "so"]
+    assert [solfa(n, "A", False) for n in ("A", "C♯", "E", "F♯")] == ["do", "mi", "so", "la"]
+    assert [solfa(n, "A", True) for n in ("E", "A", "G♯")] == ["mi", "la", "si"]
+    assert [solfa(n, "C", False) for n in ("C", "G", "A", "F")] == ["do", "so", "la", "fa"]
+    assert [solfa(n, "B", True) for n in ("F♯", "B")] == ["mi", "la"]
+    assert "E is so" in BS_BY["bs-cross"]["w"] and "low do" not in BS_BY["bs-cross"]["w"]
+    assert "mi to la in this minor key, so to do in a major one" in BS["know"]["am-e7"][1]["b"]
+    assert "do, mi and so" in BS_BY["bs-walk"]["w"] and [solfa(n, "C", False) for n in ("C", "E", "G")] == ["do", "mi", "so"]
