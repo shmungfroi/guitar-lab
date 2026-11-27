@@ -1,0 +1,110 @@
+[
+ [
+  "3a rudiments = bass list",
+  "PASS",
+  "8 cards, all ids bs-; names shared with guitar's list: ['Pulse on one string', 'The spider (1-2-3-4)'] (same name, different id and text)"
+ ],
+ [
+  "3b Finish filter core+rock+current",
+  "PASS",
+  "{\"Rock and roll\": [\"Core\", \"Rock and roll\"], \"Flamenco\": [\"Core\", \"Flamenco\", \"Rock and roll\"], \"Bossa\": [\"Core\", \"Bossa\", \"Rock and roll\"], \"Hair metal\": [\"Core\", \"Hair metal\", \"Rock and roll\"]}"
+ ],
+ [
+  "3c flamenco marked optional",
+  "PASS",
+  "['Tangos rootsOptional']"
+ ],
+ [
+  "3d tangos binary",
+  "PASS",
+  "count| 1 2 3 4 | / play | – R R R |"
+ ],
+ [
+  "3e technique has no guitar names",
+  "PASS",
+  "0 overlap with guitar's 12"
+ ],
+ [
+  "3f bass cards on all 8 stages",
+  "PASS",
+  "{\"a-e\": 3, \"twelve-bar\": 3, \"am-e7\": 2, \"c-g-f\": 2, \"four-chords\": 1, \"six-eight\": 2, \"hallelujah\": 1, \"beyond\": 2} bass cards; rendered details per stage {\"a-e\": 3, \"twelve-bar\": 3, \"am-e7\": 3, \"c-g-f\": 3, \"four-chords\": 2, \"six-eight\": 4, \"hallelujah\": 2, \"beyond\": 2}"
+ ],
+ [
+  "3g stage-2 four-line TAB",
+  "PASS",
+  "['G|---------|-----2-4-|---------|\\nD|-----2-4-|-0-4-----|---------|\\nA|-0-4-----|---------|-----2-4-|\\nE|---------|---------|-0-4-----|']"
+ ],
+ [
+  "3h denylist",
+  "INFO",
+  {
+   "strum": 10,
+   "barre": 3
+  }
+ ],
+ [
+  "4 gates per instrument",
+  "PASS",
+  "bass locked rudiments 4->3 (expected 3), technique 8->5; guitar locked 5 (fresh guitar 5), drums locked 5; gates=['a-e@bass']; guitar header 'Stage 1 of 8 · A major · Guitar · 0 of 5 steps done'; toast 'Gate passed: stage 1, A and E.'"
+ ],
+ [
+  "5a stray keys hidden, not deleted",
+  "PASS",
+  "bass Done tags r=0 t=0, best inputs filled=0, Record: 'Rudiments and techniques at Consistent or better: Bass\\n\\nNone yet.' / 'Best tempos: Bass\\n\\nNone logged yet.\\n\\nOne-minute changes, bes'; after a level change all 7 old lv keys + best kept=True; guitar Done=['Pulse on one string']"
+ ],
+ [
+  "5b storage key only 'shredder'",
+  "PASS",
+  "['shredder']"
+ ],
+ [
+  "5c 0.7/0.8/0.9 + bare import",
+  "PASS",
+  "{\"0.7\": [true, \"Backup imported: 7 levels set, 1 journal entry, 0 one-minute logs, 0 w\"], \"0.8\": [true, \"Backup imported: 7 levels set, 1 journal entry, 0 one-minute logs, 0 w\"], \"0.9\": [true, \"Backup imported: 7 levels set, 1 journal entry, 0 one-minute logs, 0 w\"], \"bare\": [true, \"Backup imported: 7 levels set, 1 journal entry, 0 one-minute logs, 0 w\"], \"format2\": [false, \"That backup was made by a newer version of The Guitar Lab than this one (0.10), so it can't be read here. Nothing has be\"]}"
+ ],
+ [
+  "5d version 0.10 everywhere",
+  "PASS",
+  "backup version 0.10; title/header/newer-version message all 0.10; '(0.9)' appears only in 2 code comments"
+ ],
+ [
+  "6a Invent play a-e capo 0",
+  "PASS",
+  "loop shown ['A', 'E', 'A', 'E']; cells=8, last-cell cycle ['R', '5', '8', '↗', '·'], 2nd-cell cycle ['R', '5', '8', '·']; bar now ['R', '·', '·', '·', 'R', '·', '·', '↗']; 21 bass (triangle) oscillator starts of 291 sources, 7 whole bars read; (root,approach,next) midi first 4 bars [(33, 29, 28), (28, 32, 33), (33, 29, 28), (28, 32, 33)]; bars into open E: 4 [(33, 29, 28)]; bad=[]"
+ ],
+ [
+  "6b Invent save",
+  "PASS",
+  "{\"d\": 1795738491627, \"st\": \"a-e\", \"inst\": \"bass\", \"tag\": \"Invent\", \"h\": \"\", \"o\": \"Loop: A – E – A – E · bar of bass: root on 1, root on 3, approach note on &\", \"w\": \"Take one note out and let the note before it ring longer.\"} || Record shows: 27 Nov 2026, A and EBassInvent: Loop: A – E – A – E · bar of bass: root on 1, root on 3, approach note on & · Take one note out and let the note before it ring longer."
+ ],
+ [
+  "6c prompts have no guitar wording",
+  "PASS",
+  "6 prompts, 0 flagged"
+ ],
+ [
+  "6a Invent play twelve-bar capo 0",
+  "PASS",
+  "loop shown ['A', 'E', 'A', 'E']; cells=8, last-cell cycle ['R', '5', '8', '↗', '·'], 2nd-cell cycle ['R', '5', '8', '·']; bar now ['R', '·', '·', '·', 'R', '·', '·', '↗']; 21 bass (triangle) oscillator starts of 431 sources, 7 whole bars read; (root,approach,next) midi first 4 bars [(33, 29, 28), (28, 32, 33), (33, 29, 28), (28, 32, 33)]; bars into open E: 4 [(33, 29, 28)]; bad=[]"
+ ],
+ [
+  "6a Invent play c-g-f capo 0",
+  "PASS",
+  "loop shown ['C', 'G', 'E7', 'G']; cells=6, last-cell cycle ['R', '5', '8', '↗', '·'], 2nd-cell cycle ['R', '5', '8', '·']; bar now ['R', '·', '·', '·', '·', '↗']; 22 bass (triangle) oscillator starts of 297 sources, 11 whole bars read; (root,approach,next) midi first 4 bars [(36, 30, 31), (31, 29, 28), (28, 30, 31), (31, 35, 36)]; bars into open E: 3 [(31, 29, 28)]; bad=[]"
+ ],
+ [
+  "6a Invent play six-eight capo 0",
+  "PASS",
+  "loop shown ['Am', 'G', 'Am', 'G']; cells=6, last-cell cycle ['R', '5', '8', '↗', '·'], 2nd-cell cycle ['R', '5', '8', '·']; bar now ['R', '·', '·', 'R', '·', '↗']; 48 bass (triangle) oscillator starts of 774 sources, 16 whole bars read; (root,approach,next) midi first 4 bars [(33, 30, 31), (31, 32, 33), (33, 30, 31), (31, 32, 33)]; bars into open E: 0 []; bad=[]"
+ ],
+ [
+  "6a Invent play beyond capo 0",
+  "PASS",
+  "loop shown ['Bm', 'D', 'Bm', 'Em']; cells=8, last-cell cycle ['R', '5', '8', '↗', '·'], 2nd-cell cycle ['R', '5', '8', '·']; bar now ['R', '·', '·', '·', 'R', '·', '·', '↗']; 21 bass (triangle) oscillator starts of 353 sources, 7 whole bars read; (root,approach,next) midi first 4 bars [(35, 37, 38), (38, 34, 35), (35, 29, 28), (28, 34, 35)]; bars into open E: 2 [(35, 29, 28)]; bad=[]"
+ ],
+ [
+  "6a Invent play a-e capo 2",
+  "PASS",
+  "loop shown ['B', 'F♯', 'B', 'F♯']; cells=8, last-cell cycle ['R', '5', '8', '↗', '·'], 2nd-cell cycle ['R', '5', '8', '·']; bar now ['R', '·', '·', '·', 'R', '·', '·', '↗']; 21 bass (triangle) oscillator starts of 291 sources, 7 whole bars read; (root,approach,next) midi first 4 bars [(33, 29, 28), (28, 32, 33), (33, 29, 28), (28, 32, 33)]; bars into open E: 4 [(33, 29, 28)]; bad=[]"
+ ]
+]
