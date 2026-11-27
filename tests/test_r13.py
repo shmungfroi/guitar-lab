@@ -358,8 +358,8 @@ def test_X10_bass_invent_builds_plays_and_saves_a_bar(app):
     near = lambda f, m: abs(f - hz(m)) < 0.3
     assert len(tri) >= 6
     assert near(tri[0], root[loop[0]]) and near(tri[1], root[loop[0]] + 7), tri[:4]
-    nxt = root[loop[1]] - 1
-    assert near(tri[2], nxt if nxt >= 28 else nxt + 12), "approach note: a semitone below the next root (an octave up if that is below the open E)"
+    nxt = root[loop[1]] - 1 if root[loop[1]] - 1 >= 28 else root[loop[1]] + 1
+    assert near(tri[2], nxt), "approach note: a semitone below the next root, or a semitone above when the next root is the open E (theory check flag)"
     assert near(tri[3], root[loop[1]])
     # save
     pg.click("#keepLoop")
