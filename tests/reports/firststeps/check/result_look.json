@@ -1,0 +1,283 @@
+[
+ [
+  "7 every plate shown in steps 1-6 is guitarArt() output unaltered (same markup once the per-call id counter ga1, ga2... is set aside, own viewBox 0 0 560 832, no transform or style on the svg itself); turning and cropping are on wrapper divs only",
+  true,
+  {
+   "1": [
+    [
+     "fst-plates",
+     ""
+    ],
+    [
+     "fst-plates",
+     ""
+    ]
+   ],
+   "2": [
+    [
+     "fst-turn",
+     "transform:translate(-50%,-50%) rotate(83deg)"
+    ]
+   ],
+   "3": [
+    [
+     "fst-zoom fst-strz",
+     "width:254.5%;margin:-213.6% 0 0 -77.3%"
+    ]
+   ],
+   "4": [
+    [
+     "fst-zoom fst-strz",
+     "width:254.5%;margin:-213.6% 0 0 -77.3%"
+    ]
+   ],
+   "5": [
+    [
+     "fst-zoom ",
+     "width:266.7%;margin:-6.7% 0 0 -83.3%"
+    ]
+   ],
+   "6": [
+    [
+     "fst-turn",
+     "transform:translate(-50%,-50%) rotate(-90deg)"
+    ]
+   ],
+   "7": []
+  }
+ ],
+ [
+  "7 no plate is stretched: every rendered width/height = 560/832 = 0.6731",
+  true,
+  [
+   0.6722,
+   0.6728,
+   0.673,
+   0.6731
+  ]
+ ],
+ [
+  "7 [dark] lit part stands out on the phone close-up for all 14 parts (pixels changed by the highlight, strongest change 0-255)",
+  true,
+  {
+   "positionMarkers": [
+    869,
+    168
+   ],
+   "saddle": [
+    660,
+    193
+   ],
+   "fingerboard": [
+    10158,
+    189
+   ],
+   "bridge": [
+    4469,
+    190
+   ],
+   "nut": [
+    576,
+    203
+   ],
+   "headstock": [
+    8877,
+    204
+   ],
+   "neck": [
+    8041,
+    203
+   ],
+   "soundHole": [
+    5758,
+    122
+   ],
+   "pickguard": [
+    5362,
+    174
+   ],
+   "pickups": [
+    2757,
+    192
+   ],
+   "body": [
+    2755,
+    181
+   ],
+   "strings": [
+    13546,
+    194
+   ],
+   "frets": [
+    5558,
+    203
+   ],
+   "machineHeads": [
+    3502,
+    203
+   ]
+  }
+ ],
+ [
+  "7 [dark] each lit string stands out (step 3 check, 360)",
+  true,
+  {
+   "1": [
+    3002,
+    208
+   ],
+   "2": [
+    2895,
+    208
+   ],
+   "3": [
+    2812,
+    208
+   ],
+   "4": [
+    2742,
+    208
+   ],
+   "5": [
+    2595,
+    208
+   ],
+   "6": [
+    2358,
+    208
+   ]
+  }
+ ],
+ [
+  "7 [light] lit part stands out on the phone close-up for all 14 parts (pixels changed by the highlight, strongest change 0-255)",
+  false,
+  {
+   "pickguard": [
+    2475,
+    92
+   ],
+   "machineHeads": [
+    1864,
+    149
+   ],
+   "strings": [
+    11800,
+    140
+   ],
+   "soundHole": [
+    4937,
+    104
+   ],
+   "saddle": [
+    671,
+    74
+   ],
+   "body": [
+    1933,
+    118
+   ],
+   "nut": [
+    506,
+    149
+   ],
+   "positionMarkers": [
+    798,
+    118
+   ],
+   "fingerboard": [
+    4329,
+    126
+   ],
+   "headstock": [
+    3059,
+    149
+   ],
+   "bridge": [
+    3143,
+    98
+   ],
+   "neck": [
+    3521,
+    149
+   ],
+   "frets": [
+    4025,
+    149
+   ],
+   "pickups": [
+    2146,
+    110
+   ]
+  }
+ ],
+ [
+  "7 [light] each lit string stands out (step 3 check, 360)",
+  true,
+  {
+   "1": [
+    2866,
+    168
+   ],
+   "2": [
+    2840,
+    163
+   ],
+   "3": [
+    2665,
+    146
+   ],
+   "4": [
+    2470,
+    133
+   ],
+   "5": [
+    2276,
+    127
+   ],
+   "6": [
+    1839,
+    120
+   ]
+  }
+ ],
+ [
+  "11 sweep: 102 screens (7 steps, check and answered states, ear check, placement, Record on a first visit, 7 tabs) x 360/1280 x dark/light: no page overflow, no console errors",
+  true,
+  "102 clean"
+ ],
+ [
+  "11 nothing inside First Steps runs past the screen edge",
+  true,
+  []
+ ],
+ [
+  "7 phone (360): every button, link, tick and field in First Steps is at least 44 px each way",
+  false,
+  {
+   "dot1 40x44": "step 1 360_dark",
+   "dot2 40x44": "step 1 360_dark",
+   "dot3 40x44": "step 1 360_dark",
+   "dot4 40x44": "step 1 360_dark",
+   "dot5 40x44": "step 1 360_dark",
+   "dot6 40x44": "step 1 360_dark",
+   "dot7 40x44": "step 1 360_dark",
+   "I can sit and hold it  328x41": "step 2 360_dark",
+   "INPUT 328x41": "step 2 360_dark",
+   "5 41x44": "step 3 check 360_dark",
+   "4 42x44": "step 3 check 360_dark",
+   "3 42x44": "step 3 check 360_dark",
+   "2 40x44": "step 3 check 360_dark",
+   "I can hear and match a 328x41": "step 4 360_dark",
+   "I played E minor along 328x41": "step 7 360_dark"
+  }
+ ],
+ [
+  "10 words: no American spellings or terms found, no emoji",
+  true,
+  {
+   "american": [],
+   "emoji": [],
+   "words checked": 1613
+  }
+ ]
+]

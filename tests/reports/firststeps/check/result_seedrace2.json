@@ -1,0 +1,128 @@
+{
+ "what": "4 processes at once, 200 loads each: seed lost [lost, loads]",
+ "app": [
+  [
+   3,
+   200
+  ],
+  [
+   1,
+   200
+  ],
+  [
+   6,
+   200
+  ],
+  [
+   0,
+   200
+  ]
+ ],
+ "bare page": [
+  [
+   0,
+   200
+  ],
+  [
+   0,
+   200
+  ],
+  [
+   0,
+   200
+  ],
+  [
+   0,
+   200
+  ]
+ ],
+ "example lost case": {
+  "i": 47,
+  "view": "v-first-steps",
+  "seed page calls": [
+   [
+    56,
+    "getItem",
+    "",
+    "null",
+    "loading",
+    "app"
+   ],
+   [
+    57,
+    "getItem",
+    "",
+    "null",
+    "loading",
+    "app"
+   ],
+   [
+    57,
+    "setItem",
+    "{}",
+    "",
+    "loading",
+    "app"
+   ],
+   [
+    57,
+    "removeItem",
+    "",
+    "",
+    "loading",
+    "app"
+   ],
+   [
+    94,
+    "clear",
+    "",
+    "",
+    "complete",
+    "test"
+   ],
+   [
+    94,
+    "setItem",
+    "{\"fs\": {\"done\": [1, 2, 3, 4, 5",
+    "",
+    "complete",
+    "test"
+   ]
+  ],
+  "second page calls": [
+   [
+    17,
+    "getItem",
+    "",
+    "null",
+    "loading",
+    "app"
+   ],
+   [
+    17,
+    "getItem",
+    "",
+    "null",
+    "loading",
+    "app"
+   ],
+   [
+    18,
+    "setItem",
+    "{}",
+    "",
+    "loading",
+    "app"
+   ],
+   [
+    22,
+    "removeItem",
+    "",
+    "",
+    "loading",
+    "app"
+   ]
+  ],
+  "value now": "null"
+ }
+}

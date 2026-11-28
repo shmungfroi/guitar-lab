@@ -1,0 +1,90 @@
+{
+ "what": "4 processes at once, 150 loads each per seeding method: [lost, loads, seconds]",
+ "runs": [
+  {
+   "blank-hop (as uihelp.open_app)": [
+    1,
+    150,
+    132.8
+   ],
+   "direct goto, no about:blank": [
+    1,
+    150,
+    116.2
+   ],
+   "init script on the same load": [
+    0,
+    150,
+    71.9
+   ]
+  },
+  {
+   "blank-hop (as uihelp.open_app)": [
+    2,
+    150,
+    130.2
+   ],
+   "direct goto, no about:blank": [
+    2,
+    150,
+    113.6
+   ],
+   "init script on the same load": [
+    0,
+    150,
+    75.5
+   ]
+  },
+  {
+   "blank-hop (as uihelp.open_app)": [
+    4,
+    150,
+    130.9
+   ],
+   "direct goto, no about:blank": [
+    3,
+    150,
+    113.0
+   ],
+   "init script on the same load": [
+    0,
+    150,
+    75.0
+   ]
+  },
+  {
+   "blank-hop (as uihelp.open_app)": [
+    0,
+    150,
+    129.1
+   ],
+   "direct goto, no about:blank": [
+    1,
+    150,
+    110.4
+   ],
+   "init script on the same load": [
+    0,
+    150,
+    72.6
+   ]
+  }
+ ],
+ "single process with 8 busy loops (no loss)": {
+  "blank-hop (as uihelp.open_app)": [
+   0,
+   120,
+   43.7
+  ],
+  "direct goto, no about:blank": [
+   0,
+   120,
+   41.4
+  ],
+  "init script on the same load": [
+   0,
+   120,
+   31.0
+  ]
+ }
+}

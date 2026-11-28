@@ -1,0 +1,1508 @@
+[
+ [
+  "[1280] 1 fresh: only First Steps view, step 1",
+  true,
+  {
+   "views": [
+    "v-first-steps"
+   ],
+   "mbar": 0,
+   "fin": false,
+   "nsw": false,
+   "inst": 0,
+   "next": false,
+   "foot": 0,
+   "tch": true,
+   "neck": false,
+   "msg": "",
+   "tabs": [
+    "First Steps"
+   ],
+   "ls": null
+  }
+ ],
+ [
+  "[1280] 1 fresh: nothing saved before the student does anything",
+  true,
+  null
+ ],
+ [
+  "[1280] 1 dots 2-7 locked; typing #path, #gig etc. stays on First Steps",
+  true,
+  [
+   [
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "{'v-first-steps'}"
+  ]
+ ],
+ [
+  "[1280] 1 step 1: Next disabled before the check",
+  true,
+  true
+ ],
+ [
+  "[1280] 2 step 1 names = booklet terms (+2 electric extras)",
+  true,
+  [
+   "Headstock",
+   "Machine heads",
+   "Nut",
+   "Neck",
+   "Fingerboard",
+   "Frets",
+   "Position markers",
+   "Body",
+   "Sound hole",
+   "Pickguard",
+   "Saddle",
+   "Bridge",
+   "Strings",
+   "Pickups",
+   "Controls",
+   "Output jack"
+  ]
+ ],
+ [
+  "[1280] 2 step 1 alternative names given (tuning pegs, head, fretboard)",
+  true,
+  {
+   "machineHeads": "2 \u00b7 Machine heads\nAlso called tuning pegs. Each one tightens or loosens one string. At school, your teacher does the tuning.",
+   "headstock": "1 \u00b7 Headstock\nThe flat end of the guitar, also called the head. The strings finish here.",
+   "fingerboard": "5 \u00b7 Fingerboard\nThe front face of the neck, also called the fretboard. Your fingers press the strings down onto it."
+  }
+ ],
+ [
+  "[1280] 1 every booklet part has a tappable spot on a drawing",
+  true,
+  []
+ ],
+ [
+  "[1280] 1 tapping the drawing names the part",
+  true,
+  "3 \u00b7 Nut\nThe thin strip where the head meets the neck. Each string sits in its own groove."
+ ],
+ [
+  "[1280] step 1 wrong answer explained, not counted, Next still blocked",
+  true,
+  "fb='You tapped the body. Look again for the machine heads.' eye='Right first time: 0 of 5'"
+ ],
+ [
+  "[1280] step 1 check passes after retry (6 questions asked, 5+1 expected with one miss)",
+  true,
+  [
+   "part",
+   "part",
+   "part",
+   "part",
+   "part",
+   "part"
+  ]
+ ],
+ [
+  "[1280] step 1 at this width asks by tapping the drawing",
+  true,
+  [
+   "part",
+   "part",
+   "part",
+   "part",
+   "part",
+   "part"
+  ]
+ ],
+ [
+  "[1280] 1 step 1 passed: Next enabled, fs.done=[1]",
+  true,
+  {
+   "finish": "bossa",
+   "stage": "a-e",
+   "nsw": false,
+   "teacher": false,
+   "lv": {},
+   "sign": {},
+   "marks": {},
+   "changes": [],
+   "journal": [],
+   "bpm": 70,
+   "useFin": false,
+   "gates": {},
+   "warm": {},
+   "best": {},
+   "capo": {},
+   "mute": {},
+   "inst": "guitar",
+   "gig": {
+    "songs": [
+     "g-boogie",
+     "g-clock",
+     "g-johnny",
+     "g-bamba"
+    ],
+    "bands": [
+     {
+      "name": "Band 1",
+      "m": {}
+     }
+    ],
+    "block": 20,
+    "rotate": true,
+    "useFin": false,
+    "open": "g-boogie",
+    "bpm": 120
+   },
+   "fs": {
+    "done": [
+     1
+    ],
+    "complete": false,
+    "placed": false
+   }
+  }
+ ],
+ [
+  "[1280] 2 step 2 content: three cards, T 1 2 3 4, picking signs, left-hander",
+  true,
+  "Next disabled=True"
+ ],
+ [
+  "[1280] 2 step 2 hand drawing carries T 1 2 3 4",
+  true,
+  "T 1 2 3 4"
+ ],
+ [
+  "[1280] 1 step 2 tick enables Next",
+  true,
+  ""
+ ],
+ [
+  "[1280] 1 step 2 untick blocks Next again",
+  true,
+  {
+   "done": [
+    1
+   ],
+   "complete": false,
+   "placed": false
+  }
+ ],
+ [
+  "[1280] 2 step 3 content",
+  true,
+  ""
+ ],
+ [
+  "[1280] 2 step 3 own memory line saved in fs.line",
+  true,
+  {
+   "done": [
+    1,
+    2
+   ],
+   "complete": false,
+   "placed": false,
+   "line": "Every Australian Dog Goes Barking Early"
+  }
+ ],
+ [
+  "[1280] 8 step 3 string buttons sound (pluck sample)",
+  true,
+  ""
+ ],
+ [
+  "[1280] step 3 wrong answer explained, not counted, Next still blocked",
+  true,
+  "fb='Not this time. String 6 is the thickest one, low E, on the left of the drawing. Count from there: 6, 5, 4, 3, 2, 1.' eye='Right first time: 0 of 5'"
+ ],
+ [
+  "[1280] step 3 check passes after retry (6 questions asked, 5+1 expected with one miss)",
+  true,
+  [
+   "str-hl",
+   "str-num",
+   "str-name",
+   "str-hl",
+   "str-num",
+   "str-name"
+  ]
+ ],
+ [
+  "[1280] 2 step 3 quiz mixes lit string / number / name",
+  true,
+  [
+   "str-hl",
+   "str-num",
+   "str-name",
+   "str-hl",
+   "str-num",
+   "str-name"
+  ]
+ ],
+ [
+  "[1280] 5 reload mid-way resumes at the first unpassed step with the memory line kept",
+  true,
+  [
+   "First Steps \u00b7 step 4 of 7",
+   {
+    "done": [
+     1,
+     2,
+     3
+    ],
+    "complete": false,
+    "placed": false,
+    "line": "Every Australian Dog Goes Barking Early"
+   }
+  ]
+ ],
+ [
+  "[1280] 2 step 4 is \"Hear the open strings\"; no peg-turning instruction outside the home box",
+  true,
+  {
+   "title": "Hear the open strings",
+   "turn sentences outside box": []
+  }
+ ],
+ [
+  "[1280] 8 reference tones E2 A2 D3 G3 B3 E4",
+  true,
+  {
+   "6": 82.41,
+   "5": 110,
+   "4": 146.83,
+   "3": 196.0,
+   "2": 246.94,
+   "1": 329.63
+  }
+ ],
+ [
+  "[1280] 8 a reference note repeats until tapped again, then stops",
+  true,
+  "starts in 3 s: 2; after stop: 0"
+ ],
+ [
+  "[1280] 1 step 4: honour tick locked until the ear check is passed; Next blocked",
+  true,
+  ""
+ ],
+ [
+  "[1280] 1 ear check: wrong answer explained, stays on the same pair, buttons need a fresh listen",
+  true,
+  "Not this time. Here is a fresh pair. Listen for whether the second note climbs or drops."
+ ],
+ [
+  "[1280] 2 ear check: 4 pairs, gaps (semitones) big to small, all >= 1",
+  true,
+  [
+   -24.0,
+   14.0,
+   5.0,
+   -1.0
+  ]
+ ],
+ [
+  "[1280] 1 ear passed -> tick unlocked; tick -> Next",
+  true,
+  {
+   "done": [
+    1,
+    2,
+    3
+   ],
+   "complete": false,
+   "placed": false,
+   "line": "Every Australian Dog Goes Barking Early",
+   "ear": true
+  }
+ ],
+ [
+  "[1280] 2 step 5 content",
+  true,
+  ""
+ ],
+ [
+  "[1280] step 5 wrong answer explained, not counted, Next still blocked",
+  true,
+  "fb='Find string 2: string 6 is on the left. Then read the number inside its dot.' eye='Right first time: 0 of 4'"
+ ],
+ [
+  "[1280] step 5 check passes after retry (5 questions asked, 4+1 expected with one miss)",
+  true,
+  [
+   "dia-finger",
+   "dia-fret",
+   "dia-open",
+   "dia-mute",
+   "dia-finger"
+  ]
+ ],
+ [
+  "[1280] 2 step 6: TAB top line = string 1 (text and printed TAB)",
+  true,
+  "e|-------0-|\nB|---1---0-|\nG|-----0-0-|\nD|-------2-|\nA|-------2-|\nE|-3-----0-|"
+ ],
+ [
+  "[1280] 8 step 6 TAB play-back sounds (3 notes + 6-note chord = 9 starts)",
+  true,
+  9
+ ],
+ [
+  "[1280] step 6 wrong answer explained, not counted, Next still blocked",
+  true,
+  "fb='Count the lines again. The top line is string 1 and the bottom line is string 6.' eye='Right first time: 0 of 3'"
+ ],
+ [
+  "[1280] step 6 check passes after retry (4 questions asked, 3+1 expected with one miss)",
+  true,
+  [
+   "tab",
+   "tab",
+   "tab",
+   "tab"
+  ]
+ ],
+ [
+  "[1280] 2 step 7: Em then E-F-G on string 1, Sing it first",
+  true,
+  [
+   "e|-0-1-3-|\nB|-------|\nG|-------|\nD|-------|\nA|-------|\nE|-------|",
+   "Em chord, frets 022000 | Em 2 3"
+  ]
+ ],
+ [
+  "[1280] 1 step 7: Start the Path disabled before the tick",
+  true,
+  [
+   "Start the Path",
+   true
+  ]
+ ],
+ [
+  "[1280] 8 step 7 band: count-in of 6 clicks, then E minor (E G B) with strums; Stop silences it",
+  true,
+  "clicks at [0, 1.71, 3.43, 4.29, 5.14, 6] s; sustained pitches (Hz) [41, 82, 196, 247, 330, 440]; 32 sample starts in 9.5 s"
+ ],
+ [
+  "[1280] 4 Start the Path: Path view, stage 1 (a-e), tabs Path + Record",
+  true,
+  [
+   [
+    "Path",
+    "Record"
+   ],
+   {
+    "done": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "complete": true,
+    "placed": false,
+    "line": "Every Australian Dog Goes Barking Early",
+    "ear": true,
+    "seen": [
+     "path",
+     "record"
+    ]
+   },
+   "Up next:\nStage 1, A and E \u00b7 step 1, Hear.\nTo reach Consistent: you can point to every chor"
+  ]
+ ],
+ [
+  "[1280] 4 \"New for you\" notice names Path and Record once",
+  true,
+  "New for you\n\nThe Path is open: the neck is your map, with one song at each fret.\n\nRecord is open: your progress, your journal and your backups."
+ ],
+ [
+  "[1280] 4 First Steps link on the Path; instrument picker now shown",
+  true,
+  ""
+ ],
+ [
+  "[1280] 4 unopened tabs cannot be reached by typing the address",
+  true,
+  ""
+ ],
+ [
+  "[1280] 4 stage 1 gate -> + Warm-up, Rudiments, announced",
+  true,
+  [
+   [
+    "Path",
+    "Warm-up",
+    "Rudiments",
+    "Record"
+   ],
+   "New for you\n\nWarm-up is open: ten minutes to start every practice.\n\nRudiments is open: short daily drills for your hands."
+  ]
+ ],
+ [
+  "[1280] 4 stage 2 gate -> + Technique, Invent, Gig, announced",
+  true,
+  [
+   [
+    "Path",
+    "Warm-up",
+    "Rudiments",
+    "Technique",
+    "Invent",
+    "Gig",
+    "Record"
+   ],
+   "New for you\n\nTechnique is open: the moves that give each style its sound.\n\nInvent is open: make your own loops from the chords you know.\n\nGig is open: plan a set and rehearse it as a band."
+  ]
+ ],
+ [
+  "[1280] 4 after reload: tabs kept, notice not repeated",
+  true,
+  [
+   "Path",
+   "Warm-up",
+   "Rudiments",
+   "Technique",
+   "Invent",
+   "Gig",
+   "Record"
+  ]
+ ],
+ [
+  "[1280] 4 (set-up) level lowered through the UI",
+  true,
+  {
+   "twelve-bar": 1795835904768
+  }
+ ],
+ [
+  "[1280] 4 a tab that has opened stays open if a level later drops",
+  true,
+  [
+   "Path",
+   "Warm-up",
+   "Rudiments",
+   "Technique",
+   "Invent",
+   "Gig",
+   "Record"
+  ]
+ ],
+ [
+  "[1280] 4 First Steps link revisits step 1 without losing progress",
+  true,
+  "First Steps \u00b7 step 1 of 7"
+ ],
+ [
+  "[1280] 5 localStorage holds only the key shredder",
+  true,
+  [
+   "shredder"
+  ]
+ ],
+ [
+  "[1280] 10 no alert/confirm/prompt called; no console errors",
+  true,
+  [
+   [],
+   []
+  ]
+ ],
+ [
+  "[1280] 10 no network requests (file:// only)",
+  true,
+  [
+   12,
+   [],
+   [
+    "Outfit-Bold.ttf",
+    "Outfit-Regular.ttf",
+    "PoiretOne-Regular.ttf",
+    "index.html"
+   ]
+  ]
+ ],
+ [
+  "[1280] placement all 8 correct -> Path opens at stage 1, fs complete + placed",
+  true,
+  [
+   [
+    "part",
+    "part",
+    "str-hl",
+    "str-num",
+    "dia-finger",
+    "dia-mute",
+    "tab",
+    "tab"
+   ],
+   {
+    "done": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "complete": true,
+    "placed": true,
+    "seen": [
+     "path",
+     "record"
+    ]
+   },
+   [
+    "Path",
+    "Record"
+   ]
+  ]
+ ],
+ [
+  "[1280] placement 8 items drawn from steps 1, 3, 5, 6",
+  true,
+  [
+   "part",
+   "part",
+   "str-hl",
+   "str-num",
+   "dia-finger",
+   "dia-mute",
+   "tab",
+   "tab"
+  ]
+ ],
+ [
+  "[1280] placement question 1 wrong -> told step [1], opens it, Path stays shut",
+  true,
+  [
+   "1",
+   "First Steps \u00b7 step 1 of 7",
+   {
+    "done": [
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "complete": false,
+    "placed": false
+   },
+   "First Steps \u00b7 played before? A few steps first  7 of 8 right.  These steps are worth a visit:  Step 1: Meet the guitar  The other steps are ticked off for you. "
+  ]
+ ],
+ [
+  "[1280] placement question 3 wrong -> told step [3], opens it, Path stays shut",
+  true,
+  [
+   "3",
+   "First Steps \u00b7 step 3 of 7",
+   {
+    "done": [
+     1,
+     2,
+     4,
+     5,
+     6,
+     7
+    ],
+    "complete": false,
+    "placed": false
+   },
+   "First Steps \u00b7 played before? A few steps first  7 of 8 right.  These steps are worth a visit:  Step 3: The strings  The other steps are ticked off for you. Pass"
+  ]
+ ],
+ [
+  "[1280] placement after routing, step 3 check passes after retry (5 questions asked, 5+1 expected with one miss)",
+  true,
+  [
+   "str-hl",
+   "str-num",
+   "str-name",
+   "str-hl",
+   "str-num"
+  ]
+ ],
+ [
+  "[1280] placement after passing the missed step, Start the Path opens the Path",
+  true,
+  [
+   [
+    "Start the Path",
+    false
+   ],
+   {
+    "done": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "complete": true,
+    "placed": false,
+    "seen": [
+     "path",
+     "record"
+    ]
+   }
+  ]
+ ],
+ [
+  "[1280] placement question 5 wrong -> told step [5], opens it, Path stays shut",
+  true,
+  [
+   "5",
+   "First Steps \u00b7 step 5 of 7",
+   {
+    "done": [
+     1,
+     2,
+     3,
+     4,
+     6,
+     7
+    ],
+    "complete": false,
+    "placed": false
+   },
+   "First Steps \u00b7 played before? A few steps first  7 of 8 right.  These steps are worth a visit:  Step 5: Chord diagrams  The other steps are ticked off for you. P"
+  ]
+ ],
+ [
+  "[1280] placement question 8 wrong -> told step [6], opens it, Path stays shut",
+  true,
+  [
+   "6",
+   "First Steps \u00b7 step 6 of 7",
+   {
+    "done": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     7
+    ],
+    "complete": false,
+    "placed": false
+   },
+   "First Steps \u00b7 played before? A few steps first  7 of 8 right.  These steps are worth a visit:  Step 6: TAB  The other steps are ticked off for you. Pass this ch"
+  ]
+ ],
+ [
+  "[1280] placement question 4 wrong -> told step [3], opens it, Path stays shut",
+  true,
+  [
+   "3",
+   "First Steps \u00b7 step 3 of 7",
+   {
+    "done": [
+     1,
+     2,
+     4,
+     5,
+     6,
+     7
+    ],
+    "complete": false,
+    "placed": false
+   },
+   "First Steps \u00b7 played before? A few steps first  7 of 8 right.  These steps are worth a visit:  Step 3: The strings  The other steps are ticked off for you. Pass"
+  ]
+ ],
+ [
+  "[1280] placement quitting part-way returns to step 1 with nothing saved",
+  true,
+  null
+ ],
+ [
+  "[1280] placement 4 teacher mode on a fresh page: all tabs, First Steps available not forced",
+  true,
+  [
+   [
+    "First Steps",
+    "Path",
+    "Warm-up",
+    "Rudiments",
+    "Technique",
+    "Invent",
+    "Gig",
+    "Record"
+   ],
+   "v-gig"
+  ]
+ ],
+ [
+  "[1280] placement 4 teacher mode off again: student is back in First Steps only",
+  true,
+  [
+   "First Steps"
+  ]
+ ],
+ [
+  "[1280] placement 10 no dialogs / console errors",
+  true,
+  []
+ ],
+ [
+  "[360] 1 fresh: only First Steps view, step 1",
+  true,
+  {
+   "views": [
+    "v-first-steps"
+   ],
+   "mbar": 0,
+   "fin": false,
+   "nsw": false,
+   "inst": 0,
+   "next": false,
+   "foot": 0,
+   "tch": true,
+   "neck": false,
+   "msg": "",
+   "tabs": [
+    "First Steps"
+   ],
+   "ls": null
+  }
+ ],
+ [
+  "[360] 1 fresh: nothing saved before the student does anything",
+  true,
+  null
+ ],
+ [
+  "[360] 1 dots 2-7 locked; typing #path, #gig etc. stays on First Steps",
+  true,
+  [
+   [
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "{'v-first-steps'}"
+  ]
+ ],
+ [
+  "[360] 1 step 1: Next disabled before the check",
+  true,
+  true
+ ],
+ [
+  "[360] 2 step 1 names = booklet terms (+2 electric extras)",
+  true,
+  [
+   "Headstock",
+   "Machine heads",
+   "Nut",
+   "Neck",
+   "Fingerboard",
+   "Frets",
+   "Position markers",
+   "Body",
+   "Sound hole",
+   "Pickguard",
+   "Saddle",
+   "Bridge",
+   "Strings",
+   "Pickups",
+   "Controls",
+   "Output jack"
+  ]
+ ],
+ [
+  "[360] 2 step 1 alternative names given (tuning pegs, head, fretboard)",
+  true,
+  {
+   "machineHeads": "2 \u00b7 Machine heads\nAlso called tuning pegs. Each one tightens or loosens one string. At school, your teacher does the tuning.",
+   "headstock": "1 \u00b7 Headstock\nThe flat end of the guitar, also called the head. The strings finish here.",
+   "fingerboard": "5 \u00b7 Fingerboard\nThe front face of the neck, also called the fretboard. Your fingers press the strings down onto it."
+  }
+ ],
+ [
+  "[360] step 1 wrong answer explained, not counted, Next still blocked",
+  true,
+  "fb=\"It isn't the fingerboard. Look at where the lit part sits on the guitar, then choose again.\" eye='Right first time: 0 of 5'"
+ ],
+ [
+  "[360] step 1 check passes after retry (6 questions asked, 5+1 expected with one miss)",
+  true,
+  [
+   "lit:bridge",
+   "lit:headstock",
+   "lit:fingerboard",
+   "lit:bridge",
+   "lit:fingerboard",
+   "lit:soundHole"
+  ]
+ ],
+ [
+  "[360] step 1 on a phone asks with a lit part and four name buttons",
+  true,
+  [
+   "lit:bridge",
+   "lit:headstock",
+   "lit:fingerboard",
+   "lit:bridge",
+   "lit:fingerboard",
+   "lit:soundHole"
+  ]
+ ],
+ [
+  "[360] 1 step 1 passed: Next enabled, fs.done=[1]",
+  true,
+  {
+   "finish": "bossa",
+   "stage": "a-e",
+   "nsw": false,
+   "teacher": false,
+   "lv": {},
+   "sign": {},
+   "marks": {},
+   "changes": [],
+   "journal": [],
+   "bpm": 70,
+   "useFin": false,
+   "gates": {},
+   "warm": {},
+   "best": {},
+   "capo": {},
+   "mute": {},
+   "inst": "guitar",
+   "gig": {
+    "songs": [
+     "g-boogie",
+     "g-clock",
+     "g-johnny",
+     "g-bamba"
+    ],
+    "bands": [
+     {
+      "name": "Band 1",
+      "m": {}
+     }
+    ],
+    "block": 20,
+    "rotate": true,
+    "useFin": false,
+    "open": "g-boogie",
+    "bpm": 120
+   },
+   "fs": {
+    "done": [
+     1
+    ],
+    "complete": false,
+    "placed": false
+   }
+  }
+ ],
+ [
+  "[360] 2 step 2 content: three cards, T 1 2 3 4, picking signs, left-hander",
+  true,
+  "Next disabled=True"
+ ],
+ [
+  "[360] 2 step 2 hand drawing carries T 1 2 3 4",
+  true,
+  "T 1 2 3 4"
+ ],
+ [
+  "[360] 1 step 2 tick enables Next",
+  true,
+  ""
+ ],
+ [
+  "[360] 1 step 2 untick blocks Next again",
+  true,
+  {
+   "done": [
+    1
+   ],
+   "complete": false,
+   "placed": false
+  }
+ ],
+ [
+  "[360] 2 step 3 content",
+  true,
+  ""
+ ],
+ [
+  "[360] 2 step 3 own memory line saved in fs.line",
+  true,
+  {
+   "done": [
+    1,
+    2
+   ],
+   "complete": false,
+   "placed": false,
+   "line": "Every Australian Dog Goes Barking Early"
+  }
+ ],
+ [
+  "[360] 8 step 3 string buttons sound (pluck sample)",
+  true,
+  ""
+ ],
+ [
+  "[360] step 3 wrong answer explained, not counted, Next still blocked",
+  true,
+  "fb='Not this time. String 6 is the thickest one, low E, on the left of the drawing. Count from there: 6, 5, 4, 3, 2, 1.' eye='Right first time: 0 of 5'"
+ ],
+ [
+  "[360] step 3 check passes after retry (6 questions asked, 5+1 expected with one miss)",
+  true,
+  [
+   "str-hl",
+   "str-num",
+   "str-name",
+   "str-hl",
+   "str-num",
+   "str-name"
+  ]
+ ],
+ [
+  "[360] 2 step 3 quiz mixes lit string / number / name",
+  true,
+  [
+   "str-hl",
+   "str-num",
+   "str-name",
+   "str-hl",
+   "str-num",
+   "str-name"
+  ]
+ ],
+ [
+  "[360] 5 reload mid-way resumes at the first unpassed step with the memory line kept",
+  true,
+  [
+   "First Steps \u00b7 step 4 of 7",
+   {
+    "done": [
+     1,
+     2,
+     3
+    ],
+    "complete": false,
+    "placed": false,
+    "line": "Every Australian Dog Goes Barking Early"
+   }
+  ]
+ ],
+ [
+  "[360] 2 step 4 is \"Hear the open strings\"; no peg-turning instruction outside the home box",
+  true,
+  {
+   "title": "Hear the open strings",
+   "turn sentences outside box": []
+  }
+ ],
+ [
+  "[360] 8 reference tones E2 A2 D3 G3 B3 E4",
+  true,
+  {
+   "6": 82.41,
+   "5": 110,
+   "4": 146.83,
+   "3": 196.0,
+   "2": 246.94,
+   "1": 329.63
+  }
+ ],
+ [
+  "[360] 8 a reference note repeats until tapped again, then stops",
+  true,
+  "starts in 3 s: 2; after stop: 0"
+ ],
+ [
+  "[360] 1 step 4: honour tick locked until the ear check is passed; Next blocked",
+  true,
+  ""
+ ],
+ [
+  "[360] 1 ear check: wrong answer explained, stays on the same pair, buttons need a fresh listen",
+  true,
+  "Not this time. Here is a fresh pair. Listen for whether the second note climbs or drops."
+ ],
+ [
+  "[360] 2 ear check: 4 pairs, gaps (semitones) big to small, all >= 1",
+  true,
+  [
+   -24.0,
+   -14.0,
+   -5.0,
+   1.0
+  ]
+ ],
+ [
+  "[360] 1 ear passed -> tick unlocked; tick -> Next",
+  true,
+  {
+   "done": [
+    1,
+    2,
+    3
+   ],
+   "complete": false,
+   "placed": false,
+   "line": "Every Australian Dog Goes Barking Early",
+   "ear": true
+  }
+ ],
+ [
+  "[360] 2 step 5 content",
+  true,
+  ""
+ ],
+ [
+  "[360] step 5 wrong answer explained, not counted, Next still blocked",
+  true,
+  "fb='Find string 1: string 6 is on the left. Then read the number inside its dot.' eye='Right first time: 0 of 4'"
+ ],
+ [
+  "[360] step 5 check passes after retry (5 questions asked, 4+1 expected with one miss)",
+  true,
+  [
+   "dia-finger",
+   "dia-fret",
+   "dia-open",
+   "dia-mute",
+   "dia-finger"
+  ]
+ ],
+ [
+  "[360] 2 step 6: TAB top line = string 1 (text and printed TAB)",
+  true,
+  "e|-------0-|\nB|---1---0-|\nG|-----0-0-|\nD|-------2-|\nA|-------2-|\nE|-3-----0-|"
+ ],
+ [
+  "[360] 8 step 6 TAB play-back sounds (3 notes + 6-note chord = 9 starts)",
+  true,
+  9
+ ],
+ [
+  "[360] step 6 wrong answer explained, not counted, Next still blocked",
+  true,
+  "fb='Count the lines again. The top line is string 1 and the bottom line is string 6.' eye='Right first time: 0 of 3'"
+ ],
+ [
+  "[360] step 6 check passes after retry (4 questions asked, 3+1 expected with one miss)",
+  true,
+  [
+   "tab",
+   "tab",
+   "tab",
+   "tab"
+  ]
+ ],
+ [
+  "[360] 2 step 7: Em then E-F-G on string 1, Sing it first",
+  true,
+  [
+   "e|-0-1-3-|\nB|-------|\nG|-------|\nD|-------|\nA|-------|\nE|-------|",
+   "Em chord, frets 022000 | Em 2 3"
+  ]
+ ],
+ [
+  "[360] 1 step 7: Start the Path disabled before the tick",
+  true,
+  [
+   "Start the Path",
+   true
+  ]
+ ],
+ [
+  "[360] 8 step 7 band: count-in of 6 clicks, then E minor (E G B) with strums; Stop silences it",
+  true,
+  "clicks at [0, 1.71, 3.43, 4.29, 5.14, 6] s; sustained pitches (Hz) [41, 82, 196, 247, 330, 440]; 32 sample starts in 9.5 s"
+ ],
+ [
+  "[360] 4 Start the Path: Path view, stage 1 (a-e), tabs Path + Record",
+  true,
+  [
+   [
+    "Path",
+    "Record"
+   ],
+   {
+    "done": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "complete": true,
+    "placed": false,
+    "line": "Every Australian Dog Goes Barking Early",
+    "ear": true,
+    "seen": [
+     "path",
+     "record"
+    ]
+   },
+   "Up next:\nStage 1, A and E \u00b7 step 1, Hear.\nTo reach Consistent: you can point to every chor"
+  ]
+ ],
+ [
+  "[360] 4 \"New for you\" notice names Path and Record once",
+  true,
+  "New for you\n\nThe Path is open: the neck is your map, with one song at each fret.\n\nRecord is open: your progress, your journal and your backups."
+ ],
+ [
+  "[360] 4 First Steps link on the Path; instrument picker now shown",
+  true,
+  ""
+ ],
+ [
+  "[360] 4 unopened tabs cannot be reached by typing the address",
+  true,
+  ""
+ ],
+ [
+  "[360] 4 stage 1 gate -> + Warm-up, Rudiments, announced",
+  true,
+  [
+   [
+    "Path",
+    "Warm-up",
+    "Rudiments",
+    "Record"
+   ],
+   "New for you\n\nWarm-up is open: ten minutes to start every practice.\n\nRudiments is open: short daily drills for your hands."
+  ]
+ ],
+ [
+  "[360] 4 stage 2 gate -> + Technique, Invent, Gig, announced",
+  true,
+  [
+   [
+    "Path",
+    "Warm-up",
+    "Rudiments",
+    "Technique",
+    "Invent",
+    "Gig",
+    "Record"
+   ],
+   "New for you\n\nTechnique is open: the moves that give each style its sound.\n\nInvent is open: make your own loops from the chords you know.\n\nGig is open: plan a set and rehearse it as a band."
+  ]
+ ],
+ [
+  "[360] 4 after reload: tabs kept, notice not repeated",
+  true,
+  [
+   "Path",
+   "Warm-up",
+   "Rudiments",
+   "Technique",
+   "Invent",
+   "Gig",
+   "Record"
+  ]
+ ],
+ [
+  "[360] 4 (set-up) level lowered through the UI",
+  true,
+  {
+   "twelve-bar": 1795835938501
+  }
+ ],
+ [
+  "[360] 4 a tab that has opened stays open if a level later drops",
+  true,
+  [
+   "Path",
+   "Warm-up",
+   "Rudiments",
+   "Technique",
+   "Invent",
+   "Gig",
+   "Record"
+  ]
+ ],
+ [
+  "[360] 4 First Steps link revisits step 1 without losing progress",
+  true,
+  "First Steps \u00b7 step 1 of 7"
+ ],
+ [
+  "[360] 5 localStorage holds only the key shredder",
+  true,
+  [
+   "shredder"
+  ]
+ ],
+ [
+  "[360] 10 no alert/confirm/prompt called; no console errors",
+  true,
+  [
+   [],
+   []
+  ]
+ ],
+ [
+  "[360] 10 no network requests (file:// only)",
+  true,
+  [
+   12,
+   [],
+   [
+    "Outfit-Bold.ttf",
+    "Outfit-Regular.ttf",
+    "PoiretOne-Regular.ttf",
+    "index.html"
+   ]
+  ]
+ ],
+ [
+  "[360] placement all 8 correct -> Path opens at stage 1, fs complete + placed",
+  true,
+  [
+   [
+    "lit",
+    "lit",
+    "str-hl",
+    "str-num",
+    "dia-finger",
+    "dia-mute",
+    "tab",
+    "tab"
+   ],
+   {
+    "done": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "complete": true,
+    "placed": true,
+    "seen": [
+     "path",
+     "record"
+    ]
+   },
+   [
+    "Path",
+    "Record"
+   ]
+  ]
+ ],
+ [
+  "[360] placement 8 items drawn from steps 1, 3, 5, 6",
+  true,
+  [
+   "lit",
+   "lit",
+   "str-hl",
+   "str-num",
+   "dia-finger",
+   "dia-mute",
+   "tab",
+   "tab"
+  ]
+ ],
+ [
+  "[360] placement question 1 wrong -> told step [1], opens it, Path stays shut",
+  true,
+  [
+   "1",
+   "First Steps \u00b7 step 1 of 7",
+   {
+    "done": [
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "complete": false,
+    "placed": false
+   },
+   "First Steps \u00b7 played before? A few steps first  7 of 8 right.  These steps are worth a visit:  Step 1: Meet the guitar  The other steps are ticked off for you. "
+  ]
+ ],
+ [
+  "[360] placement question 3 wrong -> told step [3], opens it, Path stays shut",
+  true,
+  [
+   "3",
+   "First Steps \u00b7 step 3 of 7",
+   {
+    "done": [
+     1,
+     2,
+     4,
+     5,
+     6,
+     7
+    ],
+    "complete": false,
+    "placed": false
+   },
+   "First Steps \u00b7 played before? A few steps first  7 of 8 right.  These steps are worth a visit:  Step 3: The strings  The other steps are ticked off for you. Pass"
+  ]
+ ],
+ [
+  "[360] placement after routing, step 3 check passes after retry (5 questions asked, 5+1 expected with one miss)",
+  true,
+  [
+   "str-hl",
+   "str-num",
+   "str-name",
+   "str-hl",
+   "str-num"
+  ]
+ ],
+ [
+  "[360] placement after passing the missed step, Start the Path opens the Path",
+  true,
+  [
+   [
+    "Start the Path",
+    false
+   ],
+   {
+    "done": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "complete": true,
+    "placed": false,
+    "seen": [
+     "path",
+     "record"
+    ]
+   }
+  ]
+ ],
+ [
+  "[360] placement question 5 wrong -> told step [5], opens it, Path stays shut",
+  true,
+  [
+   "5",
+   "First Steps \u00b7 step 5 of 7",
+   {
+    "done": [
+     1,
+     2,
+     3,
+     4,
+     6,
+     7
+    ],
+    "complete": false,
+    "placed": false
+   },
+   "First Steps \u00b7 played before? A few steps first  7 of 8 right.  These steps are worth a visit:  Step 5: Chord diagrams  The other steps are ticked off for you. P"
+  ]
+ ],
+ [
+  "[360] placement question 8 wrong -> told step [6], opens it, Path stays shut",
+  true,
+  [
+   "6",
+   "First Steps \u00b7 step 6 of 7",
+   {
+    "done": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     7
+    ],
+    "complete": false,
+    "placed": false
+   },
+   "First Steps \u00b7 played before? A few steps first  7 of 8 right.  These steps are worth a visit:  Step 6: TAB  The other steps are ticked off for you. Pass this ch"
+  ]
+ ],
+ [
+  "[360] placement question 4 wrong -> told step [3], opens it, Path stays shut",
+  true,
+  [
+   "3",
+   "First Steps \u00b7 step 3 of 7",
+   {
+    "done": [
+     1,
+     2,
+     4,
+     5,
+     6,
+     7
+    ],
+    "complete": false,
+    "placed": false
+   },
+   "First Steps \u00b7 played before? A few steps first  7 of 8 right.  These steps are worth a visit:  Step 3: The strings  The other steps are ticked off for you. Pass"
+  ]
+ ],
+ [
+  "[360] placement quitting part-way returns to step 1 with nothing saved",
+  true,
+  null
+ ],
+ [
+  "[360] placement 4 teacher mode on a fresh page: all tabs, First Steps available not forced",
+  true,
+  [
+   [
+    "First Steps",
+    "Path",
+    "Warm-up",
+    "Rudiments",
+    "Technique",
+    "Invent",
+    "Gig",
+    "Record"
+   ],
+   "v-gig"
+  ]
+ ],
+ [
+  "[360] placement 4 teacher mode off again: student is back in First Steps only",
+  true,
+  [
+   "First Steps"
+  ]
+ ],
+ [
+  "[360] placement 10 no dialogs / console errors",
+  true,
+  []
+ ]
+]

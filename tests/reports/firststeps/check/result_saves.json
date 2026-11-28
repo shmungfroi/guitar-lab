@@ -1,0 +1,674 @@
+[
+ [
+  "5 returning (a) levels+gates+journal: First Steps skipped, all 7 tabs, save untouched at start-up",
+  true,
+  [
+   "v-path",
+   [
+    "Path",
+    "Warm-up",
+    "Rudiments",
+    "Technique",
+    "Invent",
+    "Gig",
+    "Record"
+   ],
+   "bytes identical"
+  ]
+ ],
+ [
+  "5 returning (a) levels+gates+journal: every tab opens",
+  true,
+  [
+   "v-warm-up",
+   "v-rudiments",
+   "v-technique",
+   "v-invent",
+   "v-gig",
+   "v-record"
+  ]
+ ],
+ [
+  "5 returning (a) levels+gates+journal: after passing a First Steps check and reloading, nothing lost and all tabs kept",
+  true,
+  [
+   [],
+   {
+    "done": [
+     2
+    ],
+    "complete": true,
+    "placed": false,
+    "all": true
+   },
+   [
+    "Path",
+    "Warm-up",
+    "Rudiments",
+    "Technique",
+    "Invent",
+    "Gig",
+    "Record"
+   ]
+  ]
+ ],
+ [
+  "5 returning (a) levels+gates+journal: no console errors",
+  true,
+  []
+ ],
+ [
+  "5 returning (b) one level only: First Steps skipped, all 7 tabs, save untouched at start-up",
+  true,
+  [
+   "v-path",
+   [
+    "Path",
+    "Warm-up",
+    "Rudiments",
+    "Technique",
+    "Invent",
+    "Gig",
+    "Record"
+   ],
+   "bytes identical"
+  ]
+ ],
+ [
+  "5 returning (b) one level only: every tab opens",
+  true,
+  [
+   "v-warm-up",
+   "v-rudiments",
+   "v-technique",
+   "v-invent",
+   "v-gig",
+   "v-record"
+  ]
+ ],
+ [
+  "5 returning (b) one level only: after passing a First Steps check and reloading, nothing lost and all tabs kept",
+  true,
+  [
+   [],
+   {
+    "done": [
+     2
+    ],
+    "complete": true,
+    "placed": false,
+    "all": true
+   },
+   [
+    "Path",
+    "Warm-up",
+    "Rudiments",
+    "Technique",
+    "Invent",
+    "Gig",
+    "Record"
+   ]
+  ]
+ ],
+ [
+  "5 returning (b) one level only: no console errors",
+  true,
+  []
+ ],
+ [
+  "5 returning (b2) bare {\"lv\":{\"a-e:0\":1}}: First Steps skipped, all 7 tabs, save untouched at start-up",
+  true,
+  [
+   "v-path",
+   [
+    "Path",
+    "Warm-up",
+    "Rudiments",
+    "Technique",
+    "Invent",
+    "Gig",
+    "Record"
+   ],
+   "bytes identical"
+  ]
+ ],
+ [
+  "5 returning (b2) bare {\"lv\":{\"a-e:0\":1}}: every tab opens",
+  true,
+  [
+   "v-warm-up",
+   "v-rudiments",
+   "v-technique",
+   "v-invent",
+   "v-gig",
+   "v-record"
+  ]
+ ],
+ [
+  "5 returning (b2) bare {\"lv\":{\"a-e:0\":1}}: after passing a First Steps check and reloading, nothing lost and all tabs kept",
+  true,
+  [
+   [],
+   {
+    "done": [
+     2
+    ],
+    "complete": true,
+    "placed": false,
+    "all": true
+   },
+   [
+    "Path",
+    "Warm-up",
+    "Rudiments",
+    "Technique",
+    "Invent",
+    "Gig",
+    "Record"
+   ]
+  ]
+ ],
+ [
+  "5 returning (b2) bare {\"lv\":{\"a-e:0\":1}}: no console errors",
+  true,
+  []
+ ],
+ [
+  "5 returning (c) journal entry only: First Steps skipped, all 7 tabs, save untouched at start-up",
+  true,
+  [
+   "v-path",
+   [
+    "Path",
+    "Warm-up",
+    "Rudiments",
+    "Technique",
+    "Invent",
+    "Gig",
+    "Record"
+   ],
+   "bytes identical"
+  ]
+ ],
+ [
+  "5 returning (c) journal entry only: every tab opens",
+  true,
+  [
+   "v-warm-up",
+   "v-rudiments",
+   "v-technique",
+   "v-invent",
+   "v-gig",
+   "v-record"
+  ]
+ ],
+ [
+  "5 returning (c) journal entry only: after passing a First Steps check and reloading, nothing lost and all tabs kept",
+  true,
+  [
+   [],
+   {
+    "done": [
+     2
+    ],
+    "complete": true,
+    "placed": false,
+    "all": true
+   },
+   [
+    "Path",
+    "Warm-up",
+    "Rudiments",
+    "Technique",
+    "Invent",
+    "Gig",
+    "Record"
+   ]
+  ]
+ ],
+ [
+  "5 returning (c) journal entry only: no console errors",
+  true,
+  []
+ ],
+ [
+  "5 returning (b3): a 0.9 student who lowers their only level to nothing keeps their tabs",
+  false,
+  {
+   "lv after lowering": {
+    "a-e:0": 0
+   },
+   "fs": null,
+   "tabs straight after": [
+    "First Steps",
+    "Path"
+   ],
+   "view straight after": "v-path",
+   "tabs after reload": [
+    "First Steps"
+   ],
+   "view after reload": "v-first-steps"
+  }
+ ],
+ [
+  "5 a save with only fs complete: Path + Record",
+  true,
+  [
+   "Path",
+   "Record"
+  ]
+ ],
+ [
+  "5 odd fs value {\"fs\":\"yes\"} loads as a first visit without errors",
+  true,
+  [
+   "v-first-steps",
+   [
+    "First Steps"
+   ],
+   []
+  ]
+ ],
+ [
+  "5 odd fs value {\"fs\":{\"done\":\"all\",\"complete\":\"true\"}} loads as a first visit without errors",
+  true,
+  [
+   "v-first-steps",
+   [
+    "First Steps"
+   ],
+   []
+  ]
+ ],
+ [
+  "5 odd fs value {\"fs\":{\"done\":[9,\"x\",1,1],\"complete\":1,\"seen\":[3,\"gig\"]}} loads as a first visit without errors",
+  true,
+  [
+   "v-first-steps",
+   [
+    "First Steps"
+   ],
+   []
+  ]
+ ],
+ [
+  "5 odd fs value {\"fs\":null} loads as a first visit without errors",
+  true,
+  [
+   "v-first-steps",
+   [
+    "First Steps"
+   ],
+   []
+  ]
+ ],
+ [
+  "5 odd fs value {\"fs\":[]} loads as a first visit without errors",
+  true,
+  [
+   "v-first-steps",
+   [
+    "First Steps"
+   ],
+   []
+  ]
+ ],
+ [
+  "5 odd fs value not json loads as a first visit without errors",
+  true,
+  [
+   "v-first-steps",
+   [
+    "First Steps"
+   ],
+   []
+  ]
+ ],
+ [
+  "5 a 0.7 backup imports on a first visit: progress restored, First Steps skipped, all tabs",
+  true,
+  [
+   "v-record",
+   [
+    "Path",
+    "Warm-up",
+    "Rudiments",
+    "Technique",
+    "Invent",
+    "Gig",
+    "Record"
+   ],
+   "v-path",
+   "Replace your progress with this backup?  Backup made 28 Nov 2026: 11 levels set, 1 journal",
+   []
+  ]
+ ],
+ [
+  "5 a 0.8 backup imports on a first visit: progress restored, First Steps skipped, all tabs",
+  true,
+  [
+   "v-record",
+   [
+    "Path",
+    "Warm-up",
+    "Rudiments",
+    "Technique",
+    "Invent",
+    "Gig",
+    "Record"
+   ],
+   "v-path",
+   "Replace your progress with this backup?  Backup made 28 Nov 2026: 11 levels set, 1 journal",
+   []
+  ]
+ ],
+ [
+  "5 a 0.9 backup imports on a first visit: progress restored, First Steps skipped, all tabs",
+  true,
+  [
+   "v-record",
+   [
+    "Path",
+    "Warm-up",
+    "Rudiments",
+    "Technique",
+    "Invent",
+    "Gig",
+    "Record"
+   ],
+   "v-path",
+   "Replace your progress with this backup?  Backup made 28 Nov 2026: 11 levels set, 1 journal",
+   []
+  ]
+ ],
+ [
+  "5 bare 0.9 state imports: progress restored, all tabs",
+  true,
+  [
+   [
+    "Path",
+    "Warm-up",
+    "Rudiments",
+    "Technique",
+    "Invent",
+    "Gig",
+    "Record"
+   ],
+   "v-path"
+  ]
+ ],
+ [
+  "5 0.11 backup: version 0.11 and state.fs included",
+  true,
+  {
+   "app": "The Guitar Lab",
+   "format": 1,
+   "version": "0.11",
+   "fs": {
+    "done": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "complete": true,
+    "placed": false,
+    "ear": true,
+    "seen": [
+     "path",
+     "record"
+    ],
+    "line": "Eggs And Dates Go Bad Early"
+   }
+  }
+ ],
+ [
+  "5 0.11 backup imported on a first visit: fs restored, Path + Record, survives reload",
+  true,
+  [
+   {
+    "done": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "complete": true,
+    "placed": false,
+    "ear": true,
+    "seen": [
+     "path",
+     "record"
+    ],
+    "line": "Eggs And Dates Go Bad Early"
+   },
+   [
+    "Path",
+    "Record"
+   ],
+   "v-record"
+  ]
+ ],
+ [
+  "5 half-way First Steps backup: resumes at step 4 after import",
+  true,
+  {
+   "done": [
+    1,
+    2,
+    3
+   ],
+   "complete": false,
+   "placed": false,
+   "line": "x y"
+  }
+ ],
+ [
+  "5 newer-version message names 0.11",
+  true,
+  "That backup was made by a newer version of The Guitar Lab than this one (0.11), so it can't be read here. Nothing has been changed."
+ ],
+ [
+  "5 key is only \"shredder\" after imports",
+  true,
+  []
+ ],
+ [
+  "6 bass on a first visit: 0.9 Path, all tabs, \"coming\" note, no First Steps",
+  true,
+  [
+   [
+    "Path",
+    "Warm-up",
+    "Rudiments",
+    "Technique",
+    "Invent",
+    "Gig",
+    "Record"
+   ],
+   "First Steps for bass is coming. Until then, every tab is open.",
+   "page body equals 0.9"
+  ]
+ ],
+ [
+  "6 bass: the other six tabs equal 0.9",
+  true,
+  []
+ ],
+ [
+  "6 drums on a first visit: 0.9 Path, all tabs, \"coming\" note, no First Steps",
+  true,
+  [
+   [
+    "Path",
+    "Warm-up",
+    "Rudiments",
+    "Technique",
+    "Invent",
+    "Gig",
+    "Record"
+   ],
+   "First Steps for drums is coming. Until then, every tab is open.",
+   "page body equals 0.9"
+  ]
+ ],
+ [
+  "6 drums: the other six tabs equal 0.9",
+  true,
+  []
+ ],
+ [
+  "6 keys on a first visit: 0.9 Path, all tabs, \"coming\" note, no First Steps",
+  true,
+  [
+   [
+    "Path",
+    "Warm-up",
+    "Rudiments",
+    "Technique",
+    "Invent",
+    "Gig",
+    "Record"
+   ],
+   "First Steps for keys is coming. Until then, every tab is open.",
+   "page body equals 0.9"
+  ]
+ ],
+ [
+  "6 keys: the other six tabs equal 0.9",
+  true,
+  []
+ ],
+ [
+  "6 vocals on a first visit: 0.9 Path, all tabs, \"coming\" note, no First Steps",
+  true,
+  [
+   [
+    "Path",
+    "Warm-up",
+    "Rudiments",
+    "Technique",
+    "Invent",
+    "Gig",
+    "Record"
+   ],
+   "First Steps for vocals is coming. Until then, every tab is open.",
+   "page body equals 0.9"
+  ]
+ ],
+ [
+  "6 vocals: the other six tabs equal 0.9",
+  true,
+  []
+ ],
+ [
+  "6 guitar student (Path + Record) switches to bass: all tabs + note; back to guitar: Path + Record again",
+  true,
+  [
+   [
+    "Path",
+    "Warm-up",
+    "Rudiments",
+    "Technique",
+    "Invent",
+    "Gig",
+    "Record"
+   ],
+   "First Steps for bass is coming. Until then, every tab is open.",
+   [
+    "Path",
+    "Record"
+   ]
+  ]
+ ],
+ [
+  "9 [1280 dark] 8 stages of the Path, Gig, Record and the other tabs: page body equals 0.9 once version, First Steps link/tab are set aside",
+  true,
+  "14 views identical"
+ ],
+ [
+  "9 [1280 dark] element screenshots of Path (stages 1 and 7), Gig, Record pixel-identical to 0.9 with the First Steps link taken out",
+  true,
+  "4 identical"
+ ],
+ [
+  "9 [1280 dark] the only addition on the Path is the First Steps link",
+  true,
+  [
+   "First Steps",
+   "#first-steps",
+   "next"
+  ]
+ ],
+ [
+  "9 [360 dark] 8 stages of the Path, Gig, Record and the other tabs: page body equals 0.9 once version, First Steps link/tab are set aside",
+  true,
+  "14 views identical"
+ ],
+ [
+  "9 [360 dark] element screenshots of Path (stages 1 and 7), Gig, Record pixel-identical to 0.9 with the First Steps link taken out",
+  true,
+  "4 identical"
+ ],
+ [
+  "9 [360 dark] the only addition on the Path is the First Steps link",
+  true,
+  [
+   "First Steps",
+   "#first-steps",
+   "next"
+  ]
+ ],
+ [
+  "9 [1280 light] 8 stages of the Path, Gig, Record and the other tabs: page body equals 0.9 once version, First Steps link/tab are set aside",
+  true,
+  "14 views identical"
+ ],
+ [
+  "9 [1280 light] element screenshots of Path (stages 1 and 7), Gig, Record pixel-identical to 0.9 with the First Steps link taken out",
+  true,
+  "4 identical"
+ ],
+ [
+  "9 [1280 light] the only addition on the Path is the First Steps link",
+  true,
+  [
+   "First Steps",
+   "#first-steps",
+   "next"
+  ]
+ ],
+ [
+  "9 [360 light] 8 stages of the Path, Gig, Record and the other tabs: page body equals 0.9 once version, First Steps link/tab are set aside",
+  true,
+  "14 views identical"
+ ],
+ [
+  "9 [360 light] element screenshots of Path (stages 1 and 7), Gig, Record pixel-identical to 0.9 with the First Steps link taken out",
+  true,
+  "4 identical"
+ ],
+ [
+  "9 [360 light] the only addition on the Path is the First Steps link",
+  true,
+  [
+   "First Steps",
+   "#first-steps",
+   "next"
+  ]
+ ],
+ [
+  "9 every line of the 0.9 stylesheet is still present unchanged",
+  false,
+  [
+   "--ton:#8fbf6a;--pre:#c9a24a;--dom:#d0574b;--sec:#a493d8;--sub:#b3a98f;--kbl:#a47510;--wood:#2b1a12;--fret:#b9b4a8;--ivory:#ece2c8;--inlay:#c",
+   "--ton:light-dark(#4a7434,#8fbf6a);--pre:light-dark(#8a6a22,#c9a24a);--dom:light-dark(#a8352b,#d0574b);--sec:light-dark(#6b55b0,#a493d8);--su"
+  ]
+ ]
+]
