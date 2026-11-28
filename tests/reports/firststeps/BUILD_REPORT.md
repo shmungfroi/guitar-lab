@@ -3,10 +3,11 @@
 This is the builder's own check. It is not the independent check: that needs a separate agent given only the spec, the design skill and the output.
 
 - Branch `firststeps`, not merged. Spec: `SPEC_FS.md` (approved 28 Nov), plus the two sets of amendments below.
-- Code commits: stage A `f2a70d6`, stage B `79e008c`, stage C `424d197`, finish `4626acb`. This report is the commit after `4626acb`.
-- Full suites, run once on `4626acb`: **434 passed, 0 failed** in 4 min 25 s (`python3 -m pytest tests -q -p no:cacheprovider`). That is the 383 from 0.9 plus 51 new in `tests/test_firststeps.py`.
+- Code commits: stage A `f2a70d6`, stage B `79e008c`, stage C `424d197`, finish `4626acb`, independent fact check `76b002c` (main session), then the approved artwork (the commit this report is in).
+- Before the artwork: full suites on `4626acb`, 434 passed.
+- With the artwork: full suites run once, **445 passed, 0 failed, 0 skipped** in 4 min 47 s (383 from 0.9 plus 62 in `tests/test_firststeps.py`). After that run I changed one thing, the close-up used when a part is lit for the phone check, and reran only `tests/test_firststeps.py`: **62 passed**. The other suites were not rerun on the final file.
 - Design checker on `index.html --lab guitar`: 35 PASS, 1 FAIL, 5 WARN. The FAIL and all five WARNs are the same lines 0.9 gets (see "Design checker").
-- `index.html` is 174 KB (126 KB at 0.9). Still one file plus `fonts/`.
+- `index.html` is 193 KB (126 KB at 0.9; the approved artwork is 22 KB of it). Still one file plus `fonts/`.
 
 ## Amendments from Justin's booklet (relayed by the main session, 28 Nov)
 
@@ -14,7 +15,7 @@ The main session relayed guidance from Justin's Year 8 booklet "Rockin' the Guit
 
 | # | Amendment | Done |
 |---|---|---|
-| 1 | Step 1 uses the booklet's terms: machine heads ("tuning pegs" said once), headstock/head, nut, neck, fingerboard (fretboard), frets, position markers, body, sound hole, pickguard, saddle, bridge, strings; pickups on the electric. Acoustic and electric side by side with numbered tags on leader lines; one line on pickups | Yes. 14 parts, numbered 1 to 14. Six tags lead to both guitars |
+| 1 | Step 1 uses the booklet's terms: machine heads ("tuning pegs" said once), headstock/head, nut, neck, fingerboard (fretboard), frets, position markers, body, sound hole, pickguard, saddle, bridge, strings; pickups on the electric. Acoustic and electric side by side with numbered tags on leader lines; one line on pickups | Yes. Now the approved plates' own numbered labels |
 | 2 | Step 2 "Get ready": three cards (sit tall, hold the pick, fret it cleanly), finger numbers T 1 2 3 4, picking signs | Yes, as two rows of three cards; the sixth card is the left-hander note from the spec |
 | 3 | Step 3: string 6 thickest and lowest, string 1 thinnest, highest and closest to the floor; students make their own memory line, saved in `fs`; one finger per fret | Yes. `fs.line`, optional, up to 80 characters |
 | 4 | Step 4 becomes "Hear the open strings": no instruction to turn pegs for class students; sing on "loo", hum while plucking; ear quiz stays; separate "Your own guitar at home" box; tick reads "I can hear and match all six open strings"; octave note | Yes. Test `test_step_4_no_tuning_instruction_outside_the_home_box` |
@@ -24,16 +25,21 @@ The main session relayed guidance from Justin's Year 8 booklet "Rockin' the Guit
 | 8 | Step 7: Em kept; the TAB line is E, F, G on string 1 | Yes |
 | — | Structure cues: small label above the title, one-line subtitle, rows of three cards, numbered labels, callouts | Yes, in family style. The label reads "First Steps · step 2 of 7" in sentence case, not "// step 02": the design skill rules out zine-style eyebrows. No pink, yellow or teal from the booklet |
 
-## Second relay: the guitar drawing is now a separate design job
+## Approved artwork integrated (28 Nov)
 
-The main session then relayed that Justin wants a much better guitar illustration, to be drawn by a design agent and approved by him. So:
+Justin approved the guitar illustration ("approved", 28 Nov; relayed by the main session). It replaces my placeholder.
 
-- The drawing is behind one function: `guitarArt({kind:'acoustic'|'electric', highlight:<part id|null>, strings:<null|1-6>})`, which returns an SVG string (viewBox `0 0 720 280`, head to the left, string 6 at the bottom).
-- Part ids, each a `<g data-part="…">`: `headstock, machineHeads, nut, neck, fingerboard, frets, positionMarkers, body, soundHole, pickguard, saddle, bridge, strings, pickups` (the list is `GPARTS`). The electric has no `soundHole` or `pickguard`; the acoustic has no `pickups`.
-- Each string is `<path data-string="1…6">`, plus a wide invisible twin (class `gh`) as the tap target.
-- `GART.anchor` gives one point per part for the leader lines. A new drawing needs to supply these points too, in its own 720 by 280 space.
-- What ships now is a **plain placeholder**, not approved artwork. Its proportions are true (frets placed by the twelfth root of two on a 650 mm scale, 14 frets clear of the acoustic body, saddle at the scale length), but it is not the hand-made drawing the spec's Design section asks for. **That part of the spec is not met until the design job lands.**
-- No test reads the drawing's geometry. Tests use `data-part`, `data-string` and `data-ask` only.
+- **Used exactly as approved.** `/home/claude/guitar-art/guitar-art.js` is inlined whole, byte for byte, as one block in `index.html` between `/* guitar-art: approved by Justin 28 Nov, do not edit */` and `/* end guitar-art */`. `test_approved_guitar_art_block_is_present_and_unmodified` checks its SHA-256 (`cbc52de0…cec4d9`), compares it with the file when the file is there, and checks the app has no CSS that restyles `.ga`.
+- **The placeholder is gone:** my `guitarArt`, `GART.anchor`, the leader-line tags and their CSS are deleted. My code adapts to the artwork: `fsArt(kind, opts)` calls it with `theme:'auto'`, and uses its `string` and `stringTargets` options.
+- **Step 1** shows the two approved plates with their own numbered labels (labels on while learning, off in the check). Tapping any part on either drawing, through the artwork's own `data-part` hit areas, lights it on both plates and shows its number, name and what it does. The same 16 names are buttons under the text, so a name can be tapped instead.
+- **The two extra electric parts** (`controls`, 14, and `outputJack`, 15): labelled on the plate, named and described when tapped, never asked in the check or the placement quiz. The check draws only from the 14 parts on the class word list. If one is tapped as a wrong answer it is named ("You tapped the output jack").
+- **Phone check (under 600 px):** the question is turned round. One part is lit on the drawing and the student picks its name from four full-size buttons ("Which part is lit up?"). Small parts are shown close up so the lit part can be seen. From 600 px up the check is "Tap the nut on either guitar" on the drawing, with a button "Answer with names instead" as the keyboard and screen-reader route.
+- **Step 3 and step 4** show a close-up of the approved acoustic between the sound hole and the bridge, with `stringTargets:true` so each string can be tapped to hear it, and `string:n` to light the one being asked.
+- **Framing only, by CSS on a wrapper, never on the artwork:** close-ups are a window onto the plate (steps 3, 4, 5 and the phone check). Step 2 turns the plate to playing position (head to the viewer's right, tilted up, string 6 on top: a right-handed player seen from the front), with my own notes drawn over it. Step 6 turns it head-left so string 6 is at the bottom, as TAB is written. **Turning and cropping the plate is my call, not something Justin has seen:** if "exactly as approved" rules that out, steps 2 and 6 need a different figure.
+- **Layout:** plates are side by side from 760 px and stacked below. On step 1 at 1200 px and wider the drawing column is 720 px so the artwork's label text stays at 12 px or more; between 900 and 1199 px step 1 puts the drawings above the words. At 360 px the plates run 8 px into the page margin for the same reason (labels measure 12.3 px).
+- **Numbers** in captions follow the artwork (1 Headstock … 13 Body; 9 is Sound hole or Pickups). The electric plate says "Saddles"; the app's name button and caption say "Saddle".
+- **Fact check kept:** commit `76b002c` (position markers wording, `test_FS_facts_*`) is intact and its tests pass unchanged.
+- Fresh screenshots: all 52 in `shots/` were regenerated. I looked at steps 1 and 3 at 360 and 1280 (six of those eight files), steps 2, 5 and 6, and a contact sheet of eight lit close-ups.
 
 ## Spec, item by item
 
@@ -46,12 +52,12 @@ The main session then relayed that Justin wants a much better guitar illustratio
 | 4 | Reference tones and clip-on tuner advice; no microphone | Met, as changed by amendment 4 |
 | 5 | Left-handed flip later; short note now | Met (step 2 card) |
 | 6 | Guitar only now | Met. F15 |
-| 7 | Illustrated, warm, hand-drawn | **Partly.** Layout, type, colour and words are in family style. The guitar drawing is a placeholder (see above) |
+| 7 | Illustrated, warm, hand-drawn | Met for the guitar: Justin's approved artwork. The hand, pick and picking-sign sketches are mine and unapproved |
 
 ### The seven steps
 | # | Title | What it teaches | Check |
 |---|---|---|---|
-| 1 | Meet the guitar | Two guitars, 14 numbered parts; tap a number for its name and what it does; pickups line | Tap quiz: five parts right first time. A wrong tap says "You tapped the body. Look again for the sound hole." |
+| 1 | Meet the guitar | The two approved plates with numbered labels; tap a part or its name for what it does; pickups line | Five parts right first time. Wide screens: tap the named part on the drawing. Phones: name the lit part |
 | 2 | Get ready | Sit tall, hold the pick, fret cleanly, finger numbers, picking signs, left-hander note | Honour tick "I can sit and hold it comfortably" |
 | 3 | The strings | Numbers 6 to 1, names E A D G B E, own memory line, one finger per fret; tap a string to hear it | Five questions right first time: lit string to name, number to name, name to number |
 | 4 | Hear the open strings | Six looping reference notes, sing then hum and pluck, class tuning rule, home tuner box | Ear check, four pairs (higher or lower), then honour tick "I can hear and match all six open strings" |
@@ -114,7 +120,10 @@ Strings (step 3):
 - String 6 is the thickest and lowest, low E. String 1 is the thinnest and highest, high E, closest to the floor when the guitar is held.
 - String 6 to string 1: E A D G B E (so 5 = A, 4 = D, 3 = G, 2 = B).
 - One finger per fret at the first three frets: fret 1 finger 1, fret 2 finger 2, fret 3 finger 3.
-- The drawing shows the guitar flat on the lap, strings up, with string 6 nearest the player (at the bottom).
+- The close-up shows the guitar standing up: string 6, the thickest, on the left; string 1 on the right.
+- Extra parts named when tapped: Controls (volume and tone knobs and the pickup switch on an electric); Output jack (where the lead to the amplifier plugs in).
+- Step 6 caption: TAB is written the way the guitar lies on your lap, head to your left, string 6 nearest you.
+- Position markers card, as corrected by the fact check: "Above fret 12 the pattern starts again."
 
 Open strings (step 4):
 - Reference pitches: string 6 E2 82.41 Hz, 5 A2 110.00, 4 D3 146.83, 3 G3 196.00, 2 B3 246.94, 1 E4 329.63 (MIDI 40 45 50 55 59 64).
@@ -145,13 +154,13 @@ Memory line offered as an example: "Emus And Dingoes Go Bush Early". I wrote it;
 
 ## Design checker
 
-`python3 <skill>/scripts/check_design.py index.html --lab guitar` gives 35 PASS, 1 FAIL, 5 WARN, line for line what `main` (0.9) gives:
+`python3 <skill>/scripts/check_design.py index.html --lab guitar` gives 35 PASS, 1 FAIL, 5 WARN: the same lines as `main` (0.9), except that the off-family colour count rises from 13 to 43 because of the artwork's wood, metal and bone colours (declared in the approved block under its own `sf-allow` comment):
 
 - **FAIL, Number-diamond trace: missing.** Already failing on 0.9. Not fixed: adding the trace restyles every page of the app, which this spec does not cover. F17 allows this one FAIL by name and fails on any other. For Justin to decide.
-- WARN, shared layer marker absent; 13 colours outside the family (necks, finishes, keyboards: all from before 0.11); no print rules; the name "shredder" (the storage key); "shouting capitals" false alarm on the footer. All from before 0.11.
+- WARN, shared layer marker absent; colours outside the family (necks, finishes, keyboards from before 0.11, plus the artwork's illustration colours); no print rules; the name "shredder" (the storage key); "shouting capitals" false alarm on the footer. All from before 0.11.
 - First Steps adds no hex colours of its own: it uses the app's tokens plus two new ones, `--gold` (the skill's value) and `--onfin` (text on the signature colour, 5.4:1 or better on all four Finish colours in both themes by my arithmetic; not checker-verified).
 
-Screenshots: `shots/` has every step, the four quiz checks, the placement result and the opened Path at 360 and 1280 in dark and light (52 files). I looked at a sample of 13 across those, not all 52. Full-page shots at 360 show the sticky tab bar part-way down the page; that is how full-page capture draws a sticky bar, not a layout fault.
+Screenshots: `shots/` has every step, the four quiz checks, the placement result and the opened Path at 360 and 1280 in dark and light (52 files, all regenerated with the approved artwork). I looked at about a dozen of them, not all 52. Full-page shots at 360 show the sticky tab bar part-way down the page; that is how full-page capture draws a sticky bar, not a layout fault.
 
 ## Judgement calls
 
@@ -163,18 +172,20 @@ Screenshots: `shots/` has every step, the four quiz checks, the placement result
 6. **Quiz rule:** a check needs N answers right first time. A miss is explained, the question stays until answered, and one more is asked. The placement quiz gives one go per question with no feedback until the end.
 7. **Partial placement** ticks off every step without a wrong answer (including 2, 4 and 7) and leaves only the missed ones.
 8. **Reference tones use the Warm-up tab's triangle-wave voice, not the plucked voice.** The plucked voice is measurably flat on high notes (about 10 cents at E4 by my calculation), which is wrong for a pitch reference. Strings, TAB play-back and Em use the plucked voice.
-9. **The tap quiz is answered on the numbered tags,** not on the part shapes, which overlap.
+9. **The tap quiz uses the artwork's own hit areas.** Where parts overlap, the artwork decides which one a tap means (its notes list the order).
 10. **Existing tests:** `uihelp.open_app` seeds a returning student's save by default, with a comment, rather than editing 90 call sites. Seeds that already hold progress are untouched. Two U1 cases use `returning=False`; `sandbox()` uses Teacher mode for tabs other than Record; six version strings moved to 0.11 and three test names were renamed to match. No assertion was loosened.
 11. **Stage 2 gate without stage 1** opens Technique, Invent and Gig but not Rudiments and Warm-up, as the spec's wording has it.
 
 ## Gaps and things to know
 
-- **The guitar drawing is a placeholder** awaiting the design job and Justin's approval. The hand, pick and picking-sign sketches are also mine and unapproved.
+- **The hand, pick and picking-sign sketches, and the notes drawn over the step 2 figure, are mine and unapproved.** So is turning and cropping the approved plate (steps 2 to 6).
+- **The phone check asks the question the other way round** (name the lit part) from the wide-screen check (find the named part). Both test the same 14 names.
+- The artwork's highlight was checked by its artist in Chromium only; nobody has seen it on a real iPad.
 - **I never saw the booklet.** Vocabulary and conventions follow the relayed points; someone should compare against the booklet itself.
 - **Storage-blocked viewers** (such as a sandboxed preview) treat every visit as a first visit, so First Steps shows each time. The placement quiz or a backup import gets past it.
 - **Existing Path cards disagree with First Steps in two places** and were left alone under "content unchanged": the stage 1 "six strings" card uses the common "Eddie Ate Dynamite" line, and stage 1's "Parts of the guitar" card says "tuners" and "fretboard".
 - **Step 5's quiz diagram is always D** for the first four questions.
-- **Accessibility:** tags are keyboard-reachable buttons, and during the check their labels are "Label 3" so names are not given away. A screen-reader user cannot do the tap quiz or read the printed TAB unaided. Tapping a string on the drawing has no keyboard path; the row of string buttons does the same job.
+- **Accessibility:** the drawing itself has no keyboard path (the artwork has no focusable parts, by design). The name buttons in the lesson and "Answer with names instead" in the check are the keyboard route; the row of string buttons does the job of tapping a string. A screen-reader user still cannot tell which part is lit, or read the printed TAB, unaided.
 - **Not tested:** real phones, Safari, Firefox. Chromium only, as for the other suites.
 - **Two tests skip** on a clone without commit `90719f9` or without the design skill installed. Both ran here.
 - Quiz questions are random, so one run does not cover every question; the quiz tests answer whatever is asked.
@@ -182,8 +193,9 @@ Screenshots: `shots/` has every step, the four quiz checks, the placement result
 
 ## Tests
 
-`tests/test_firststeps.py`, 51 tests: F1 first open · F2 Next gated at every step · F3 wrong answers · F4 tap quiz · F5 strings · F6 tones and ear check · F7 diagram answers read off the drawn diagram · F8 TAB as printed and as heard · F9 Em against the Path's Em box · F10 Start the Path · F11 placement (all right; three wrong-answer routes; quit) · F12 tabs as needed · F13 returning saves · F14 `fs` in saves and backups, 0.7/0.8/0.9/bare imports, odd values · F15 other instruments · F16 layout, tap targets, drawing text size, no pop-ups or network · F17 design checker · plus the step 4 amendment test, the memory line, string taps, and Path/Gig/Record against 0.9.
+`tests/test_firststeps.py`, 62 tests (51 from the build, 8 `test_FS_facts_*` from the fact check, 3 new for the artwork: the phone check, the names route, the unmodified block): F1 first open · F2 Next gated at every step · F3 wrong answers · F4 tap quiz · F5 strings · F6 tones and ear check · F7 diagram answers read off the drawn diagram · F8 TAB as printed and as heard · F9 Em against the Path's Em box · F10 Start the Path · F11 placement (all right; three wrong-answer routes; quit) · F12 tabs as needed · F13 returning saves · F14 `fs` in saves and backups, 0.7/0.8/0.9/bare imports, odd values · F15 other instruments · F16 layout, tap targets, drawing text size, no pop-ups or network · F17 design checker · plus the step 4 amendment test, the memory line, string taps, and Path/Gig/Record against 0.9.
 
-| Suite | Result on `4626acb` |
+| Run | Result |
 |---|---|
-| All (`tests`) | 434 passed, 0 failed, 0 skipped |
+| All suites, once, with the approved artwork | 445 passed, 0 failed, 0 skipped |
+| `tests/test_firststeps.py` on the final file | 62 passed |

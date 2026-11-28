@@ -94,7 +94,7 @@ SHREDDER_INDEX=/tmp/shredder05/index.html python3 -m pytest tests -q -p no:cache
   therefore seeds a returning student's save by default (`fs` complete with every tab kept), so `test_ui.py` and `test_timing.py` go on
   testing the app with every tab open; a seed that already holds progress is left exactly as given. `returning=False` gives a true first
   visit. `sandbox()` (storage blocked, so always a first visit) turns Teacher mode on to reach a tab other than Record.
-  `test_firststeps.py` never depends on the drawing's geometry: parts are `data-part`, strings are `data-string`, and each question says
+  The guitar drawing is Justin's approved artwork, inlined unchanged (`test_approved_guitar_art_block_is_present_and_unmodified` holds its SHA-256). `test_firststeps.py` never depends on the drawing's geometry: parts are `data-part` (tapped through their `.hit` areas), strings are `data-string`, and each question says
   what it asks in `data-ask` (never the answer). `test_path_gig_and_record_are_as_0_9_once_open` needs commit 90719f9 in the clone and
   skips without it; F17 needs the shmungfroi-design skill installed and skips without it. Quiz questions are drawn at random, so the
   quiz tests answer whatever is asked.

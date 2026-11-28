@@ -176,6 +176,10 @@ def expected(pg):
     a = ask(pg).split(":")
     if a[0] == "part":
         return a[1]
+    if a[0] == "lit":  # the part lit on the approved drawing
+        lit = pg.evaluate("()=>[...document.querySelectorAll('#v-first-steps .fst-plates [data-part].hl')].map(g=>g.dataset.part)")
+        assert len(lit) == 1, lit
+        return lit[0]
     if a[0].startswith("str-"):
         return a[1]
     if a[0] in ("dia-finger", "dia-fret"):
@@ -190,9 +194,14 @@ def expected(pg):
     raise AssertionError("unknown question " + ask(pg))
 
 
+def tap_part(pg, part):
+    """Tap a part on the approved drawing through its own hit area (data-part > .hit), on whichever guitar has it."""
+    pg.locator(f'#v-first-steps .fst-plates [data-part="{part}"] .hit').first.dispatch_event("click")
+
+
 def give(pg, val):
     if ask(pg).startswith("part:"):
-        pg.click(f'#v-first-steps .gtag[data-part="{val}"]')
+        tap_part(pg, val)
     else:
         pg.click(f'#fsQuiz [data-fa="{val}"]')
 
@@ -245,35 +254,108 @@ def pass_ear(pg):
 
 # ===================================================================== F2, F3 checks gate Next; wrong answers don't pass
 
+ART_IDS = {"acoustic": sorted(set(PARTS) - {"pickups"}), "electric": sorted(set(PARTS) - {"soundHole"} | {"controls", "outputJack"})}
+PLATES_JS = "()=>[...document.querySelectorAll('#v-first-steps .fst-plates svg.ga')].map(s=>({label:s.getAttribute('aria-label'),parts:[...new Set([...s.querySelectorAll('[data-part]')].map(g=>g.dataset.part))].sort(),strings:[...new Set([...s.querySelectorAll('[data-string]')].map(g=>g.dataset.string))].sort(),tags:[...s.querySelectorAll('.tag')].map(t=>t.dataset.for),lit:[...s.querySelectorAll('[data-part].hl')].map(g=>g.dataset.part)}))"
+
+
 def test_F2_F4_step_1_tap_quiz_gates_next(app):
     pg = app(returning=False)
     assert next_off(pg)
-    assert pg.evaluate("()=>[...document.querySelectorAll('#v-first-steps .gtag')].map(g=>g.dataset.part).sort()") == sorted(PARTS)
-    for kind in ("acoustic", "electric"):
-        got = pg.evaluate("()=>[...document.querySelectorAll('#v-first-steps svg.gart')].map(s=>[s.getAttribute('aria-label'),[...s.querySelectorAll('[data-part]')].map(g=>g.dataset.part).sort(),[...new Set([...s.querySelectorAll('[data-string]')].map(g=>g.dataset.string))].sort()])")
-    assert len(got) == 2 and got[0][2] == got[1][2] == list("123456")
-    assert "pickups" in got[1][1] and "pickups" not in got[0][1] and "soundHole" in got[0][1] and "soundHole" not in got[1][1]
-    pg.click('.gtag[data-part="nut"]')
-    assert pg.inner_text("#fsCap").startswith("3 · Nut")
-    assert pg.evaluate("()=>document.querySelectorAll('.gart [data-part=nut].on').length") == 2, "the part lights up on both drawings"
+    ac, el = pg.evaluate(PLATES_JS)
+    assert "acoustic" in ac["label"] and "electric" in el["label"]
+    assert ac["parts"] == ART_IDS["acoustic"] and el["parts"] == ART_IDS["electric"] and ac["strings"] == el["strings"] == list("123456")
+    assert sorted(ac["tags"]) == ART_IDS["acoustic"] and sorted(el["tags"]) == ART_IDS["electric"], "the drawing's own labels are on while learning"
+    # learning: tap a part on the drawing, or its name, and it lights up on both guitars with its number and what it does
+    tap_part(pg, "nut")
+    assert pg.inner_text("#fsCap").startswith("3 · Nut") and [p["lit"] for p in pg.evaluate(PLATES_JS)] == [["nut"], ["nut"]]
+    names = pg.evaluate("()=>[...document.querySelectorAll('.fst-names [data-fname]')].map(b=>b.dataset.fname)")
+    assert names == PARTS + ["controls", "outputJack"]
+    pg.click('[data-fname="saddle"]')
+    assert pg.inner_text("#fsCap").startswith("12 · Saddle") and pg.get_attribute('[data-fname="saddle"]', "aria-pressed") == "true"
+    pg.click('[data-fname="controls"]')
+    assert pg.inner_text("#fsCap").startswith("14 · Controls") and [p["lit"] for p in pg.evaluate(PLATES_JS)] == [[], ["controls"]]
     pg.click("#fsQuizGo")
-    assert pg.locator(".fst-key").count() == 0 and pg.locator("#fsCap").count() == 0, "names are hidden during the check"
-    assert all(re.fullmatch(r"Label \d+", l) for l in pg.evaluate("()=>[...document.querySelectorAll('.gtag')].map(g=>g.getAttribute('aria-label'))"))
+    plates = pg.evaluate(PLATES_JS)
+    assert len(plates) == 2 and all(p["tags"] == [] and p["lit"] == [] for p in plates), "labels are hidden during the check"
+    assert pg.locator(".fst-names").count() == 0 and pg.locator("#fsCap").count() == 0
     # a wrong tap says what it was, does not pass, and the same part is still being asked
     want = expected(pg)
-    wrong = next(p for p in PARTS if p != want)
+    wrong = next(p for p in PARTS if p != want and p not in ("pickups", "soundHole"))
     give(pg, wrong)
     assert "You tapped" in pg.inner_text("#fsFb") and ask(pg) == "part:" + want and "0 of 5" in pg.inner_text("#fsQuiz")
     give(pg, want)
     assert "0 of 5" in pg.inner_text("#fsQuiz"), "a part found on the second go does not count"
+    tap_part(pg, "outputJack")
+    assert "You tapped the output jack" in pg.inner_text("#fsFb"), "the two extra electric parts can be named but are never asked for"
     pg.click("#fsQuizEnd")
     assert next_off(pg) and "fs" not in state(pg)
+    for _ in range(4):  # only the 14 parts on the class word list are asked
+        pg.click("#fsQuizGo")
+        assert ask(pg)[5:] in PARTS
+        pg.click("#fsQuizEnd")
     seen = run_quiz(pg)
     assert len(seen) == 5 and all(s.startswith("part:") and s[5:] in PARTS for s in seen)
     assert not next_off(pg) and state(pg)["fs"]["done"] == [1]
     pg.click("#fsNext")
     assert pg.inner_text("#v-first-steps h2") == TITLES[1]
     assert not pg.errors
+
+
+def test_F4_phone_quiz_answers_by_name_with_full_size_buttons(app):
+    """Under 600 px frets, strings and the saddle are a few pixels wide, so a part is lit and named from buttons instead."""
+    pg = app(returning=False, width=360, height=800)
+    small = pg.evaluate("()=>[...document.querySelectorAll('.fst-names button')].map(b=>b.getBoundingClientRect().height).filter(h=>h<44)")
+    assert not small, "name buttons meet 44 px"
+    tap_part(pg, "body")
+    assert pg.inner_text("#fsCap").startswith("13 · Body"), "the drawing is still tappable on a phone"
+    pg.click("#fsQuizGo")
+    for i in range(5):
+        assert ask(pg) == "lit" and pg.inner_text("#fsAsk") == "Which part is lit up?"
+        plates = pg.evaluate(PLATES_JS)
+        assert len(plates) == 1 and plates[0]["tags"] == [] and len(plates[0]["lit"]) == 1
+        want = plates[0]["lit"][0]
+        assert want in PARTS and want in ART_IDS["electric" if "electric" in plates[0]["label"] else "acoustic"]
+        btn = pg.evaluate("()=>[...document.querySelectorAll('#fsQuiz [data-fa]')].map(b=>[b.dataset.fa,b.textContent,b.getBoundingClientRect().height])")
+        assert len(btn) == 4 and want in [b[0] for b in btn] and all(b[2] >= 44 for b in btn) and len({b[0] for b in btn}) == 4
+        assert not vis(pg, "#fsLitGo"), "no switch to tapping on a phone"
+        if i == 0:
+            give(pg, next(b[0] for b in btn if b[0] != want))
+            assert "It isn't" in pg.inner_text("#fsFb") and not passed_quiz(pg)
+            give(pg, expected(pg))
+            assert "0 of 5" in pg.inner_text("#fsQuiz")
+            want = expected(pg)
+        give(pg, want)
+    assert passed_quiz(pg) and state(pg)["fs"]["done"] == [1]
+    assert not pg.errors
+
+
+def test_F4_names_are_offered_as_the_keyboard_route_on_wide_screens(app):
+    pg = app(returning=False)
+    pg.click("#fsQuizGo")
+    assert ask(pg).startswith("part:") and pg.inner_text("#fsLitGo") == "Answer with names instead"
+    pg.click("#fsLitGo")
+    assert ask(pg) == "lit" and pg.inner_text("#fsLitGo") == "Tap the drawing instead"
+    for _ in range(5):
+        give(pg, expected(pg))
+    assert passed_quiz(pg)
+    assert not pg.errors
+
+
+ART_SRC = pathlib.Path("/home/claude/guitar-art/guitar-art.js")
+ART_SHA = "cbc52de052080124d13f56412cac9e4c4dec536691fb9e04175087eb60cec4d9"  # the artwork Justin approved on 28 Nov
+
+
+def test_approved_guitar_art_block_is_present_and_unmodified():
+    import hashlib
+    src = (pathlib.Path(__file__).resolve().parent.parent / "index.html").read_text(encoding="utf-8")
+    a, b = "/* guitar-art: approved by Justin 28 Nov, do not edit */\n", "\n/* end guitar-art */\n"
+    assert src.count(a) == 1 and src.count(b) == 1
+    block = src[src.index(a) + len(a):src.index(b)]
+    assert hashlib.sha256(block.encode("utf-8")).hexdigest() == ART_SHA, "the approved artwork has been edited"
+    if ART_SRC.exists():
+        assert block == ART_SRC.read_text(encoding="utf-8"), "differs from the approved file"
+    assert src.count("guitarArt = (function") == 1 and "function guitarArt" not in src, "one drawing only: the placeholder is gone"
+    assert not re.search(r"\.ga[ .{][^}]*\{", src.replace(block, "")), "the app must not restyle the artwork"
 
 
 def test_F2_step_2_honour_tick(app):
@@ -296,11 +378,11 @@ def test_F2_F3_F5_strings_quiz(app):
     body = pg.inner_text("#v-first-steps .fst-body")
     assert "String 6 is the thickest" in body and "low E" in body and "closest to the floor" in body and "E A D G B E" in body
     assert "fret 1 is finger 1, fret 2 is finger 2 and fret 3 is finger 3" in body
-    # the labelled drawing: string numbers beside the letters, 6 = E at the bottom
-    labels = pg.evaluate("()=>[...document.querySelectorAll('.fst-strfig > text')].slice(0,12).map(t=>t.textContent)")
-    assert labels == ["1", "E", "2", "B", "3", "G", "4", "D", "5", "A", "6", "E"]
-    ys = pg.evaluate("()=>[1,6].map(n=>document.querySelector('.fst-strfig path.gs[data-string=\"'+n+'\"]').getBoundingClientRect().top)")
-    assert ys[1] > ys[0], "string 6 is drawn at the bottom"
+    # the close-up of the approved drawing: string 6 on the left, and the buttons under the text run 6 to 1 with their letters
+    xs = pg.evaluate("()=>[6,5,4,3,2,1].map(n=>{const r=document.querySelector('.fst-strz [data-string=\"'+n+'\"]').getBoundingClientRect();return r.left+r.width/2})")
+    assert xs == sorted(xs) and xs[0] < xs[5], "string 6 is drawn on the left"
+    assert "String 6, the thickest, is on the left" in pg.inner_text(".fst-strcap")
+    assert pg.evaluate("()=>[...document.querySelectorAll('[data-fpl]')].map(b=>b.textContent)") == ["6 · E", "5 · A", "4 · D", "3 · G", "2 · B", "1 · E"]
     pg.click("#fsQuizGo")
     kinds = set()
     for _ in range(60):
@@ -312,8 +394,8 @@ def test_F2_F3_F5_strings_quiz(app):
         q = pg.inner_text("#fsAsk")
         labels = dict(pg.evaluate("()=>[...document.querySelectorAll('#fsQuiz [data-fa]')].map(b=>[b.dataset.fa,b.textContent])"))
         if kind == "str-hl":
-            assert pg.evaluate("()=>[...document.querySelectorAll('.fst-strfig path.gs.on')].map(p=>p.dataset.string)") == [str(n)]
-            assert pg.locator(".fst-strfig > text").count() == 0, "no labels while a string is being asked"
+            assert pg.evaluate("()=>[...document.querySelectorAll('.fst-strz [data-string].hl')].map(p=>p.dataset.string)") == [str(n)]
+            assert pg.locator(".fst-strcap").count() == 0 and pg.locator(".fst-strz .tag").count() == 0, "no labels while a string is being asked"
         if kind in ("str-hl", "str-num"):
             assert {int(k): v.lower() for k, v in labels.items()} == {k: v.lower() for k, v in SNUM.items()}
             if kind == "str-num":
@@ -351,7 +433,7 @@ def test_step_3_tapping_a_string_plays_it(app):
     pg = fresh(app, [1, 2])
     n = len(starts(pg))
     pg.click('[data-fpl="6"]')
-    pg.locator('.fst-strfig .gh[data-string="1"]').click(force=True)
+    pg.locator('.fst-strz [data-string="1"] .hit').first.dispatch_event("click")
     assert len(starts(pg)) == n + 2 and all(s["kind"] == "buf" for s in starts(pg)[n:])
     assert not pg.errors
 
@@ -627,7 +709,7 @@ def place(pg, wrong_at=()):
     for i in range(8):
         assert pg.get_attribute("#fsQuiz", "data-place") == str(i)
         a = ask(pg)
-        steps.append({"part": 1, "str-hl": 3, "str-num": 3, "str-name": 3, "dia-finger": 5, "dia-fret": 5, "dia-open": 5, "dia-mute": 5, "tab": 6}[a.split(":")[0]])
+        steps.append({"part": 1, "lit": 1, "str-hl": 3, "str-num": 3, "str-name": 3, "dia-finger": 5, "dia-fret": 5, "dia-open": 5, "dia-mute": 5, "tab": 6}[a.split(":")[0]])
         want = expected(pg)
         give(pg, next(o for o in options(pg) if o != want) if i in wrong_at else want)
     return steps
@@ -799,7 +881,7 @@ def test_path_gig_and_record_are_as_0_9_once_open(browser, tmp_path):
 def _walk(pg, problems, where):
     for p in pg.evaluate(OVERFLOW_JS):
         problems.append(f"{where}: overflow {p}")
-    small = pg.evaluate("""()=>[...document.querySelectorAll('#v-first-steps button, #v-first-steps .gtag, #v-first-steps a.lk')].filter(e=>e.getClientRects().length).map(e=>{const r=e.getBoundingClientRect();return [e.id||e.textContent.trim().slice(0,20),Math.round(Math.min(r.width,r.height))]}).filter(x=>x[1]<40)""")
+    small = pg.evaluate("""()=>[...document.querySelectorAll('#v-first-steps button, #v-first-steps a.lk')].filter(e=>e.getClientRects().length).map(e=>{const r=e.getBoundingClientRect();return [e.id||e.textContent.trim().slice(0,20),Math.round(Math.min(r.width,r.height))]}).filter(x=>x[1]<40)""")
     for s in small:
         problems.append(f"{where}: tap target {s}")
     tiny = pg.evaluate("""()=>[...document.querySelectorAll('#v-first-steps text')].filter(t=>t.getClientRects().length).map(t=>[t.textContent,Math.round(parseFloat(getComputedStyle(t).fontSize)*t.getBoundingClientRect().height/Math.max(1,t.getBBox().height)*10)/10]).filter(x=>x[1]<11.5)""")
