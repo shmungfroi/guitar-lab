@@ -712,7 +712,7 @@ const SNAME=['','high E','B','G','D','A','low E'],SLET=['','E','B','G','D','A','
 const fsNarrow=()=>window.innerWidth<700;
 /* ---- figures ---- */
 /* both guitars standing up (head at the top, string 6 on the left, like a chord diagram), with numbered tags on leader lines. The tags are the tap targets. */
-function fsFigParts(quiz){const k=.52,nw=fsNarrow(),tr=nw?11:8.5,tf=nw?12:9.5,hit=nw?22:15,cx={acoustic:100,electric:262},oy=14,pt=(kind,[x,y])=>[cx[kind]-(y-140)*k,oy+(x-20)*k];
+function fsFigParts(quiz){const k=.52,nw=fsNarrow(),tr=nw?11.5:8.5,tf=nw?13.4:9.5,hit=nw?22:15,cx={acoustic:100,electric:262},oy=14,pt=(kind,[x,y])=>[cx[kind]-(y-140)*k,oy+(x-20)*k];
  const TAGS=[['headstock',16,28],['neck',16,104],['positionMarkers',16,150],['fingerboard',16,196],['soundHole',16,244],['saddle',16,292],['body',16,340],['machineHeads',184,30],['nut',184,76],['frets',184,124],['strings',184,176],['pickguard',184,250],['bridge',184,300],['pickups',344,258]];
  let lead='',tags='';TAGS.forEach(([id,tx,ty])=>{const pts=[];if(tx<300&&GART.anchor.acoustic[id])pts.push(pt('acoustic',GART.anchor.acoustic[id]));if(tx>100&&GART.anchor.electric[id])pts.push(pt('electric',GART.anchor.electric[id]));
   pts.forEach(([x,y])=>{lead+=`<line class="gld" x1="${tx}" y1="${ty}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/><circle class="gd" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="1.8"/>`});const num=fpn(id);
@@ -720,11 +720,11 @@ function fsFigParts(quiz){const k=.52,nw=fsNarrow(),tr=nw?11:8.5,tf=nw?12:9.5,hi
  const g=kind=>`<g transform="translate(${cx[kind]+140*k},${oy-20*k}) rotate(90) scale(${k})">${guitarArt({kind,highlight:quiz?null:fsPart||null})}</g>`;
  return `<svg viewBox="0 0 360 398" role="group" aria-label="An acoustic guitar and an electric guitar with numbered labels">${g('acoustic')}${g('electric')}${lead}${tags}<text class="gtx" x="100" y="392" text-anchor="middle" font-size="${tf}">Acoustic</text><text class="gtx" x="262" y="392" text-anchor="middle" font-size="${tf}">Electric</text></svg>`}
 /* the strings near the bridge, lying flat: string 6 at the bottom, as in TAB. o.on lights one string; o.labels shows numbers and names. */
-function fsFigStrings(o){o=o||{};const tf=fsNarrow()?11.5:10,Y=n=>(gsy(n,561)-80)*2;
+function fsFigStrings(o){o=o||{};const tf=fsNarrow()?13.4:10,Y=n=>(gsy(n,561)-80)*2;
  const lab=o.labels?[1,2,3,4,5,6].map(n=>`<text class="gtx" x="306" y="${(Y(n)+4).toFixed(1)}" font-size="${tf}">${n}</text><text class="gtx" x="326" y="${(Y(n)+4).toFixed(1)}" font-size="${tf}" font-weight="500">${SLET[n]}</text>`).join('')+`<text class="gtx" x="352" y="20" text-anchor="end" font-size="${tf}">string 1: thinnest, highest</text><text class="gtx" x="352" y="226" text-anchor="end" font-size="${tf}">string 6: thickest, lowest</text>`:'';
  return `<svg class="fst-strfig" viewBox="0 0 360 232" role="group" aria-label="${o.on?'The six strings, with one lit up':'The six strings near the bridge, string 6 at the bottom'}"><g transform="translate(-880,-160) scale(2)">${guitarArt({kind:'acoustic',strings:o.on||null})}</g>${lab}</svg>`}
 /* sitting position: the same drawing as you would see it in a mirror (string 6 on top), head tilted up */
-function fsFigHold(){const tf=fsNarrow()?11.5:10;
+function fsFigHold(){const tf=fsNarrow()?13.4:10;
  return `<svg viewBox="0 0 360 232" role="img" aria-label="An acoustic guitar held for playing: the neck points slightly up, the waist rests on the right leg, the fretting hand is near the head and the strumming hand is over the sound hole"><g transform="translate(180,112) rotate(7) scale(.47,-.47) translate(-360,-140)">${guitarArt({kind:'acoustic'})}</g>
  <path class="gg" d="M210,190 C224,168 260,168 272,190"/><text class="gtx" x="241" y="208" text-anchor="middle" font-size="${tf}">your right leg</text>
  <ellipse class="gld" cx="101" cy="102" rx="24" ry="15" transform="rotate(7 101 102)" stroke-dasharray="3 3"/><text class="gtx" x="101" y="136" text-anchor="middle" font-size="${tf}">fretting hand</text>
@@ -818,10 +818,60 @@ document.addEventListener('click',e=>{if(view!=='first-steps')return;const t=e.t
 document.addEventListener('keydown',e=>{if(view==='first-steps'&&(e.key==='Enter'||e.key===' ')&&e.target.classList&&e.target.classList.contains('gtag')){e.preventDefault();fsAct(e.target)}});
 document.addEventListener('change',e=>{const n=+(e.target.dataset||{}).ftick;if(!n)return;if(e.target.checked)fsMark(n);else if(!fsDone()){const f=FSF();f.done=f.done.filter(x=>x!==n);save()}fsRe(`[data-ftick="${n}"]`)});
 document.addEventListener('input',e=>{if(e.target.id==='fsLine'){const v=e.target.value.slice(0,80),f=FSF();if(v.trim())f.line=v;else delete f.line;save()}});
-function fsGen2(){return qPart()}
-function fsPlaceH(){return ''}
-function fsAct2(){}
-function fsPlaceAns(){}
+/* ---- steps 5 to 7 and the placement quiz ---- */
+/* a chord box drawn by the app's own box(), in a key where the chord has no function, so it is plain ink with no numeral */
+const fsBox=ch=>box(ch,Object.keys(KEYS).find(k=>!KEYS[k].m[ch])||'A');
+const QDK=['finger','fret','open','mute'];
+const sList=a=>a.length?(a.length>1?'Strings ':'String ')+andList(a.map(String))+' ('+andList(a.map(n=>SNAME[n]))+')':'None of them';
+function qDia(ch,kind){const c=CH[ch],ns=[6,5,4,3,2,1],at=n=>c.f[6-n],fr=ns.filter(n=>/[1-9]/.test(at(n))),O=ns.filter(n=>at(n)==='0'),M=ns.filter(n=>at(n)==='x'),fig=()=>fsBox(ch)+'<p class="note" style="text-align:center;margin:4px 0 0">Tap the diagram to hear the chord.</p>';
+ if(kind==='finger'||kind==='fret'){const n=fr[Math.floor(Math.random()*fr.length)],fg=kind==='finger',where=`Find string ${n}: string 6 is on the left. `;
+  return {step:5,ask:`dia-${kind}:${ch}:${n}`,q:fg?`Which finger presses string ${n}, the ${SNAME[n]} string?`:`At which fret is string ${n}, the ${SNAME[n]} string, pressed?`,opts:[1,2,3,4].map(x=>[String(x),(fg?'Finger ':'Fret ')+x]),ans:fg?c.g[6-n]:at(n),
+   why:()=>where+(fg?'Then read the number inside its dot.':'Then count the spaces down from the nut. The first space is fret 1.'),yes:fg?`Yes: finger ${c.g[6-n]} goes on string ${n}.`:`Yes: string ${n} is pressed at fret ${at(n)}.`,fig}}
+ const op=kind==='open',want=op?O:M,seen={},opts=[];[O,M,fr,[]].forEach(a=>{const v=a.join(',');if(!(v in seen)){seen[v]=1;opts.push([v,sList(a)])}});
+ return {step:5,ask:`dia-${kind}:${ch}`,q:op?'Which strings are played open?':'Which strings are not played?',opts:shuffle(opts),ans:want.join(','),why:()=>op?'Look above the nut for the small circles: they mark the open strings.':'Look above the nut for the × signs: those strings are left out.',
+  yes:want.length?`Yes: ${sList(want).toLowerCase()} ${op?(want.length>1?'ring':'rings')+' open':(want.length>1?'are':'is')+' left out'}.`:op?'Yes: no string is open in this chord.':'Yes: every string is played.',fig}}
+/* TAB lines for the check: [string index as mkTab counts it (0 = string 6), fret] */
+const QT=[[[1,2],[3,0],[5,3]],[[0,0],[2,2],[4,3]],[[5,1],[1,3],[3,2]]];
+const fretW=f=>f?'fret '+f:'open',evM=e=>Array.isArray(e[0])?e.map(([s,f])=>OPEN[s]+f):OPEN[e[0]]+e[1];
+const fsTabH=(ev,label)=>`<div class="tab">${esc(mkTab(ev))}</div><button data-ftab="${esc(JSON.stringify(ev))}">${label}</button>`;
+function qTab(ev,i){const [s,f]=ev[i],n=6-s,f2=f===0?2:0;
+ return {step:6,ev,ask:'tab:'+i,q:`Look at the ${['first','second','third'][i]} number in the TAB. Which string is it on, and which fret?`,opts:shuffle([[n,f],[7-n,f],[n,f2],[7-n,f2]]).map(([a,b])=>[a+':'+b,`String ${a}, ${fretW(b)}`]),ans:n+':'+f,
+  why:v=>+String(v).split(':')[0]!==n?'Count the lines again. The top line is string 1 and the bottom line is string 6.':'That is the right string. Now the number: it is the fret, and 0 means open.',yes:`Yes: string ${n}, ${fretW(f)}. That note is ${PCN.major[(OPEN[s]+f)%12]}.`,fig:()=>fsTabH(ev,'Hear the three notes')}}
+function fsGen2(step,n){if(step===5)return n<4?qDia('D',QDK[n]):qDia(['Am','C','A'][n%3],QDK[n%4]);return qTab(QT[(fq.seed+Math.floor(n/3))%3],n%3)}
+const FS_TAB=[[0,3],[4,1],[3,0],[[0,0],[1,2],[2,2],[3,0],[4,0],[5,0]]],FS_EFG=[[5,0],[5,1],[5,3]];
+/* the band for step 7: eight bars of E minor, four strums a bar, at the Path tempo */
+const FS_EM={id:'fs-em',plain:true,key:'A',ch:['Em'],pat:'four',song:{map:[]}};
+FSV[5]=()=>({fig:`<div class="fst-pair"><div><svg viewBox="0 0 120 262" role="img" aria-label="The top of the neck standing up: head at the top, string 6 on the left"><g transform="translate(214,-16) rotate(90) scale(1.1)">${guitarArt({kind:'acoustic'})}</g></svg><p class="note" style="text-align:center;margin:4px 0 0">The neck, standing up</p></div><div>${fsBox('A')}<p class="note" style="text-align:center;margin:4px 0 0">The same neck as a diagram: an A chord. Tap it to hear it.</p></div></div>`,
+ body:`<p>A chord diagram is a picture of the neck standing up, with the head at the top.</p><p>The lines going down are the six strings. String 6, low E, is on the left.</p><p>The lines going across are the frets. The thick line at the top is the nut.</p>
+ <p>A dot shows where a finger goes. The number in the dot is the finger: 1 index, 2 middle, 3 ring, 4 little. On some diagrams T means thumb.</p><p>A small circle (o) above a string means play it open. A × above a string means don't play it.</p>
+ <div class="fst-tip"><p><b>Read the A chord:</b> string 6 has a ×, so leave it out. Strings 5 and 1 are open. Fingers 1, 2 and 3 sit side by side at fret 2, on strings 4, 3 and 2.</p></div>
+ ${fsCheckH(5,'Four questions about a new diagram. You need four right first time.')}`});
+FSV[6]=()=>({fig:fsTabH(FS_TAB,'Hear this TAB')+`<p class="note" style="margin:8px 0 14px">Top line: string 1, high E. Bottom line: string 6, low E.</p>`+fsFigStrings({labels:true}),
+ body:`<p>TAB is short for tablature. It shows which string to play and which fret to press.</p><p>The six lines are the six strings. The top line is string 1, high E, the thinnest. The bottom line is string 6, low E, the thickest. It is the guitar lying flat on your lap, as in the drawing.</p>
+ <p>A number is a fret, and 0 means play the string open. Frets are counted from the nut, which is 0, towards the bridge.</p><p>Read from left to right. Numbers stacked on top of each other are played together: a chord.</p>
+ <p>TAB doesn't show rhythm on its own. You learn the rhythm by listening, or from the staff printed above the TAB.</p>
+ <div class="fst-tip"><p><b>Read this TAB:</b> string 6 at fret 3 is G. String 2 at fret 1 is C. String 3 open is G. Then six numbers in a stack: all six strings together, the chord of E minor.</p></div>
+ ${fsCheckH(6,'Read three notes from a short TAB: the string and the fret for each. You need three right first time.')}`});
+FSV[7]=()=>({fig:`<div class="fst-pair"><div>${fsBox('Em')}<p class="note" style="text-align:center;margin:4px 0 0">E minor. Tap it to hear it.</p></div><div>${fsTabH(FS_EFG,'Hear the three notes')}</div></div>`,
+ body:`<p>This chord is E minor, written Em. It needs two fingers.</p><p>Finger 2 goes on string 5, the A string, at fret 2. Finger 3 goes on string 4, the D string, at fret 2. The other four strings are open.</p><p>Strum all six strings with one downstroke. Let every string ring.</p>
+ <p>Now three single notes on string 1: open, fret 1, fret 3. They are E, F and G, which are mi, fa and so in C major. Use finger 1 for F and finger 3 for G.</p>
+ <div class="fst-tip"><p><b>Sing it first.</b> Sing the three notes, then play them. Your fingers follow your ear.</p></div>
+ <div class="fst-check"><h3>The check</h3><p>Play E minor with the band. It counts you in: 1, 2, then 1 2 3 4. Then it plays E minor for eight bars. Strum down on every beat.</p><div class="row"><button id="fsBand">${playing==='fs'?'Stop':'Play with the band'}</button></div>${fsTick(7,'I played E minor along with the band')}</div>`});
+function fsFinish(){const f=FSF();f.complete=true;save();focusView=true;goTo('path')}
+function fsPlaceStart(){const line=QT[Math.floor(Math.random()*3)],a=qPart();let b;do{b=qPart()}while(b.ask===a.ask);fp={i:0,qs:[a,b,qStr('hl'),qStr('num'),qDia('D','finger'),qDia('D','mute'),qTab(line,0),qTab(line,2)],miss:[],wrong:0,end:false}}
+/* eight questions, no second goes. All right: First Steps is complete. Otherwise the steps with a wrong answer stay open and the rest are ticked off. */
+function fsPlaceAns(v){if(!fp||fp.end)return;const q=fp.qs[fp.i];if(String(v)!==String(q.ans)){fp.wrong++;if(!fp.miss.includes(q.step))fp.miss.push(q.step)}fp.i++;
+ if(fp.i>=fp.qs.length){const f=FSF();if(!fp.miss.length){f.done=F7.slice();f.placed=true;fp=null;fsFinish();return}fp.end=true;fp.miss.sort();f.done=[...new Set(f.done.concat(F7.filter(n=>!fp.miss.includes(n))))].sort();save()}fsRe('#fsAsk')}
+function fsPlaceH(){const eye='<div class="fst-eye">First Steps · played before?</div>';
+ if(fp.end)return `${eye}<h2 tabindex="-1">Nearly there</h2><p class="fst-sub">${8-fp.wrong} of 8 right.</p><div class="fst-body" id="fsPlace" data-miss="${fp.miss.join(',')}" style="margin-top:18px"><p id="fsAsk" tabindex="-1">These steps are worth a visit:</p><ul>${fp.miss.map(n=>`<li>Step ${n}: ${FSTEPS[n-1][1]}</li>`).join('')}</ul><p>The other steps are ticked off for you. Pass ${fp.miss.length>1?'these checks':'this check'} and the Path opens.</p><button id="fsPlaceOpen" class="fst-go">Open step ${fp.miss[0]}</button></div>`;
+ const q=fp.qs[fp.i];return `${eye}<h2 tabindex="-1">Show what you know</h2><p class="fst-sub">Question ${fp.i+1} of 8. One go at each.</p><div class="fst-grid"><div class="fst-fig">${q.fig()}</div><div class="fst-body"><div id="fsQuiz" data-place="${fp.i}" data-ask="${esc(q.ask)}"${q.ev?` data-ev="${esc(JSON.stringify(q.ev))}"`:''}><p class="fst-ask" id="fsAsk" tabindex="-1">${esc(q.q)}</p>${fsOptsH(q)}</div></div></div><div class="fst-nav"><button id="fsPlaceQuit">Back to step 1</button></div>`}
+function fsAct2(t){const d=t.dataset||{};
+ if(d.ftab){let ev=[];try{ev=JSON.parse(d.ftab)}catch(e){}if(playing||fsLoopT)stopAll();fsPluck(ev.map(evM))}
+ else if(t.id==='fsBand'){if(playing==='fs'){stopAll();return}playSeq(Array.from({length:8},()=>({c:'Em'})),'fs',FS_EM).then(()=>{const b=$('fsBand');if(b&&playing==='fs')b.textContent='Stop'})}
+ else if(t.id==='fsStart'){if(fsDone()){focusView=true;goTo('path')}else if(F7.every(fsIsDone))fsFinish()}
+ else if(t.id==='fsPlaceGo'){fsQuiet();fsPlaceStart();fsRe('#fsAsk');try{window.scrollTo(0,0)}catch(e){}}
+ else if(t.id==='fsPlaceQuit'){fp=null;fsAt=1;fsRe('#fsPlaceGo')}
+ else if(t.id==='fsPlaceOpen'){const n=fp.miss[0];fp=null;fsGo(n)}}
 
 /* end first steps */
 /* sequencing */

@@ -162,9 +162,9 @@ PARTS = ["headstock", "machineHeads", "nut", "neck", "fingerboard", "frets", "po
          "saddle", "bridge", "strings", "pickups"]
 
 
-def fresh(app, done=(), **kw):
+def fresh(app, done=(), extra=None, **kw):
     """A student part-way through First Steps: the steps in done are passed."""
-    return app(state={"fs": {"done": list(done), "complete": False, "placed": False}}, returning=False, **kw)
+    return app(state=dict(extra or {}, fs={"done": list(done), "complete": False, "placed": False}), returning=False, **kw)
 
 
 def ask(pg):
@@ -409,3 +409,459 @@ def test_step_4_no_tuning_instruction_outside_the_home_box(app):
         pg.click(f'[data-fgo="{n}"]')
         assert not TURN.search(pg.inner_text("#v-first-steps .fst-body")), n
     assert not pg.errors
+
+
+# ===================================================================== F7 chord diagrams
+
+# Reads a chord box as it is DRAWN: finger dots (string, fret, finger number), open circles and crosses, by position in the SVG.
+BOX_JS = r"""sel=>{const svg=document.querySelector(sel);if(!svg)return null;const str=x=>6-Math.round((x-12)/13.2),out={name:svg.querySelector('text').textContent,dots:{},open:[],mute:[]};
+ svg.querySelectorAll('circle').forEach(c=>{const r=+c.getAttribute('r'),n=str(+c.getAttribute('cx'));if(r<4)out.open.push(n);else{const fret=Math.round((+c.getAttribute('cy')-26)/17+.5);
+   const t=[...svg.querySelectorAll('text')].find(t=>Math.abs(+t.getAttribute('x')-+c.getAttribute('cx'))<.1&&Math.abs(+t.getAttribute('y')-+c.getAttribute('cy'))<6);out.dots[n]=[fret,t?t.textContent:'']}});
+ svg.querySelectorAll('text').forEach(t=>{if(t.textContent==='×')out.mute.push(str(+t.getAttribute('x')))});
+ const lines=[...svg.querySelectorAll('line')].filter(l=>l.getAttribute('x1')===l.getAttribute('x2')).map(l=>[+l.getAttribute('x1'),parseFloat(l.getAttribute('stroke-width'))]).sort((a,b)=>a[0]-b[0]);
+ out.thickLeft=lines[0][1]>lines[5][1];out.nut=!!svg.querySelector('rect[height="3.5"]');out.open.sort((a,b)=>b-a);out.mute.sort((a,b)=>b-a);return out}"""
+
+
+def from_drawing(pg, d):
+    a = ask(pg).split(":")
+    if a[0] == "dia-finger":
+        return d["dots"][a[2]][1]
+    if a[0] == "dia-fret":
+        return str(d["dots"][a[2]][0])
+    return ",".join(str(n) for n in d["open" if a[0] == "dia-open" else "mute"])
+
+
+def test_F2_F3_F7_diagram_quiz_answers_match_the_drawn_diagram(app):
+    pg = fresh(app, [1, 2, 3, 4])
+    assert pg.inner_text("#v-first-steps h2") == TITLES[4] and next_off(pg)
+    body = pg.inner_text("#v-first-steps .fst-body")
+    for w in ("String 6, low E, is on the left", "thick line at the top is the nut", "1 index, 2 middle, 3 ring, 4 little", "T means thumb", "play it open", "don't play it"):
+        assert w in body, w
+    a = pg.evaluate(BOX_JS, ".fst-fig .cb svg")
+    assert a["name"] == "A" and a["thickLeft"] and a["nut"] and a["mute"] == [6] and a["open"] == [5, 1] and a["dots"] == {"4": [2, "1"], "3": [2, "2"], "2": [2, "3"]}
+    assert "string 6 has a ×" in body and "Strings 5 and 1 are open" in body and "Fingers 1, 2 and 3 sit side by side at fret 2, on strings 4, 3 and 2" in body
+    pg.click("#fsQuizGo")
+    kinds, first = [], True
+    for _ in range(40):
+        if passed_quiz(pg):
+            break
+        d = pg.evaluate(BOX_JS, ".fst-fig .cb svg")
+        assert d["name"] == ask(pg).split(":")[1], "the diagram shown is the one asked about"
+        want = from_drawing(pg, d)
+        assert want == expected(pg), f"{ask(pg)}: drawing says {want}, chord data says {expected(pg)}"
+        kinds.append(ask(pg).split(":")[0])
+        if first:
+            first = False
+            give(pg, next(o for o in options(pg) if o != want))
+            assert not passed_quiz(pg) and "0 of 4" in pg.inner_text("#fsQuiz") and pg.inner_text("#fsFb")
+            give(pg, want)
+            assert "0 of 4" in pg.inner_text("#fsQuiz")
+            continue
+        give(pg, want)
+    assert passed_quiz(pg) and set(kinds) == {"dia-finger", "dia-fret", "dia-open", "dia-mute"} and len(kinds) == 5
+    assert state(pg)["fs"]["done"] == [1, 2, 3, 4, 5] and not next_off(pg)
+    assert not pg.errors
+
+
+# ===================================================================== F8 TAB
+
+# Estimates the pitch of a plucked note from its sample data (autocorrelation), so play-back is checked by what would be heard.
+PITCH_JS = r"""i=>{const b=window.__aud.starts[i].node.buffer,d=b.getChannelData(0),sr=b.sampleRate,o=4000,N=4096;let best=0,bl=0;
+ for(let l=Math.floor(sr/1200);l<Math.floor(sr/60);l++){let s=0,e1=0,e2=0;for(let k=0;k<N;k++){s+=d[o+k]*d[o+k+l];e1+=d[o+k]*d[o+k];e2+=d[o+k+l]*d[o+k+l]}const c=s/Math.sqrt(e1*e2+1e-12);if(c>best+.02){best=c;bl=l}}return sr/bl}"""
+
+
+def midi_hz(m):
+    return 440 * 2 ** ((m - 69) / 12)
+
+
+def heard(pg, since):
+    out = []
+    for s in starts(pg)[since:]:
+        assert s["kind"] == "buf" and pg.evaluate("e=>window.__audible(window.__aud.starts[e])", s["i"]) > 0
+        out.append((s["when"], pg.evaluate(PITCH_JS, s["i"])))
+    return out
+
+
+def close(hz, m):
+    return abs(1200 * __import__("math").log2(hz / midi_hz(m))) < 40
+
+
+def read_tab(pg, sel=".fst-fig .tab"):
+    """Reads a TAB as printed: [(string number, fret)] left to right, where the TOP line is string 1."""
+    rows = pg.inner_text(sel).strip().split("\n")
+    assert len(rows) == 6 and [r[0] for r in rows] == ["e", "B", "G", "D", "A", "E"], rows
+    notes = []
+    for col in range(2, len(rows[0])):
+        hit = [(r + 1, int(rows[r][col])) for r in range(6) if rows[r][col].isdigit()]
+        if hit:
+            notes.append(hit if len(hit) > 1 else hit[0])
+    return notes
+
+
+def test_F2_F3_F8_tab_quiz_and_playback(app):
+    pg = fresh(app, [1, 2, 3, 4, 5])
+    assert pg.inner_text("#v-first-steps h2") == TITLES[5] and next_off(pg)
+    body = pg.inner_text("#v-first-steps .fst-body")
+    for w in ("top line is string 1, high E, the thinnest", "bottom line is string 6, low E, the thickest", "0 means play the string open", "counted from the nut",
+              "left to right", "stacked", "a chord", "doesn't show rhythm on its own", "by listening", "staff printed above"):
+        assert w in body, w
+    # the lesson TAB: the booklet's three notes, then a stacked chord, as printed and as played
+    shown = read_tab(pg)
+    assert shown[:3] == [(6, 3), (2, 1), (3, 0)] and sorted(shown[3]) == [(1, 0), (2, 0), (3, 0), (4, 2), (5, 2), (6, 0)]
+    assert "string 6 at fret 3 is G" in body and "String 2 at fret 1 is C" in body and "String 3 open is G" in body and "E minor" in body
+    n = len(starts(pg))
+    pg.click(".fst-fig [data-ftab]")
+    h = heard(pg, n)
+    assert len(h) == 9 and close(h[0][1], 43) and close(h[1][1], 60) and close(h[2][1], 55), h  # G2, C4, G3
+    assert h[0][0] < h[1][0] < h[2][0] < h[3][0] and sorted(round(x[1]) for x in h[3:]) == sorted(round(pg.evaluate(PITCH_JS, s["i"])) for s in starts(pg)[n + 3:])
+    for (_, hz), m in zip(sorted(h[3:], key=lambda x: x[1]), [40, 47, 52, 55, 59, 64]):  # E minor, low to high
+        assert close(hz, m), (hz, m)
+    pg.click("#fsQuizGo")
+    first, asked = True, 0
+    for _ in range(30):
+        if passed_quiz(pg):
+            break
+        i = int(ask(pg).split(":")[1])
+        printed = read_tab(pg)
+        assert len(printed) == 3
+        want = f"{printed[i][0]}:{printed[i][1]}"
+        assert want == expected(pg), "the answer is the note as printed, counting the top line as string 1"
+        assert ["first", "second", "third"][i] in pg.inner_text("#fsAsk")
+        asked += 1
+        if first:
+            first = False
+            s, f = printed[i]
+            give(pg, f"{7 - s}:{f}")  # the classic slip: reading the TAB upside down
+            assert "top line is string 1 and the bottom line is string 6" in pg.inner_text("#fsFb") and not passed_quiz(pg)
+            give(pg, want)
+            continue
+        # play-back sounds the printed notes: open string pitch plus the fret
+        k = len(starts(pg))
+        pg.click(".fst-fig [data-ftab]")
+        h = heard(pg, k)
+        assert len(h) == 3 and all(close(hz, OPEN[6 - s] + f) for (_, hz), (s, f) in zip(h, printed)), (h, printed)
+        give(pg, want)
+    assert passed_quiz(pg) and asked == 4 and state(pg)["fs"]["done"] == [1, 2, 3, 4, 5, 6] and not next_off(pg)
+    assert not pg.errors
+
+
+# ===================================================================== F9, F10 first sound and the Path
+
+def test_F9_em_diagram_matches_the_apps_em_box(app):
+    pg = fresh(app, [1, 2, 3, 4, 5, 6])
+    assert pg.inner_text("#v-first-steps h2") == TITLES[6]
+    em = pg.evaluate(BOX_JS, ".fst-fig .cb svg")
+    f, g = CH["Em"]["f"], CH["Em"]["g"]
+    assert f == "022000" and em["name"] == "Em" and em["mute"] == [] and em["open"] == [6, 3, 2, 1]
+    assert em["dots"] == {str(6 - i): [int(f[i]), g[i]] for i in range(6) if f[i] not in "0x"} == {"5": [2, "2"], "4": [2, "3"]}
+    body = pg.inner_text("#v-first-steps .fst-body")
+    assert "Finger 2 goes on string 5, the A string, at fret 2" in body and "Finger 3 goes on string 4, the D string, at fret 2" in body and "Sing it first" in body
+    path = app(state={"stage": "beyond"})
+    there = path.evaluate(BOX_JS, '#stage .cb[data-strum="Em"] svg')
+    assert there["dots"] == em["dots"] and there["open"] == em["open"] and there["mute"] == em["mute"], "same shape as the Path's Em box"
+    n = len(starts(pg))
+    pg.click('.fst-fig .cb[data-strum="Em"]')
+    assert sorted(round(hz) for _, hz in heard(pg, n)) == sorted(round(hz) for hz in [pg.evaluate(PITCH_JS, s["i"]) for s in starts(pg)[n:]]) and len(starts(pg)) == n + 6
+    # three notes on string 1: E, F, G
+    assert read_tab(pg) == [(1, 0), (1, 1), (1, 3)]
+    assert "open, fret 1, fret 3" in body and "E, F and G" in body and "mi, fa and so in C major" in body and "finger 1 for F and finger 3 for G" in body
+    n = len(starts(pg))
+    pg.click(".fst-fig [data-ftab]")
+    h = heard(pg, n)
+    assert len(h) == 3 and close(h[0][1], 64) and close(h[1][1], 65) and close(h[2][1], 67)
+    assert not pg.errors and not path.errors
+
+
+def test_F2_F10_finishing_step_7_opens_the_path_at_stage_1(app):
+    pg = fresh(app, [1, 2, 3, 4, 5, 6], extra={"bpm": 200})
+    assert pg.is_disabled("#fsStart")
+    n = len(starts(pg))
+    pg.click("#fsBand")
+    pg.wait_for_function("()=>document.getElementById('fsBand').textContent==='Stop'")
+    pg.wait_for_timeout(3200)
+    band = starts(pg)[n:]
+    assert len([s for s in band if s["kind"] == "osc"]) >= 6 and len([s for s in band if s["kind"] == "buf"]) >= 6, "the band counts in and plays"
+    em = [pg.evaluate(PITCH_JS, s["i"]) for s in band if s["kind"] == "buf" and s["dur"] > 2]
+    assert em and all(any(close(hz, m) for m in (40, 47, 52, 55, 59, 64)) for hz in em), em  # only the six notes of the Em shape
+    pg.click("#fsBand")
+    assert pg.inner_text("#fsBand") == "Play with the band"
+    m = len(starts(pg))
+    pg.wait_for_timeout(600)
+    assert len(starts(pg)) == m, "the band stops"
+    pg.check('[data-ftick="7"]')
+    assert not pg.is_disabled("#fsStart") and pg.inner_text("#fsStart") == "Start the Path"
+    pg.click("#fsStart")
+    pg.wait_for_selector("#stage h2")
+    assert views(pg) == ["v-path"] and tabs(pg) == ["Path", "Record"]
+    assert pg.inner_text("#stage h2") == "A and E" and pg.get_attribute('[data-st="a-e"]', "aria-current") == "step"
+    note = pg.inner_text("#tabNote")
+    assert "The Path is open:" in note and "Record is open:" in note
+    fs = state(pg)["fs"]
+    assert fs["complete"] is True and fs["done"] == [1, 2, 3, 4, 5, 6, 7] and fs["placed"] is False
+    assert vis(pg, "[data-inst]") and vis(pg, "#finishes") and vis(pg, ".mbar"), "the full app is back"
+    # revisiting from the Path loses nothing
+    pg.click("#fsLink")
+    pg.wait_for_selector("#v-first-steps h2")
+    assert views(pg) == ["v-first-steps"] and tabs(pg) == ["Path", "Record"] and not next_off(pg)
+    pg.click('[data-fgo="7"]')
+    assert pg.inner_text("#fsStart") == "Back to the Path"
+    pg.click("#fsStart")
+    pg.wait_for_selector("#stage h2")
+    assert state(pg)["fs"] == fs and views(pg) == ["v-path"]
+    assert not pg.errors
+
+
+def test_F10_steps_are_taken_in_order(app):
+    pg = fresh(app, [1, 2, 4, 5, 6])
+    assert pg.inner_text("#v-first-steps h2") == TITLES[2], "opens at the first step not yet passed"
+    assert not pg.is_disabled('[data-fgo="4"]'), "a passed step can be revisited"
+    assert pg.is_disabled('[data-fgo="7"]') and next_off(pg), "step 7 waits for step 3"
+    assert not pg.errors
+
+
+# ===================================================================== F11 placement
+
+def place(pg, wrong_at=()):
+    pg.click("#fsPlaceGo")
+    steps = []
+    for i in range(8):
+        assert pg.get_attribute("#fsQuiz", "data-place") == str(i)
+        a = ask(pg)
+        steps.append({"part": 1, "str-hl": 3, "str-num": 3, "str-name": 3, "dia-finger": 5, "dia-fret": 5, "dia-open": 5, "dia-mute": 5, "tab": 6}[a.split(":")[0]])
+        want = expected(pg)
+        give(pg, next(o for o in options(pg) if o != want) if i in wrong_at else want)
+    return steps
+
+
+def test_F11_placement_all_correct_skips_first_steps(app):
+    pg = app(returning=False)
+    steps = place(pg)
+    assert steps == [1, 1, 3, 3, 5, 5, 6, 6], "eight items, two each from steps 1, 3, 5 and 6"
+    pg.wait_for_selector("#stage h2")
+    assert views(pg) == ["v-path"] and tabs(pg) == ["Path", "Record"] and pg.inner_text("#stage h2") == "A and E"
+    fs = state(pg)["fs"]
+    assert fs["complete"] is True and fs["placed"] is True and fs["done"] == [1, 2, 3, 4, 5, 6, 7]
+    assert not pg.errors
+
+
+@pytest.mark.parametrize("wrong_at,miss", [((6,), [6]), ((0, 4), [1, 5]), ((3,), [3])], ids=["tab", "part-and-diagram", "strings"])
+def test_F11_placement_wrong_answer_routes_to_the_right_step(app, wrong_at, miss):
+    pg = app(returning=False)
+    place(pg, wrong_at)
+    assert pg.get_attribute("#fsPlace", "data-miss") == ",".join(map(str, miss))
+    txt = pg.inner_text("#v-first-steps")
+    assert f"{8 - len(wrong_at)} of 8 right" in txt and all(f"Step {n}: {TITLES[n - 1]}" in txt for n in miss)
+    assert all(f"Step {n}:" not in txt for n in range(1, 8) if n not in miss)
+    fs = state(pg)["fs"]
+    assert fs["complete"] is False and fs["placed"] is False and fs["done"] == [n for n in range(1, 8) if n not in miss]
+    assert pg.inner_text("#fsPlaceOpen") == f"Open step {miss[0]}"
+    pg.click("#fsPlaceOpen")
+    assert views(pg) == ["v-first-steps"] and pg.inner_text("#v-first-steps h2") == TITLES[miss[0] - 1] and next_off(pg)
+    for n in miss:  # pass what was missed, then the Path can be started
+        pg.click(f'[data-fgo="{n}"]')
+        run_quiz(pg)
+    pg.click('[data-fgo="7"]')
+    pg.click("#fsStart")
+    pg.wait_for_selector("#stage h2")
+    assert views(pg) == ["v-path"] and state(pg)["fs"]["complete"] is True
+    assert not pg.errors
+
+
+def test_F11_placement_can_be_left(app):
+    pg = app(returning=False)
+    pg.click("#fsPlaceGo")
+    pg.click("#fsPlaceQuit")
+    assert pg.inner_text("#v-first-steps h2") == TITLES[0] and raw(pg) is None
+    assert not pg.errors
+
+
+# ===================================================================== F14 saving, backups, older saves
+
+OLD = {"finish": "rock", "stage": "c-g-f", "lv": {"a-e:0": 2, "a-e:1": 3, "c-g-f@keys:0": 1}, "marks": {"a-e:0": 2}, "bpm": 96, "inst": "guitar",
+       "journal": [{"d": 1764200000000, "st": "a-e", "inst": "guitar", "h": "Heard it", "o": "Played it", "w": "Wrote it"}], "gates": {}, "warm": {}}
+CLIP_JS = "()=>{window.__clip=null;Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:t=>{window.__clip=t;return Promise.resolve()}}})}"
+
+
+def backup_of(pg):
+    go(pg, "record")
+    pg.evaluate(CLIP_JS)
+    pg.click("#bkCopy")
+    pg.wait_for_function("()=>window.__clip")
+    return json.loads(pg.evaluate("()=>window.__clip"))
+
+
+def bring_back(pg, txt):
+    pg.fill("#bkIn", txt)
+    pg.click("#bkImport")
+    pg.click("#bkYes")
+
+
+def test_F14_fs_is_saved_survives_reload_and_is_in_backups(app):
+    pg = app(returning=False)
+    run_quiz(pg)
+    pg.click("#fsNext")
+    pg.check('[data-ftick="2"]')
+    saved = state(pg)
+    assert saved["fs"] == {"done": [1, 2], "complete": False, "placed": False}
+    assert set(saved) - {"fs"} == set(D_KEYS), "the save gains fs and nothing else"
+    pg.reload()
+    pg.wait_for_selector("#v-first-steps h2")
+    assert views(pg) == ["v-first-steps"] and pg.inner_text("#v-first-steps h2") == TITLES[2], "picks up at the first step not yet passed"
+    assert state(pg) == saved
+    done = app(state={"fs": dict(DONE, line="Eels Always Dance Gently Before Eating", seen=["path", "record"], ear=True), "lv": STAGE1})
+    out = backup_of(done)
+    assert out["version"] == "0.11" and out["format"] == 1 and {k: out["state"]["fs"][k] for k in state(done)["fs"] if k != "seen"} == {k: v for k, v in state(done)["fs"].items() if k != "seen"}
+    assert out["state"]["fs"]["done"] == [1, 2, 3, 4, 5, 6, 7] and out["state"]["fs"]["line"].startswith("Eels")
+    # that backup, brought back on a first visit through the link on step 1
+    new = app(returning=False)
+    new.click('#v-first-steps a[href="#record"]')
+    new.wait_for_selector("#bkIn")
+    assert views(new) == ["v-record"] and tabs(new) == ["First Steps", "Record"]
+    bring_back(new, json.dumps(out))
+    assert "Backup imported" in new.inner_text("#bkMsg") and state(new)["fs"] == out["state"]["fs"]
+    assert tabs(new) == ["Path", "Warm-up", "Rudiments", "Record"]
+    assert not pg.errors and not done.errors and not new.errors
+
+
+D_KEYS = ["finish", "stage", "nsw", "teacher", "lv", "sign", "marks", "changes", "journal", "bpm", "useFin", "gates", "warm", "best", "capo", "mute", "inst", "gig"]
+
+
+@pytest.mark.parametrize("wrap", ["0.7", "0.8", "0.9", None], ids=["0.7", "0.8", "0.9", "bare-state"])
+def test_F14_older_backups_and_bare_state_still_import(app, wrap):
+    pg = app(returning=False, hash_="record")
+    assert views(pg) == ["v-record"]
+    bring_back(pg, json.dumps(OLD if wrap is None else {"app": "The Guitar Lab", "format": 1, "version": wrap, "saved": "2026-11-20T03:00:00.000Z", "state": OLD}))
+    assert "Backup imported" in pg.inner_text("#bkMsg")
+    got = state(pg)
+    assert "fs" not in got and all(got[k] == v for k, v in OLD.items()), "an older backup comes back exactly, with nothing added"
+    assert tabs(pg) == ALL_TABS, "and its owner keeps every tab"
+    go(pg, "path")
+    assert views(pg) == ["v-path"] and pg.inner_text("#stage h2") == "C, G and the small F"
+    assert not pg.errors
+
+
+def test_F14_importing_an_empty_old_backup_starts_first_steps(app):
+    pg = app(state={"fs": DONE, "lv": STAGE1}, hash_="record")
+    bring_back(pg, json.dumps({"app": "The Guitar Lab", "format": 1, "version": "0.9", "state": {"bpm": 80, "lv": {}}}))
+    # the student is on Record, which stays open by name so a different backup can be tried; everything else is First Steps again
+    assert views(pg) == ["v-record"] and tabs(pg) == ["First Steps", "Record"] and "fs" not in state(pg)
+    go(pg, "path")
+    assert views(pg) == ["v-first-steps"] and tabs(pg) == ["First Steps"]
+    assert not pg.errors
+
+
+@pytest.mark.parametrize("bad", [[1, 2], "done", {"done": "all", "complete": "yes"}, {"done": [0, 9, 2, 2, "3"], "seen": [1, "gig"], "line": 5}])
+def test_F14_odd_fs_values_load_safely(app, bad):
+    pg = app(state={"fs": bad}, returning=False)
+    assert views(pg) == ["v-first-steps"]
+    if isinstance(bad, dict) and isinstance(bad.get("done"), list):
+        assert pg.inner_text("#v-first-steps h2") == TITLES[0] and pg.get_attribute('[data-fgo="2"]', "class") == "dn"
+    assert not pg.errors
+
+
+# ===================================================================== unchanged once open
+
+def test_path_gig_and_record_are_as_0_9_once_open(browser, tmp_path):
+    """Hard constraint: for a returning guitar student the Path, Gig and Record are 0.9's, apart from the version and the First Steps link."""
+    import uihelp
+    root = pathlib.Path(__file__).resolve().parent.parent
+    old = subprocess.run(["git", "show", "90719f9:index.html"], cwd=root, capture_output=True)
+    if old.returncode:
+        pytest.skip("0.9 (90719f9) is not in this clone")
+    (tmp_path / "index.html").write_bytes(old.stdout)
+    (tmp_path / "fonts").symlink_to(root / "fonts")
+    seed = {"lv": {**STAGE1, "twelve-bar:0": 1}, "gates": {"a-e": 1764200000000}, "journal": OLD["journal"]}
+    grab = r"""()=>{const o={};for(const id of ['next','neck','stage','side','v-gig','v-record']){const e=document.getElementById(id).cloneNode(true);e.querySelectorAll('#fsLink').forEach(x=>x.remove());o[id]=e.innerHTML}return o}"""
+    got = {}
+    for name, url in (("old", (tmp_path / "index.html").as_uri()), ("new", uihelp.URL)):
+        ctx = browser.new_context(viewport={"width": 1280, "height": 900})
+        pg = ctx.new_page()
+        pg.clock.install(time=1764300000000)
+        pg.goto(url + "#__seed")
+        pg.evaluate("s=>localStorage.setItem('shredder',s)", json.dumps(seed))
+        got[name] = {}
+        for h in ("a-e", "twelve-bar", "hallelujah", "gig", "record"):
+            pg.goto("about:blank")
+            pg.goto(url + "#" + h)
+            pg.wait_for_selector("#tabs a[aria-current=page]", state="attached")
+            got[name][h] = pg.evaluate(grab)
+        got[name]["tabs"] = tabs(pg)
+        ctx.close()
+    assert got["new"]["tabs"] == got["old"]["tabs"] == ALL_TABS
+    for h in got["old"]:
+        if h != "tabs":
+            for part in got["old"][h]:
+                assert got["new"][h][part] == got["old"][h][part], f"#{h} {part} differs from 0.9"
+
+
+# ===================================================================== F16 layout, F17 design
+
+def _walk(pg, problems, where):
+    for p in pg.evaluate(OVERFLOW_JS):
+        problems.append(f"{where}: overflow {p}")
+    small = pg.evaluate("""()=>[...document.querySelectorAll('#v-first-steps button, #v-first-steps .gtag, #v-first-steps a.lk')].filter(e=>e.getClientRects().length).map(e=>{const r=e.getBoundingClientRect();return [e.id||e.textContent.trim().slice(0,20),Math.round(Math.min(r.width,r.height))]}).filter(x=>x[1]<40)""")
+    for s in small:
+        problems.append(f"{where}: tap target {s}")
+    tiny = pg.evaluate("""()=>[...document.querySelectorAll('#v-first-steps text')].filter(t=>t.getClientRects().length).map(t=>[t.textContent,Math.round(parseFloat(getComputedStyle(t).fontSize)*t.getBoundingClientRect().height/Math.max(1,t.getBBox().height)*10)/10]).filter(x=>x[1]<11.5)""")
+    for s in tiny[:3]:
+        problems.append(f"{where}: drawing text under 12px {s}")
+
+
+@pytest.mark.parametrize("scheme", ["dark", "light"])
+@pytest.mark.parametrize("width", [360, 1280])
+def test_F16_every_step_fits_with_no_console_errors(app, width, scheme):
+    pg = fresh(app, [1, 2, 3, 4, 5, 6], width=width, height=800, scheme=scheme)
+    lum = sum(int(x) for x in re.findall(r"\d+", pg.evaluate("()=>getComputedStyle(document.body).backgroundColor"))[:3])
+    assert (lum > 600) if scheme == "light" else (lum < 120)
+    problems = []
+    for n in range(1, 8):
+        pg.click(f'[data-fgo="{n}"]')
+        assert pg.inner_text("#v-first-steps h2") == TITLES[n - 1]
+        _walk(pg, problems, f"step {n}")
+        if pg.locator("#fsQuizGo").count():
+            pg.click("#fsQuizGo")
+            _walk(pg, problems, f"step {n} check")
+            give(pg, next(o for o in options(pg) if o != expected(pg)))
+            _walk(pg, problems, f"step {n} check, after a miss")
+            pg.click("#fsQuizEnd")
+    pg.click('[data-fgo="1"]')
+    pg.click("#fsPlaceGo")
+    for i in range(8):
+        _walk(pg, problems, f"placement {i + 1}")
+        give(pg, expected(pg) if i else next(o for o in options(pg) if o != expected(pg)))
+    _walk(pg, problems, "placement result")
+    if width == 1280:  # the drawing sits beside the words
+        pg.click("#fsPlaceOpen")
+        box = pg.evaluate("()=>['.fst-fig','.fst-body'].map(s=>{const r=document.querySelector(s).getBoundingClientRect();return [r.left,r.right,r.top]})")
+        assert box[0][1] <= box[1][0] and abs(box[0][2] - box[1][2]) < 80, box
+    else:  # the drawing sits on top
+        pg.click("#fsPlaceOpen")
+        box = pg.evaluate("()=>['.fst-fig','.fst-body'].map(s=>{const r=document.querySelector(s).getBoundingClientRect();return [r.top,r.bottom]})")
+        assert box[0][1] <= box[1][0] + 1, box
+    assert not problems and not pg.errors, "\n".join(problems + pg.errors)
+
+
+def test_F16_no_popups_network_or_new_storage_keys():
+    src = (pathlib.Path(__file__).resolve().parent.parent / "index.html").read_text(encoding="utf-8")
+    assert not re.search(r"\b(alert|confirm|prompt)\s*\(", src)
+    assert {m[1] for m in re.findall(r"localStorage\.(get|set|remove)Item\('([^']+)'", src)} == {"shredder"} and "localStorage.clear" not in src
+    assert not re.search(r"\b(fetch|XMLHttpRequest|WebSocket|sendBeacon|importScripts)\b", src) and not re.search(r"<script[^>]+src=|<link[^>]+href=", src)
+    for token, dark, light in (("--ton", "#8fbf6a", "#4a7434"), ("--pre", "#c9a24a", "#8a6a22"), ("--dom", "#d0574b", "#a8352b"), ("--sec", "#a493d8", "#6b55b0"), ("--sub", "#b3a98f", "#5e5340")):
+        assert f"{token}:{dark}" in src and f"{token}:light-dark({light},{dark})" in src, token + " changed"
+    fs_css = src[src.index("/* First Steps (0.11)"):src.index("@media(prefers-reduced-motion")]
+    assert not re.search(r"--(ton|pre|dom|sec|sub)\b", fs_css), "function colours are for harmony, not for First Steps' interface"
+
+
+SKILL = pathlib.Path("/root/.claude/skills/synced/f1b3e4ab-b47d-4f75-b27e-08d2e93f882c_202e44b6-919b-40e3-8017-b3049067e2b4/shmungfroi-design/scripts/check_design.py")
+# The one FAIL the checker already gives 0.9 (main 90719f9): the whole app has no number-diamond trace yet. That is an app-wide
+# restyle outside this spec, listed in BUILD_REPORT.md for Justin; First Steps must add no FAIL of its own.
+KNOWN_FAIL = {"Number-diamond trace"}
+
+
+def test_F17_design_checker_has_no_new_fail():
+    if not SKILL.exists():
+        pytest.skip("shmungfroi-design skill is not installed here")
+    index = pathlib.Path(__file__).resolve().parent.parent / "index.html"
+    out = subprocess.run([sys.executable, str(SKILL), str(index), "--lab", "guitar"], capture_output=True, text=True).stdout
+    fails = [l.split("|")[2].strip() for l in out.splitlines() if l.startswith("| FAIL")]
+    assert "PASS" in out and set(fails) <= KNOWN_FAIL, out
