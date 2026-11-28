@@ -865,3 +865,155 @@ def test_F17_design_checker_has_no_new_fail():
     out = subprocess.run([sys.executable, str(SKILL), str(index), "--lab", "guitar"], capture_output=True, text=True).stdout
     fails = [l.split("|")[2].strip() for l in out.splitlines() if l.startswith("| FAIL")]
     assert "PASS" in out and set(fails) <= KNOWN_FAIL, out
+
+
+# ===================================================================== FS facts (independent music/guitar fact check, 28 Nov)
+# Data tests: they read First Steps' own tables and question builders straight out of index.html (through appdata's
+# hook) and compare them with an answer key written here from standard guitar practice, not from the app.
+
+FS_HZ = {6: 82.41, 5: 110.00, 4: 146.83, 3: 196.00, 2: 246.94, 1: 329.63}  # E2 A2 D3 G3 B3 E4, A4 = 440
+FS_NAMES = {6: "E", 5: "A", 4: "D", 3: "G", 2: "B", 1: "E"}
+NOTE = ["C", "D♭", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"]
+# standard open shapes, written string 6 to string 1: frets and fingers
+SHAPES = {"A": ("x02220", "001230"), "D": ("xx0232", "000132"), "Em": ("022000", "023000"),
+          "Am": ("x02210", "002310"), "C": ("x32010", "032010")}
+
+
+@pytest.fixture(scope="module")
+def fsx(browser, tmp_path_factory):
+    """Evaluate an expression inside the app's own script scope. Audio starts are recorded, as in uihelp."""
+    import uihelp
+    td = tmp_path_factory.mktemp("fsfacts")
+    (td / "index.html").write_text(appdata.hooked_html(), encoding="utf-8")
+    (td / "fonts").symlink_to(appdata.INDEX.parent / "fonts")
+    ctx = browser.new_context()
+    ctx.add_init_script(uihelp.AUDIO_JS)
+    pg = ctx.new_page()
+    pg.goto((td / "index.html").as_uri())
+    pg.wait_for_function("()=>typeof globalThis.__APP==='function'")
+    yield lambda js: pg.evaluate("j=>__APP(j)", js), pg
+    ctx.close()
+
+
+def test_FS_facts_open_string_pitches_and_reference_tones(fsx):
+    ev, pg = fsx
+    assert ev("OPEN") == [40, 45, 50, 55, 59, 64], "E2 A2 D3 G3 B3 E4"
+    for n, hz in FS_HZ.items():
+        m = ev(f"sOpen({n})")
+        assert abs(440 * 2 ** ((m - 69) / 12) - hz) < 0.01, (n, m)
+    # what step 4's reference buttons actually play: one triangle oscillator at the exact frequency
+    for n, hz in FS_HZ.items():
+        k = len(pg.evaluate("()=>window.__starts()"))
+        ev(f"(fsLoopI=0,fsRef({n}),0)")
+        o = [s for s in pg.evaluate("()=>window.__starts()")[k:] if s["kind"] == "osc"]
+        assert len(o) == 1 and o[0]["type"] == "triangle" and abs(o[0]["freq"] - hz) < 0.01, (n, o)
+    ev("(stopAll(),fsQuiet(),0)")
+
+
+def test_FS_facts_string_order_and_names(fsx):
+    ev, _ = fsx
+    assert ev("SLET")[1:] == [FS_NAMES[n] for n in range(1, 7)]
+    assert ev("SNAME")[1:] == ["high E", "B", "G", "D", "A", "low E"]
+    assert [NOTE[ev(f"sOpen({n})") % 12] for n in range(6, 0, -1)] == list("EADGBE")
+    assert ev("sOpen(6)") < ev("sOpen(1)") and ev("sOpen(1)") - ev("sOpen(6)") == 24, "string 6 lowest, string 1 two octaves up"
+    b3 = ev("FSV[3]().body")
+    for w in ("String 6 is the thickest string and it sounds the lowest. It is called low E.", "String 1 is the thinnest and it sounds the highest",
+              "closest to the floor", "E A D G B E", "fret 1 is finger 1, fret 2 is finger 2 and fret 3 is finger 3"):
+        assert w in b3, w
+    line = re.search(r"Ours, to start you off: ([^.]+)\.", b3).group(1)
+    assert "".join(w[0] for w in line.split()) == "EADGBE", line
+
+
+def test_FS_facts_ear_pairs(fsx):
+    ev, _ = fsx
+    pairs = ev("EARG")
+    assert pairs == [[40, 24], [45, 14], [50, 5], [55, 1]], "E2-E4, A2-B3, D3-G3, G3-G#3"
+    for lo, gap in pairs:
+        assert lo in ev("OPEN") and gap >= 1
+    for i in range(4):
+        e = ev(f"fsEarNew({i})")
+        assert abs(e["pair"][0] - e["pair"][1]) == pairs[i][1] and min(e["pair"]) == pairs[i][0]
+    act = ev("fsAct.toString()")
+    assert "const up=fe.pair[1]>fe.pair[0];if((d.ear==='up')===up)" in act, "Higher is right when the second note is higher"
+
+
+def test_FS_facts_chord_shapes_are_standard(fsx):
+    ev, _ = fsx
+    for ch, (f, g) in SHAPES.items():
+        c = ev(f"CH[{json.dumps(ch)}]")
+        assert (c["f"], c["g"]) == (f, g), ch
+
+
+def test_FS_facts_diagram_answer_keys(fsx):
+    ev, _ = fsx
+    for ch, (f, g) in SHAPES.items():
+        if ch == "Em":
+            continue
+        fr = {6 - i: (f[i], g[i]) for i in range(6) if f[i] not in "0x"}
+        opn = ",".join(str(6 - i) for i in range(6) if f[i] == "0")
+        mute = ",".join(str(6 - i) for i in range(6) if f[i] == "x")
+        for _ in range(12):
+            for kind in ("finger", "fret"):
+                q = ev(f"qDia({json.dumps(ch)},'{kind}')")
+                n = int(q["ask"].split(":")[2])
+                assert q["ans"] == fr[n][1 if kind == "finger" else 0], (ch, kind, n, q["ans"])
+                assert q["ans"] in [o[0] for o in q["opts"]]
+        qo, qm = ev(f"qDia({json.dumps(ch)},'open')"), ev(f"qDia({json.dumps(ch)},'mute')")
+        assert qo["ans"] == opn and qm["ans"] == mute, ch
+        assert qo["ans"] in [o[0] for o in qo["opts"]] and qm["ans"] in [o[0] for o in qm["opts"]]
+    # the D check: 1 on G, 3 on B, 2 on high E; D open; low E and A not played
+    assert {n: SHAPES["D"][1][6 - n] for n in (3, 2, 1)} == {3: "1", 2: "3", 1: "2"}
+    b5 = ev("FSV[5]().body")
+    assert "string 6 has a ×" in b5 and "Strings 5 and 1 are open" in b5 and "Fingers 1, 2 and 3 sit side by side at fret 2, on strings 4, 3 and 2" in b5
+
+
+def test_FS_facts_tab_orientation_answer_keys_and_pitches(fsx):
+    ev, _ = fsx
+    rows = ev("mkTab([[5,3]])").split("\n")
+    assert [r[0] for r in rows] == list("eBGDAE") and "3" in rows[0] and "3" not in "".join(rows[1:]), "string 1 (index 5) on the top line"
+    # lesson TAB: string 6 fret 3 = G, string 2 fret 1 = C, string 3 open = G, then Em stacked
+    t = ev("FS_TAB")
+    pit = [ev(f"OPEN[{s}]") + f for s, f in t[:3]]
+    assert [6 - s for s, _ in t[:3]] == [6, 2, 3] and [f for _, f in t[:3]] == [3, 1, 0] and [NOTE[p % 12] for p in pit] == ["G", "C", "G"]
+    assert pit == [43, 60, 55], "G2, middle C, G3"
+    assert "".join(str(f) for _, f in sorted(t[3])) == SHAPES["Em"][0]
+    assert ev("evM(FS_TAB[0])") == 43 and ev("evM(FS_TAB[3])") == [40, 47, 52, 55, 59, 64]
+    want = [[("B", 5, 2), ("G", 3, 0), ("G", 1, 3)], [("E", 6, 0), ("E", 4, 2), ("D", 2, 3)], [("F", 1, 1), ("C", 5, 3), ("A", 3, 2)]]
+    for line, key in zip(ev("QT"), want):
+        for i, (name, n, f) in enumerate(key):
+            q = ev(f"qTab({json.dumps(line)},{i})")
+            assert q["ans"] == f"{n}:{f}" and q["ans"] in [o[0] for o in q["opts"]], (line, i, q["ans"])
+            assert NOTE[(ev(f"sOpen({n})") + f) % 12] == name and f"That note is {name}." in q["yes"], (line, i, q["yes"])
+    b6 = ev("FSV[6]().body")
+    for w in ("The top line is string 1, high E, the thinnest. The bottom line is string 6, low E, the thickest.", "0 means play the string open",
+              "counted from the nut, which is 0, towards the bridge", "stacked on top of each other are played together", "TAB doesn't show rhythm",
+              "string 6 at fret 3 is G. String 2 at fret 1 is C. String 3 open is G."):
+        assert w in b6, w
+
+
+def test_FS_facts_step_7_em_and_efg(fsx):
+    ev, _ = fsx
+    efg = ev("FS_EFG")
+    assert all(s == 5 for s, _ in efg) and [f for _, f in efg] == [0, 1, 3]
+    pit = [ev("OPEN[5]") + f for _, f in efg]
+    assert pit == [64, 65, 67] and [NOTE[p % 12] for p in pit] == ["E", "F", "G"]
+    assert [(p - 60) % 12 for p in pit] == [4, 5, 7], "mi fa so above do = C"
+    b7 = ev("FSV[7]().body")
+    assert "Finger 2 goes on string 5, the A string, at fret 2. Finger 3 goes on string 4, the D string, at fret 2." in b7
+    assert "E, F and G, which are mi, fa and so in C major" in b7 and "finger 1 for F and finger 3 for G" in b7
+
+
+def test_FS_facts_parts_and_technique_words(fsx):
+    ev, _ = fsx
+    fp = {p[0]: p for p in ev("FPART")}
+    assert [p[1] for p in ev("FPART")] == ["Headstock", "Machine heads", "Nut", "Neck", "Fingerboard", "Frets", "Position markers", "Body",
+                                           "Sound hole", "Pickguard", "Saddle", "Bridge", "Strings", "Pickups"]
+    assert "also called the head" in fp["headstock"][3] and "tuning pegs" in fp["machineHeads"][3] and "fretboard" in fp["fingerboard"][3]
+    assert "3, 5, 7 and 9" in fp["positionMarkers"][3] and "two dots at fret 12" in fp["positionMarkers"][3]
+    assert "set into the bridge" in fp["saddle"][3] and "electric" in fp["pickups"][3]
+    b2 = ev("FSV[2]().body")
+    assert "T thumb, 1 index, 2 middle, 3 ring, 4 little" in b2
+    assert "The square arch means a downstroke: pick towards the floor. The V means an upstroke" in b2 and "down on the beat and up on the “&amp;”" in b2
+    assert "just behind the fret wire" in b2
+    b4 = ev("FSV[4]().body")
+    assert "your teacher tunes the class guitars" in b4 and "written an octave higher than it sounds" in b4
