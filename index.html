@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>The Guitar Lab 0.9</title>
+<title>The Guitar Lab 0.11</title>
 <style>
 /* VOICE: a patient guitar teacher in the Shmungfroi family: warm, exact, unhurried.
    IDEA: the guitar neck is the map; each fret is a stage, the inlays are the gates you earn.
@@ -14,11 +14,11 @@
 @font-face{font-family:'G Outfit';src:url(fonts/Outfit-Bold.ttf) format('truetype');font-weight:500 700;font-display:swap}
 @font-face{font-family:'G Poiret';src:url(fonts/PoiretOne-Regular.ttf) format('truetype');font-display:swap}
 :root{--bg:#0b0906;--card:#12100b;--ink:#ece2c8;--mut:#9c927c;--rule:#2a2418;--hi:#f0d48a;--ok:#d9cfb6;
---ton:#8fbf6a;--pre:#c9a24a;--dom:#d0574b;--sec:#a493d8;--sub:#b3a98f;--kbl:#a47510;--wood:#2b1a12;--fret:#b9b4a8;--ivory:#ece2c8;--inlay:#c9a24a;--fin:#2f9e9b;color-scheme:dark}
+--ton:#8fbf6a;--pre:#c9a24a;--dom:#d0574b;--sec:#a493d8;--sub:#b3a98f;--kbl:#a47510;--wood:#2b1a12;--fret:#b9b4a8;--ivory:#ece2c8;--inlay:#c9a24a;--fin:#2f9e9b;--gold:#c9a24a;--onfin:#0b0906;color-scheme:dark}
 @supports (color:light-dark(#000,#fff)){:root{color-scheme:light dark;
 --bg:light-dark(#f7f1e3,#0b0906);--card:light-dark(#fffaf0,#12100b);--ink:light-dark(#2a2216,#ece2c8);--mut:light-dark(#6f634c,#9c927c);
 --rule:light-dark(#d9cdb2,#2a2418);--hi:light-dark(#7a5c12,#f0d48a);--ok:light-dark(#3d3426,#d9cfb6);
---ton:light-dark(#4a7434,#8fbf6a);--pre:light-dark(#8a6a22,#c9a24a);--dom:light-dark(#a8352b,#d0574b);--sec:light-dark(#6b55b0,#a493d8);--sub:light-dark(#5e5340,#b3a98f)}
+--ton:light-dark(#4a7434,#8fbf6a);--pre:light-dark(#8a6a22,#c9a24a);--dom:light-dark(#a8352b,#d0574b);--sec:light-dark(#6b55b0,#a493d8);--sub:light-dark(#5e5340,#b3a98f);--gold:light-dark(#8a6a22,#c9a24a);--onfin:light-dark(#fffaf0,#0b0906)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 'G Outfit',Outfit,system-ui,sans-serif;overflow-x:clip}
@@ -117,6 +117,51 @@ table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px
 .nut{height:12px}.fr{border-right:0;border-bottom:3px solid var(--fret);min-height:56px;text-align:left;padding:8px 12px 14px}
 .fr .lb{position:static;display:inline-block}.dot{top:50%!important;left:auto;right:18px;margin-top:-7px}.dot.a{right:38px}
 .step{grid-template-columns:24px minmax(0,1fr)}.step>.lvl{grid-column:2}.list{grid-template-columns:minmax(0,1fr)}}
+/* First Steps (0.11): one step at a time, the drawing on top on a phone and beside the words on a wide screen */
+.fsmode #finishes,.fsmode #nswBtn,.fsmode header .note,.fsmode .mbar,.fsmode .foot{display:none}
+.fsmode .top h1{font-size:28px}.fsmode header .row{margin-top:4px!important}
+.fst{max-width:1100px}
+.fst-eye{font-size:13px;color:var(--mut)}
+.fst h2{font-size:40px;margin-top:2px}
+.fst-sub{color:var(--ok);margin:6px 0 0}
+.fst-dots{display:flex;gap:4px;list-style:none;margin:12px 0 0;padding:0}
+.fst-dots button{width:40px;padding:0;border-radius:999px;font-variant-numeric:tabular-nums}
+.fst-dots button[aria-current=step]{border-color:var(--hi);box-shadow:inset 0 0 0 1px var(--hi)}
+.fst-dots button.dn{border-color:var(--fin);background:color-mix(in srgb,var(--fin) 18%,var(--card))}
+.fst-dots button.dn::after{content:'✓';font-size:12px;margin-left:1px}
+.fst-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;margin-top:18px}
+.fst-fig svg{display:block;width:100%;height:auto;max-width:540px;margin:0 auto}
+.fst-fig .cb{max-width:170px;margin:0 auto}.fst-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:center}
+.fst-cap{min-height:48px;margin:8px 0 0;font-size:15px}.fst-cap b{font-weight:500}
+.fst-key{columns:2;column-gap:18px;margin:8px 0 0;padding-left:26px;font-size:14px;color:var(--ok)}
+.fst-body p{margin:0 0 10px;max-width:62ch}
+.fst-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0}
+.fst-card{border:1px solid var(--rule);border-radius:12px;background:var(--card);padding:14px 16px}.fst-card p{font-size:15px;margin:0}.fst-card svg{display:block;width:64px;height:auto;margin:0 0 6px}
+.fst-tip{border-left:3px solid var(--gold);background:var(--card);padding:10px 14px;margin:14px 0;border-radius:0 6px 6px 0;max-width:62ch}.fst-tip b{font-weight:500}.fst-tip p{margin:0}
+.fst-home{border:1px solid var(--rule);border-radius:12px;padding:14px 16px;margin:18px 0 0;max-width:62ch}
+.fst-check{border-top:1px solid var(--rule);margin-top:18px;padding-top:14px}
+.fst-opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.fst-fb{min-height:26px;margin:12px 0 0}.fst-ask{font-size:18px;font-weight:500;margin:0}
+.fst-nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:22px;padding-top:14px;border-top:1px solid var(--rule)}
+.fst-go{background:var(--fin);border-color:var(--fin);color:var(--onfin);font-weight:500}
+.fst button:disabled{opacity:.45;cursor:default}.fst button:disabled:hover{border-color:var(--rule)}
+.fst-line{display:block;width:100%;max-width:420px;margin-top:4px}
+.fst .tab{font-size:15px;line-height:1.3;max-width:max-content}
+.fst .chk{border-top:0;padding:6px 0}
+.tabnote p{margin:4px 0 0}
+/* the guitar drawing: single-weight line, ivory with gold detail; every part and string carries its id */
+.gart *{vector-effect:non-scaling-stroke}
+.gl{fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.gg{fill:none;stroke:var(--gold);stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
+.gd{fill:var(--gold);stroke:none}.gs{fill:none;stroke:var(--gold);stroke-linecap:round}.gh{fill:none;stroke:transparent;stroke-width:14;pointer-events:stroke;cursor:pointer}
+.gart [data-part].on .gl,.gart [data-part].on .gg,.gart [data-part].on .gs{stroke:var(--hi);stroke-width:3}.gart [data-part].on .gd{fill:var(--hi)}
+.gart .gs.on{stroke:var(--hi)}.gart .gs.dim{opacity:.3}
+.gld{stroke:var(--gold);stroke-opacity:.65;stroke-width:1;fill:none}.gtag{cursor:pointer}
+.gt-c{fill:var(--bg);stroke:var(--gold);stroke-width:1.5}.gt-n{fill:var(--ink);font-weight:500;font-family:'G Outfit',Outfit,system-ui,sans-serif}
+.gtag[aria-pressed=true] .gt-c{fill:var(--hi);stroke:var(--hi)}.gtag[aria-pressed=true] .gt-n{fill:var(--bg)}
+.gtx{fill:var(--ok);font-family:'G Outfit',Outfit,system-ui,sans-serif}
+@media(min-width:900px){.fst-grid{grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:40px;align-items:start}.fst-fig{position:sticky;top:64px}}
+@media(max-width:700px){.fst-cards{grid-template-columns:minmax(0,1fr)}.fst h2{font-size:32px}.fst-key{font-size:13px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -124,7 +169,7 @@ table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px
 <div class="wrap">
 <header>
 <div class="top">
-<div><h1>The Guitar Lab</h1><div class="sub">version 0.9 · a Shmungfroi instrument</div></div>
+<div><h1>The Guitar Lab</h1><div class="sub">version 0.11 · a Shmungfroi instrument</div></div>
 <div class="sp"></div>
 <div class="chips" role="group" aria-label="Finish" id="finishes"></div>
 </div>
@@ -135,15 +180,16 @@ table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px
 </div>
 </header>
 <div class="stick"><nav class="tabs" aria-label="Sections" id="tabs">
-<a href="#path">Path</a><a href="#warm-up">Warm-up</a><a href="#rudiments">Rudiments</a><a href="#technique">Technique</a><a href="#invent">Invent</a><a href="#gig">Gig</a><a href="#record">Record</a>
+<a href="#first-steps" class="hide">First Steps</a><a href="#path">Path</a><a href="#warm-up">Warm-up</a><a href="#rudiments">Rudiments</a><a href="#technique">Technique</a><a href="#invent">Invent</a><a href="#gig">Gig</a><a href="#record">Record</a>
 </nav>
 <div class="mbar" role="group" aria-label="Metronome"><button class="m-toggle" aria-pressed="false">Metronome</button><button class="m-step" data-step="-5" aria-label="Slower">−</button><span class="v m-out">70</span><button class="m-step" data-step="5" aria-label="Faster">+</button><span class="note m-unit">bpm</span><span class="note m-name"></span></div></div>
 
+<section id="v-first-steps" class="view fst hide"></section>
 <section id="v-path" class="view">
 <div class="next" id="next"></div>
 <nav class="neck" id="neck" aria-label="Stages on the neck"></nav>
 <div class="legend"><span>The bar under each fret shows steps at Consistent or better.</span><span>Inlays sit at frets 3, 5 and 7 as on a real neck (Hallelujah carries the double), and turn gold when that stage's gate passes.</span></div>
-<div id="gateMsg"></div>
+<div id="gateMsg" aria-live="polite"></div>
 <div class="cols" style="margin-top:12px"><div class="stk" id="stage"></div><aside class="stk" id="side"></aside></div>
 </section>
 <section id="v-warm-up" class="view hide"></section>
@@ -299,7 +345,14 @@ for(const k in S.warm)if(!Array.isArray(S.warm[k]))delete S.warm[k];for(const k 
 for(const o of ['marks','best','gates','sign'])for(const k in S[o]){const v=+S[o][k];if(!isFinite(v))delete S[o][k];else S[o][k]=v}for(const k in S.mute)S.mute[k]=!!S.mute[k];S.changes=S.changes.filter(c=>typeof c.d==='number');
 /* 0.6: changes and journal entries carry their instrument; anything saved before 0.6 was guitar's. Rudiment, technique and best-tempo keys without an @instrument suffix are guitar's too. */
 S.changes.forEach(c=>{if(!IK.includes(c.inst))c.inst='guitar'});S.journal.forEach(j=>{if(!IK.includes(j.inst))j.inst='guitar'});
-if(!FIN.some(f=>f.k===S.finish))S.finish='bossa';if(!ST.some(s=>s.id===S.stage))S.stage='a-e';if(!Array.isArray(S.changes))S.changes=[];if(!Array.isArray(S.journal))S.journal=[]}
+if(!FIN.some(f=>f.k===S.finish))S.finish='bossa';if(!ST.some(s=>s.id===S.stage))S.stage='a-e';if(!Array.isArray(S.changes))S.changes=[];if(!Array.isArray(S.journal))S.journal=[];
+/* 0.11 First Steps: the one new field. Absent until a first check is passed, so a 0.9 save and a first visit both load without it. */
+const f=L&&typeof L==='object'?L.fs:null;if(f&&typeof f==='object'&&!Array.isArray(f)){S.fs={done:[...new Set((Array.isArray(f.done)?f.done:[]).filter(n=>Number.isInteger(n)&&n>=1&&n<=7))].sort(),complete:f.complete===true,placed:f.placed===true};
+ if(f.all===true)S.fs.all=true;if(f.ear===true)S.fs.ear=true;if(Array.isArray(f.seen))S.fs.seen=[...new Set(f.seen.filter(v=>typeof v==='string'))].slice(0,7);if(typeof f.line==='string'&&f.line.trim())S.fs.line=f.line.slice(0,80)}}
+/* anything a student has earned or logged counts as progress */
+const hasProg=()=>Object.values(S.lv).some(v=>v>0)||[S.gates,S.marks,S.sign,S.best,S.warm].some(o=>Object.keys(o).length>0)||S.journal.length>0||S.changes.length>0||!!(S.gig&&Array.isArray(S.gig.bands)&&S.gig.bands.some(b=>b&&b.m&&typeof b.m==='object'&&Object.keys(b.m).length));
+/* a save with progress and no fs field is from before First Steps existed: it skips First Steps and keeps every tab it had. Nothing is written for that: it is worked out each time, so such a save stays exactly as 0.9 left it until the student passes a First Steps check. */
+const fsOld=()=>!S.fs&&hasProg();
 const lsGet=()=>localStorage.getItem('shredder'),lsSet=v=>localStorage.setItem('shredder',v);
 {let L=null;try{L=JSON.parse(lsGet()||'{}')}catch(e){}loadState(L)}
 /* true when the browser kept it; false where storage is blocked (a sandboxed frame, private mode), so the page can say so (0.8) */
@@ -341,7 +394,7 @@ function strum(name,t0,mode,dest){const a=A();if(!a||!CH[name])return;const f=CH
  const L=dest?lastBand:lastTap;L.forEach(v=>{try{v.gain.setTargetAtTime(0,t,.02)}catch(e){}});L.length=0;
  const cp=capo();if(mode==='B'){const v=note(OPEN[idx[0]]+(+f[idx[0]])+cp,t,.24,dest);if(v)L.push(v);return}
  const order=mode==='U'?idx.slice().reverse().slice(0,4):(mode==='C'?idx.slice(-4):idx);order.forEach((i,k)=>{const v=note(OPEN[i]+(+f[i])+cp,t+k*.016,mode==='U'?.09:.13,dest);if(v)L.push(v)})}
-function stopAll(){runId++;live.forEach(s=>{try{s.stop()}catch(e){}});live=[];lastTap=[];lastBand=[];seqT.forEach(x=>{clearTimeout(x);clearInterval(x)});seqT=[];document.querySelectorAll('.rm-bar.now,.fs.now').forEach(x=>x.classList.remove('now'));const gb=$('playGig');if(gb)gb.textContent='Play the chart';playing=false;const b=$('playMap');if(b)b.textContent='Play the chart';const l=$('playLoop');if(l)l.textContent='Play the loop ×4'}
+function stopAll(){runId++;live.forEach(s=>{try{s.stop()}catch(e){}});live=[];lastTap=[];lastBand=[];seqT.forEach(x=>{clearTimeout(x);clearInterval(x)});seqT=[];document.querySelectorAll('.rm-bar.now,.fs.now').forEach(x=>x.classList.remove('now'));const gb=$('playGig');if(gb)gb.textContent='Play the chart';playing=false;const b=$('playMap');if(b)b.textContent='Play the chart';const l=$('playLoop');if(l)l.textContent='Play the loop ×4';fsQuiet()}
 function click(t,acc,dest){const a=A();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.frequency.value=acc?1500:1000;g.gain.setValueAtTime(acc?.25:.12,t);g.gain.exponentialRampToValueAtTime(.001,t+.05);o.connect(g).connect(dest||a.destination);o.start(t);o.stop(t+.06);track(o)}
 /* drawing */
 function box(name,k){const c=CH[name];const [rn,fn,lab]=fnOf(k,name);const col=fn?`var(${FN[fn][1]})`:'currentColor';const x=i=>12+i*13.2,top=Math.max(1,...[...c.f].filter(v=>v!=='x'&&v!=='0').map(Number))>4?Math.min(...[...c.f].filter(v=>/[1-9]/.test(v)).map(Number)):1;
@@ -425,7 +478,7 @@ function keys(n,t,d,dest){if(!CH[n])return;const r=rootOf(n);pcsOf(n).filter(pc=
 const PARTS=[['guitar','Guitar'],['bass','Bass'],['drums','Drums'],['keys','Keys']];
 /* path */
 function nextUp(){for(const s of ST){const i=[0,1,2,3,4].find(i=>lvl(kk(s,i))<2);if(i!==undefined)return {s,i}}return null}
-function renderNext(){const n=nextUp();const w=S.warm[today()]||[];$('next').innerHTML=n?`<b>Up next:</b><span>Stage ${ST.indexOf(n.s)+1}, ${esc(n.s.title)} · step ${n.i+1}, ${STEPS(n.s)[n.i][0]}.</span><span class="note">To reach Consistent: ${STEPS(n.s)[n.i][2][1]}.</span><span class="sp"></span><a class="lk" href="#${n.s.id}">Go to it</a>${w.length<5?`<a class="lk" href="#warm-up">Warm up first (${w.length}/5 today)</a>`:''}`:'<b>Every gate passed.</b><span>Go back and take every step to Applied.</span>'}
+function renderNext(){const n=nextUp();const w=S.warm[today()]||[];const fl=fsOn()?'<a class="lk" id="fsLink" href="#first-steps">First Steps</a>':'';$('next').innerHTML=n?`<b>Up next:</b><span>Stage ${ST.indexOf(n.s)+1}, ${esc(n.s.title)} · step ${n.i+1}, ${STEPS(n.s)[n.i][0]}.</span><span class="note">To reach Consistent: ${STEPS(n.s)[n.i][2][1]}.</span><span class="sp"></span><a class="lk" href="#${n.s.id}">Go to it</a>${w.length<5?`<a class="lk" href="#warm-up">Warm up first (${w.length}/5 today)</a>`:''}${fl}`:'<b>Every gate passed.</b><span>Go back and take every step to Applied.</span><span class="sp"></span>'+fl}
 function renderFinish(){const f=FIN.find(f=>f.k===S.finish);let lc=false;try{lc=CSS.supports('color','light-dark(#000,#fff)')}catch(e){}document.documentElement.style.setProperty('--fin',lc?`light-dark(${f.lc},${f.col})`:f.col);
  $('finishes').innerHTML=FIN.map(x=>`<button data-fin="${x.k}" aria-pressed="${x.k===S.finish}">${x.n}</button>`).join('');$('nswBtn').setAttribute('aria-pressed',S.nsw);$('tchBtn').setAttribute('aria-pressed',S.teacher)}
 function renderNeck(){const dots={2:1,4:1,6:2},n=nextUp();$('neck').innerHTML='<div class="nut"></div>'+ST.map((s,i)=>{const d=dots[i],pd=passed(s)?' done':'',ahead=n&&ST.indexOf(n.s)<i&&!done(s);
@@ -553,7 +606,7 @@ function renderRecord(){const s=stage(),iname=INST.find(x=>x[0]===S.inst)[1],mc=
 let bk={note:null,pend:null,inTxt:'',out:''},dlCap;
 /* a claude.ai artifact can hand files to its viewer; anywhere else this stays empty and the plain download link is used */
 const dlFind=()=>{if(dlCap!==undefined)return Promise.resolve(dlCap);try{const c=window.claude;if(c&&typeof c.use==='function')return Promise.resolve(c.use('downloads')).then(d=>dlCap=(d&&typeof d.save==='function')?d:null,()=>dlCap=null)}catch(e){}return Promise.resolve(null)};
-const backupObj=()=>{gigS();return {app:'The Guitar Lab',format:1,version:'0.9',saved:new Date().toISOString(),state:JSON.parse(JSON.stringify(S))}};
+const backupObj=()=>{gigS();return {app:'The Guitar Lab',format:1,version:'0.11',saved:new Date().toISOString(),state:JSON.parse(JSON.stringify(S))}};
 const backupText=()=>JSON.stringify(backupObj(),null,1);
 const bkName=()=>'guitar-lab-backup-'+today()+'.json';
 const NOCHG=' Nothing has been changed.';
@@ -563,7 +616,7 @@ function readBackup(txt){txt=String(txt||'').replace(/^﻿/,'').trim();if(!txt)r
  try{o=JSON.parse(txt)}catch(e){return {err:'That isn\'t a Guitar Lab backup: the text can\'t be read as JSON, so part of it may be missing or changed. Copy the whole backup, from the first { to the last }, and try again.'+NOCHG}}
  const isO=v=>!!v&&typeof v==='object'&&!Array.isArray(v);if(!isO(o))return {err:'That isn\'t a Guitar Lab backup: a backup is one block of text that starts with { and ends with }.'+NOCHG};
  const wrapped=isO(o.state)&&('format' in o||'app' in o),st=wrapped?o.state:o;
- if(wrapped&&typeof o.format==='number'&&o.format>1)return {err:'That backup was made by a newer version of The Guitar Lab than this one (0.9), so it can\'t be read here.'+NOCHG};
+ if(wrapped&&typeof o.format==='number'&&o.format>1)return {err:'That backup was made by a newer version of The Guitar Lab than this one (0.11), so it can\'t be read here.'+NOCHG};
  const known=Object.keys(DEF).filter(k=>st[k]!==undefined&&st[k]!==null);if(!known.length)return {err:'That JSON isn\'t a Guitar Lab backup: it has none of the things this app saves (levels, journal, gig plan and so on).'+NOCHG};
  const bad=known.filter(k=>!kindOK(DEF[k],st[k]));if(bad.length)return {err:'That backup is damaged: '+bad.map(k=>'"'+k+'"').join(', ')+(bad.length>1?' are':' is')+' not in the form this app saves.'+NOCHG};
  if(Array.isArray(st.changes)&&st.changes.some(c=>!isO(c))||Array.isArray(st.journal)&&st.journal.some(j=>!isO(j)))return {err:'That backup is damaged: its practice log or journal has entries this app can\'t read.'+NOCHG};
@@ -591,17 +644,39 @@ function bkCopy(){const txt=backupText(),done=()=>bkSay('Backup copied. Paste it
  clipWrite(txt).then(done,box)}
 function bkOffer(txt){const r=readBackup(txt);if(r.err){bk.pend=null;const a=$('bkAsk');if(a)a.innerHTML='';bkSay(r.err,1);return}bk.pend=r;bk.note=null;renderRecord();const no=$('bkNo');if(no)no.focus()}
 function bkApply(){const q=bk.pend;if(!q)return;const old=S,tch=S.teacher;try{loadState(JSON.parse(JSON.stringify(q.st)));S.teacher=tch;gigS();checkGates()}catch(e){S=old;bk.pend=null;renderRecord();bkSay('That backup couldn\'t be loaded.'+NOCHG,1);return}
- stopAll();if(metro)stopMetro();loop=[];loopChg='';for(const k in bus)bus[k].gain.value=S.mute[k]?0:1;const kept=save();bk={note:['Backup imported: '+bkCount(S)+(kept?'. Your progress has been replaced and saved in this browser.':'. It is loaded for this visit only: this page isn\'t allowed to store anything here, so it will be gone when the page closes. Keep your backup file, and use Download backup or Copy backup before you leave to keep anything new.'),false],pend:null,inTxt:'',out:''};all();mUI();toast('Backup imported');const h=$('backup');if(h){h.setAttribute('tabindex','-1');h.focus({preventScroll:true})}}
+ stopAll();if(metro)stopMetro();loop=[];loopChg='';for(const k in bus)bus[k].gain.value=S.mute[k]?0:1;noteTabs(true);const kept=save();bk={note:['Backup imported: '+bkCount(S)+(kept?'. Your progress has been replaced and saved in this browser.':'. It is loaded for this visit only: this page isn\'t allowed to store anything here, so it will be gone when the page closes. Keep your backup file, and use Download backup or Copy backup before you leave to keep anything new.'),false],pend:null,inTxt:'',out:''};{const n=bk.note;route();bk.note=n;if(view==='record')renderRecord()}toast('Backup imported');const h=$('backup');if(h){h.setAttribute('tabindex','-1');h.focus({preventScroll:true})}}
+/* first steps (0.11) */
+/* First Steps is written for guitar in this batch; the other instruments keep every tab, as in 0.9 */
+const fsOn=()=>S.inst==='guitar',fsDone=()=>S.fs?!!S.fs.complete:fsOld(),fsAll=()=>S.fs?!!S.fs.all:fsOld(),fsForced=()=>fsOn()&&!fsDone()&&!S.teacher;
+const FSF=()=>{if(!S.fs){const o=fsOld();S.fs={done:[],complete:o,placed:false};if(o)S.fs.all=true}return S.fs};
+const TABS2=['rudiments','warm-up'],TABS3=['technique','invent','gig'];let tabNote=[];
+const TABWHY={path:'the neck is your map, with one song at each fret',record:'your progress, your journal and your backups','warm-up':'ten minutes to start every practice',rudiments:'short daily drills for your hands',technique:'the moves that give each style its sound',invent:'make your own loops from the chords you know',gig:'plan a set and rehearse it as a band'};
+const TABNAME={path:'The Path','warm-up':'Warm-up',rudiments:'Rudiments',technique:'Technique',invent:'Invent',gig:'Gig',record:'Record'};
+/* tabs as needed: Path and Record after First Steps; Rudiments and Warm-up after the stage 1 gate; Technique, Invent and Gig after the stage 2 gate. A tab that has opened stays open. Teacher mode, other instruments and saves from before 0.11 see them all. */
+function openTabs(){if(S.teacher||!fsOn()||fsAll())return VIEWS.slice();if(!fsDone())return [];const seen=S.fs.seen||[],t=['path','record'];
+ if(passed(ST[0])||TABS2.some(v=>seen.includes(v)))t.push(...TABS2);if(passed(ST[1])||TABS3.some(v=>seen.includes(v)))t.push(...TABS3);return t}
+/* a tab is announced once, the moment it opens; quiet=true (start-up, import) just records what is already open */
+function noteTabs(quiet){if(!fsDone()||fsAll()||S.teacher||!fsOn())return;const seen=S.fs.seen||(S.fs.seen=[]),nw=VIEWS.filter(v=>openTabs().includes(v)&&!seen.includes(v));if(!nw.length)return;seen.push(...nw);if(!quiet){tabNote=nw;save()}}
+function renderTabs(){const t=openTabs();document.querySelectorAll('#tabs a').forEach(a=>{const v=a.getAttribute('href').slice(1);a.classList.toggle('hide',v==='first-steps'?!(fsOn()&&!fsDone()):!(t.includes(v)||v===view))})}
+function renderMsg(){const g=$('gateMsg');let h='';if(tabNote.length)h+=`<div class="gate tabnote" id="tabNote"><b style="font-weight:500">New for you</b>${tabNote.map(v=>`<p>${TABNAME[v]} is open: ${TABWHY[v]}.</p>`).join('')}</div>`;
+ if(!fsOn())h+=`<p class="note" id="fsSoon">First Steps for ${INST.find(x=>x[0]===S.inst)[1].toLowerCase()} is coming. Until then, every tab is open.</p>`;if(g.innerHTML!==h)g.innerHTML=h}
+const goTo=h=>{let same=false;try{same=location.hash==='#'+h;if(!same)location.hash=h}catch(e){same=true}if(same)route()};
+const FSTEPS=[[1,'Meet the guitar'],[2,'Get ready'],[3,'The strings'],[4,'Hear the open strings'],[5,'Chord diagrams'],[6,'TAB'],[7,'First sound']];
+let fsAt=0;function fsLeave(){}function fsQuiet(){}
+function renderFS(){const d=(S.fs&&S.fs.done)||[];if(!fsAt)fsAt=FSTEPS.map(s=>s[0]).find(n=>!d.includes(n))||1;
+ $('v-first-steps').innerHTML=`<div class="fst-eye">First Steps · step ${fsAt} of 7</div><h2>${FSTEPS[fsAt-1][1]}</h2><div class="fst-nav"><button id="fsNext" class="fst-go" disabled>Next</button></div>`}
+
+/* end first steps */
 /* sequencing */
 let metro=null,timerLeft=0,tmr=null,seqT=[],playing=false,confirmLower=null;
 const home=s=>s.ch.find(c=>/^(I|i)$/.test(fnOf(s.key,c)[0]))||s.ch[0];
 function formBars(s){const sg=s.song,idx=[];let off=0;const start={};sg.map.forEach(m=>{start[m.s]=off;off+=m.b.length});
  (FORM[s.id]||sg.form||sg.map.map(m=>[m.s,1])).forEach(([n,r])=>{const m=sg.map.find(x=>x.s===n);if(!m)return;for(let k=0;k<r;k++)m.b.forEach((b,i)=>idx.push({c:b,i:start[n]+i}))});return idx}
 /* the Path and the Gig each keep their own feel switch (0.7): a gig song plays its own feel unless the Gig switch is on */
-const finOn=s=>GIG.includes(s)?!!gigS().useFin:S.useFin;
+const finOn=s=>s.plain?false:GIG.includes(s)?!!gigS().useFin:S.useFin;
 function feelMiss(s){if(!finOn(s))return '';const f=FIN.find(f=>f.k===S.finish),fp=finPat(s),sp=PAT[s.pat];return fp&&fp.b===sp.b?'':`The band can't follow the ${f.n} feel on this song: its count doesn't fit one bar of ${sp.m===6?'6/8':sp.m+'/4'}. The band keeps the stage pattern; the metronome still plays the feel.`}
 function bandPat(s){const sp=PAT[s.pat];if(!finOn(s))return sp;const fp=finPat(s);return fp&&fp.b===sp.b?Object.assign({},fp,{m:sp.m}):sp}
-async function playSeq(bars,kind,s){const a=A();if(!a)return;stopAll();const my=++runId;if(metro)stopMetro();try{await a.resume()}catch(e){}if(my!==runId)return;s=s||stage();playing=kind;const p=bandPat(s),beat=60/bpm(),cs=cells(p),n=cs.length,free=kind==='loop';
+async function playSeq(bars,kind,s){const a=A();if(!a)return;stopAll();const my=++runId;if(metro)stopMetro();try{await a.resume()}catch(e){}if(my!==runId)return;s=s||stage();playing=kind;const p=bandPat(s),beat=60/bpm(),cs=cells(p),n=cs.length,free=kind==='loop'||kind==='fs';
  const P=k=>free||kind==='gig'?out():part(k),dp=drumPat(p);let t=a.currentTime+.15;
  if(p.m===4){[0,2].forEach(k=>click(t+k*beat,k===0));t+=4*beat;for(let k=0;k<4;k++)click(t+k*beat,k===0);t+=4*beat}
  else if(p.m===3){for(let k=0;k<3;k++)click(t+k*beat,k===0);t+=3*beat}
@@ -624,9 +699,14 @@ function stopMetro(){clearInterval(metro);metro=null;mUI();document.querySelecto
 function restartMetro(){if(metro){stopMetro();startMetro()}}
 function checkGates(){ST.forEach(s=>{if(passed(s)&&!S.gates[gk(s)]){S.gates[gk(s)]=Date.now();toast(`Gate passed: stage ${ST.indexOf(s)+1}, ${s.title}.${[2,4,6].includes(ST.indexOf(s))?' Its inlay is now gold.':''}`)}else if(!passed(s)&&S.gates[gk(s)])delete S.gates[gk(s)]})}
 const VIEWS=['path','warm-up','rudiments','technique','invent','gig','record'];let view='path';
-function route(){let h='';try{h=location.hash.slice(1)}catch(e){}const before=view+S.stage;if(ST.some(s=>s.id===h)){if(S.stage!==h){S.stage=h;loop=[];save();stopAll()}view='path'}else if(VIEWS.includes(h))view=h;else view='path';
+function route(){let h='';try{h=location.hash.slice(1)}catch(e){}const before=view+S.stage,forced=fsForced();
+ /* 0.11: until First Steps is finished a guitar student sees only First Steps (and Record, when asked for by name, so a backup can be brought back); after that, only the tabs that have opened */
+ if(h==='first-steps'&&fsOn())view='first-steps';else if(forced)view=h==='record'?'record':'first-steps';
+ else if(ST.some(s=>s.id===h)){if(S.stage!==h){S.stage=h;loop=[];save();stopAll()}view='path'}else if(VIEWS.includes(h)&&openTabs().includes(h))view=h;else view='path';
+ if(view!=='path')tabNote=[];if(view!=='first-steps')fsLeave();else if(metro)stopMetro();
+ $('v-first-steps').classList.toggle('hide',view!=='first-steps');document.body.classList.toggle('fsmode',view==='first-steps');
  if(before!==view+S.stage&&playing)stopAll();if(view!=='gig')document.body.classList.remove('present');if(view!=='record'){bk.pend=null;bk.note=null;bk.out=''}VIEWS.forEach(v=>{$('v-'+v).classList.toggle('hide',v!==view);if(v!==view&&v!=='path')$('v-'+v).innerHTML=''});document.querySelectorAll('#tabs a').forEach(a=>a.setAttribute('aria-current',a.getAttribute('href')==='#'+view?'page':'false'));all();restartMetro();mUI();if(pendingFocus){refocus(pendingFocus);pendingFocus=null}else if(focusView){const hd=view==='path'?$('next'):$('v-'+view).querySelector('h2');if(hd){hd.setAttribute('tabindex','-1');hd.focus()}}focusView=false}
-function all(){renderFinish();if(view==='path'){renderNext();renderNeck();renderStage();renderSide()}else if(view==='warm-up')renderWarm();else if(view==='rudiments')renderRud();else if(view==='technique')renderTech();else if(view==='invent')renderInvent();else if(view==='gig')renderGig();else renderRecord()}
+function all(){renderFinish();noteTabs(false);renderTabs();if(view==='first-steps')renderFS();else if(view==='path'){renderMsg();renderNext();renderNeck();renderStage();renderSide()}else if(view==='warm-up')renderWarm();else if(view==='rudiments')renderRud();else if(view==='technique')renderTech();else if(view==='invent')renderInvent();else if(view==='gig')renderGig();else renderRecord()}
 function refocus(sel){const el=document.querySelector(sel);if(el)el.focus()}
 let focusView=false,pendingFocus=null;
 document.addEventListener('click',e=>{if(e.target.closest('#tabs a')||e.target.closest('#next a'))focusView=true;const t=e.target.closest('button');if(!t)return;if(!(t.dataset.lv&&t.dataset.lv===confirmLower&&t.dataset.dir==='-1'))confirmLower=null;
@@ -642,7 +722,7 @@ document.addEventListener('click',e=>{if(e.target.closest('#tabs a')||e.target.c
  else if(t.dataset.pat){const nf=t.dataset.pat==='1',chg=nf!==S.useFin,was=chg&&playing;S.useFin=nf;save();if(was)stopAll();const r=!!metro;stopMetro();all();if(r)startMetro();mUI();refocus(`[data-pat="${t.dataset.pat}"]`);const ms=feelMiss(stage());if(was||(chg&&ms))toast((was?'Feel changed, so the band has stopped. Press Play again. ':'')+ms,ms?7000:0)}
  else if(t.dataset.gpat){const G=gigS(),nf=t.dataset.gpat==='1',chg=nf!==G.useFin,was=chg&&playing;G.useFin=nf;save();if(was)stopAll();renderGig();restartMetro();mUI();refocus(`[data-gpat="${t.dataset.gpat}"]`);if(was)toast('Feel changed, so the band has stopped. Press Play again.')}
  else if(t.id==='nswBtn'){S.nsw=!S.nsw;save();all()}
- else if(t.id==='tchBtn'){S.teacher=!S.teacher;save();all()}
+ else if(t.id==='tchBtn'){S.teacher=!S.teacher;save();route();refocus('#tchBtn')}
  else if(t.classList.contains('m-toggle')){if(metro)stopMetro();else{if(playing)stopAll();startMetro()}mUI()}
  else if(t.classList.contains('m-step')){setBpm(bpm()+(+t.dataset.step));mUI();tempoStop()}
  else if(t.id==='playMap'){if(playing==='map'){stopAll();return}playSeq(formBars(stage()),'map')}
@@ -661,7 +741,7 @@ document.addEventListener('click',e=>{if(e.target.closest('#tabs a')||e.target.c
  else if(t.id==='bkImport')bkOffer($('bkIn').value)
  else if(t.id==='bkYes')bkApply()
  else if(t.id==='bkNo'){bk.pend=null;renderRecord();bkSay('Import cancelled. Your progress is unchanged.');refocus('#bkImport')}
- else if(t.dataset.inst){S.inst=t.dataset.inst;save();all();mUI();refocus(`[data-inst="${S.inst}"]`);toast(INST.find(x=>x[0]===S.inst)[1]+': your steps, gates and record are now for this instrument.')}
+ else if(t.dataset.inst){S.inst=t.dataset.inst;save();route();refocus(`[data-inst="${S.inst}"]`);toast(INST.find(x=>x[0]===S.inst)[1]+': your steps, gates and record are now for this instrument.')}
  else if(t.dataset.mute){const k=t.dataset.mute;S.mute[k]=!S.mute[k];save();t.setAttribute('aria-pressed',!S.mute[k]);if(bus[k])bus[k].gain.value=S.mute[k]?0:1}
  else if(t.dataset.tgt){setBpm(t.dataset.tgt);mUI();if(!tempoStop())toast('Metronome set to '+bpm()+' bpm')}
  else if(t.dataset.capo){if(playing)stopAll();const s=stage();S.capo[s.id]=Math.max(0,Math.min(7,capo()+(+t.dataset.capo)));if(!S.capo[s.id])delete S.capo[s.id];save();renderStage();renderSide();refocus(`[data-capo="${t.dataset.capo}"]`);toast((capo()?'Capo '+capo():'No capo')+': sounds in '+sounds(s)+'.')}
@@ -682,9 +762,9 @@ document.addEventListener('change',e=>{const d=e.target.dataset;
  if(d.mark!==undefined){if(e.target.value==='')delete S.marks[d.mark];else S.marks[d.mark]=+e.target.value;save();grade()}
  else if(d.warm){const t=today(),cur=S.warm[t]||[];S.warm[t]=e.target.checked?[...new Set(cur.concat(d.warm))]:cur.filter(x=>x!==d.warm);save();renderWarm();if((S.warm[t]||[]).length===5)toast('Warm-up done. Off to your Path.');refocus(`[data-warm="${d.warm}"]`)}
  else if(d.best){const v=parseInt(e.target.value,10);if(v>=30&&v<=300){S.best[d.best]=v;save();toast('Best tempo saved: '+v+' bpm')}else{e.target.value=S.best[d.best]||'';toast('Enter a tempo from 30 to 300')}}});
-window.addEventListener('hashchange',route);let wasNarrow=window.innerWidth<700;window.addEventListener('resize',()=>{const nw=window.innerWidth<700;if(nw!==wasNarrow){wasNarrow=nw;if(view==='path')renderStage();else if(view==='gig')renderGig()}});
-document.addEventListener('visibilitychange',()=>{if(document.hidden){if(metro)stopMetro();if(playing)stopAll()}});
-gigS();checkGates();route();dlFind();
+window.addEventListener('hashchange',route);let wasNarrow=window.innerWidth<700;window.addEventListener('resize',()=>{const nw=window.innerWidth<700;if(nw!==wasNarrow){wasNarrow=nw;if(view==='path')renderStage();else if(view==='gig')renderGig();else if(view==='first-steps')renderFS()}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){fsQuiet();if(metro)stopMetro();if(playing)stopAll()}});
+gigS();checkGates();noteTabs(true);route();dlFind();
 }
 </script>
 </body>

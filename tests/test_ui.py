@@ -802,7 +802,7 @@ def test_R1_export_import_round_trip_is_lossless(app):
     txt = copy_backup(a)
     assert "copied" in text(a, "#bkMsg").lower()
     out = json.loads(txt)
-    assert out["app"] == "The Guitar Lab" and out["version"] == "0.9" and out["format"] == 1 and out["saved"]
+    assert out["app"] == "The Guitar Lab" and out["version"] == "0.11" and out["format"] == 1 and out["saved"]
     assert out["state"] == RICH, "export must carry the full saved state unchanged"
     with a.expect_download() as dl:
         a.click("#bkDown")
@@ -1007,10 +1007,10 @@ def test_R1_no_browser_popups_in_source():
     assert not re.search(r"<script[^>]+src=|<link[^>]+href=", src), "external script or stylesheet"
 
 
-def test_version_label_is_0_9(app):
+def test_version_label_is_0_11(app):
     pg = app(state={})
-    assert pg.title() == "The Guitar Lab 0.9"
-    assert "version 0.9" in text(pg, "header .sub")
+    assert pg.title() == "The Guitar Lab 0.11"
+    assert "version 0.11" in text(pg, "header .sub")
     assert "0.6" not in pg.evaluate("()=>document.body.innerText")
 
 
@@ -1609,6 +1609,10 @@ def sandbox(browser, tmp_path, hash_="record", sel="#backup"):
     pg.on("pageerror", lambda e: log.append("pageerror: " + str(e)))
     pg.goto(host.as_uri())
     fr = pg.frames[1]
+    if hash_ != "record":
+        # 0.11 First Steps: storage is blocked in this frame, so every load is a first visit and only First Steps
+        # (and Record, by name) is open. Teacher mode shows every tab, which is how this test reaches the tab it checks.
+        fr.click("#tchBtn")
     fr.wait_for_selector(sel)
     assert fr.evaluate("()=>{try{localStorage.getItem('x');return 'open'}catch(e){return 'blocked'}}") == "blocked", "frame is not sandboxed"
     return ctx, pg, fr, log
@@ -1656,7 +1660,7 @@ def test_T3_normal_page_messages_still_correct(app):
     m2 = text(pg, "#bkMsg")
     assert dl.value.suggested_filename in m2 and "Copy backup" in m2
     assert not MADE.search(m2.split("If no file appeared")[0]), m2
-    assert json.loads(pathlib.Path(dl.value.path()).read_text(encoding="utf-8"))["version"] == "0.9"
+    assert json.loads(pathlib.Path(dl.value.path()).read_text(encoding="utf-8"))["version"] == "0.11"
     assert not pg.errors
 
 
@@ -1765,7 +1769,9 @@ def test_U1_sandbox_wording_does_not_promise_storage(browser, tmp_path):
 
 @pytest.mark.parametrize("seed", [None, {}, RICH], ids=["first-visit", "empty", "rich"])
 def test_U1_normal_page_wording_unchanged_from_0_8(app, seed):
-    pg = app(state=seed, hash_="record")
+    # 0.11 First Steps: returning=False keeps the first-visit and empty seeds exactly as given (no seeded fs), which is
+    # what this test is about. Record still opens by name on a first visit, so a backup can be brought back.
+    pg = app(state=seed, hash_="record", returning=False)
     if seed is None:
         assert raw(pg) is None, "checking for storage must not write anything on a first visit"
     else:
@@ -1905,21 +1911,21 @@ def test_U3_sizes_at_1280_unchanged_from_0_8(app):
 # --------------------------------------------------------------------- 0.9 version label and older backups
 
 @pytest.mark.parametrize("wrap", ["0.7", "0.8", "0.9", None], ids=["0.7", "0.8", "0.9", "bare-state"])
-def test_version_0_9_still_imports_older_backups_and_bare_state(app, wrap):
+def test_version_0_11_still_imports_older_backups_and_bare_state(app, wrap):
     pg = app(state={}, hash_="record")
     offer(pg, json.dumps(RICH if wrap is None else {"app": "The Guitar Lab", "format": 1, "version": wrap, "saved": "2026-11-20T03:00:00.000Z", "state": RICH}))
     pg.click("#bkYes")
     assert "Backup imported" in text(pg, "#bkMsg") and state(pg) == RICH
-    assert json.loads(copy_backup(pg))["version"] == "0.9", "a new backup is stamped 0.9"
+    assert json.loads(copy_backup(pg))["version"] == "0.11", "a new backup is stamped 0.11"
     assert not pg.errors
 
 
-def test_version_0_9_newer_backup_message_names_this_version(app):
+def test_version_0_11_newer_backup_message_names_this_version(app):
     pg = app(state=RICH, hash_="record")
     before = raw(pg)
     offer(pg, json.dumps({"app": "The Guitar Lab", "format": 2, "version": "1.0", "state": RICH}))
     msg = text(pg, "#bkMsg")
-    assert "newer version of The Guitar Lab than this one (0.9)" in msg and "Nothing has been changed" in msg and "0.8" not in msg, msg
+    assert "newer version of The Guitar Lab than this one (0.11)" in msg and "Nothing has been changed" in msg and "0.8" not in msg, msg
     assert raw(pg) == before and not pg.errors
 
 

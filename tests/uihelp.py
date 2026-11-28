@@ -33,7 +33,23 @@ window.__audState=()=>({ctxs:A.ctxs.length,states:A.ctxs.map(c=>c.state),resumes
 LAUNCH_ARGS = ["--autoplay-policy=no-user-gesture-required"]
 
 
-def open_app(browser, width=1280, height=900, scheme="dark", state=None, hash_="", clock=False):
+# 0.11 First Steps: a guitar student with no saved progress now sees only First Steps, and tabs open as gates pass.
+# These suites test the app a returning student uses (every tab, as in 0.9), so by default the page is seeded with
+# the save such a student has: First Steps finished and every tab kept ("all", which is what the app itself gives any
+# save with progress from before 0.11). Nothing else about the seeded state changes. Pass returning=False for a true
+# first visit (tests/test_firststeps.py does).
+RETURNING = {"done": [1, 2, 3, 4, 5, 6, 7], "complete": True, "placed": False, "all": True}
+
+
+def has_progress(st):
+    """The app's own rule (hasProg in index.html): a save like this is already a returning student's, so it is left exactly as given."""
+    return (any(v > 0 for v in (st.get("lv") or {}).values()) or any(st.get(k) for k in ("gates", "marks", "sign", "best", "warm", "journal", "changes"))
+            or any((b or {}).get("m") for b in ((st.get("gig") or {}).get("bands") or [])))
+
+
+def open_app(browser, width=1280, height=900, scheme="dark", state=None, hash_="", clock=False, returning=True):
+    if returning and "fs" not in (state or {}) and not has_progress(state or {}):
+        state = dict(state or {}, fs=RETURNING)
     ctx = browser.new_context(viewport={"width": width, "height": height}, color_scheme=scheme)
     ctx.add_init_script(AUDIO_JS)
     page = ctx.new_page()
