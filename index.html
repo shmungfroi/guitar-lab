@@ -131,12 +131,12 @@ table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px
 .fst-dots button.dn::after{content:'✓';font-size:12px;margin-left:1px}
 .fst-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;margin-top:18px}
 .fst-fig svg{display:block;width:100%;height:auto;max-width:540px;margin:0 auto}
-.fst-fig .cb{max-width:170px;margin:0 auto}.fst-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:center}
+.fst-fig .cb{max-width:220px;margin:0 auto}.fst-fig .cb svg{max-width:200px}.fst-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:center}
 .fst-cap{min-height:48px;margin:8px 0 0;font-size:15px}.fst-cap b{font-weight:500}
 .fst-key{columns:2;column-gap:18px;margin:8px 0 0;padding-left:26px;font-size:14px;color:var(--ok)}
 .fst-body p{margin:0 0 10px;max-width:62ch}
 .fst-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0}
-.fst-card{border:1px solid var(--rule);border-radius:12px;background:var(--card);padding:14px 16px}.fst-card p{font-size:15px;margin:0}.fst-card svg{display:block;width:64px;height:auto;margin:0 0 6px}
+.fst-card{border:1px solid var(--rule);border-radius:12px;background:var(--card);padding:14px 16px}.fst-card p{font-size:15px;margin:0}.fst-card svg{display:block;height:auto;margin:0 0 8px}
 .fst-tip{border-left:3px solid var(--gold);background:var(--card);padding:10px 14px;margin:14px 0;border-radius:0 6px 6px 0;max-width:62ch}.fst-tip b{font-weight:500}.fst-tip p{margin:0}
 .fst-home{border:1px solid var(--rule);border-radius:12px;padding:14px 16px;margin:18px 0 0;max-width:62ch}
 .fst-check{border-top:1px solid var(--rule);margin-top:18px;padding-top:14px}
@@ -661,10 +661,167 @@ function renderTabs(){const t=openTabs();document.querySelectorAll('#tabs a').fo
 function renderMsg(){const g=$('gateMsg');let h='';if(tabNote.length)h+=`<div class="gate tabnote" id="tabNote"><b style="font-weight:500">New for you</b>${tabNote.map(v=>`<p>${TABNAME[v]} is open: ${TABWHY[v]}.</p>`).join('')}</div>`;
  if(!fsOn())h+=`<p class="note" id="fsSoon">First Steps for ${INST.find(x=>x[0]===S.inst)[1].toLowerCase()} is coming. Until then, every tab is open.</p>`;if(g.innerHTML!==h)g.innerHTML=h}
 const goTo=h=>{let same=false;try{same=location.hash==='#'+h;if(!same)location.hash=h}catch(e){same=true}if(same)route()};
-const FSTEPS=[[1,'Meet the guitar'],[2,'Get ready'],[3,'The strings'],[4,'Hear the open strings'],[5,'Chord diagrams'],[6,'TAB'],[7,'First sound']];
-let fsAt=0;function fsLeave(){}function fsQuiet(){}
-function renderFS(){const d=(S.fs&&S.fs.done)||[];if(!fsAt)fsAt=FSTEPS.map(s=>s[0]).find(n=>!d.includes(n))||1;
- $('v-first-steps').innerHTML=`<div class="fst-eye">First Steps · step ${fsAt} of 7</div><h2>${FSTEPS[fsAt-1][1]}</h2><div class="fst-nav"><button id="fsNext" class="fst-go" disabled>Next</button></div>`}
+const FSTEPS=[[1,'Meet the guitar','Two guitars, one set of names.'],[2,'Get ready','How to sit, hold the pick and place your fingers.'],[3,'The strings','Six strings, each with a number and a name.'],[4,'Hear the open strings','Listen, sing, then pluck.'],[5,'Chord diagrams','A picture of where your fingers go.'],[6,'TAB','Six lines for six strings.'],[7,'First sound','Your first chord, then your first three notes.']];
+const F7=[1,2,3,4,5,6,7];
+/* ---- the guitar drawing ----
+   It sits behind this one function so the artwork can be replaced without touching the steps or the tests.
+   guitarArt({kind:'acoustic'|'electric', highlight:<part id|null>, strings:<null|1-6>}) returns an SVG string, 720 by 280: head to the left, string 6 at the bottom (the guitar lying flat on your lap, the same way up as TAB).
+   Every part is a <g data-part="id"> (ids in GPARTS); every string is a <path data-string="1-6"> with a wide invisible twin (class gh) to tap. GART.anchor gives one point on each part for a label's leader line.
+   This drawing is a plain placeholder with true proportions (frets from the twelfth root of two, on a 650 mm scale). The finished illustration is a separate design job. */
+const GPARTS=['headstock','machineHeads','nut','neck','fingerboard','frets','positionMarkers','body','soundHole','pickguard','saddle','bridge','strings','pickups'];
+const GART={w:720,h:280,anchor:{acoustic:{headstock:[40,163],machineHeads:[72,95],nut:[131,126],neck:[200,155.3],fingerboard:[330,157],frets:[239.6,125],positionMarkers:[266,140],body:[640,230],soundHole:[462,173],pickguard:[520,95],saddle:[561,161],bridge:[572,96],strings:[400,124.4]},
+ electric:{machineHeads:[72,185],nut:[131,154],frets:[239.6,155],strings:[400,155.6],bridge:[563,166],pickups:[459.5,114]}}};
+const gfx=n=>132+429*(1-2**(-n/12)),ghw=x=>14+(x-132)*5.5/296,gsy=(n,x)=>{const t=Math.min(1,Math.max(0,(x-132)/429));return 140+(n-3.5)*(4.6+2.6*t)};
+function guitarArt(o){o=o||{};const el=o.kind==='electric',hl=o.highlight||null,sn=o.strings||null,r=v=>Math.round(v*10)/10;
+ const P=(id,inner)=>`<g data-part="${id}"${hl===id?' class="on"':''}>${inner}</g>`,nf=el?22:20,fe=r(gfx(nf)),bj=el?400:370,se=el?571:575;
+ const body=el?'M400,121 C390,112 378,96 368,74 C364,62 372,54 384,56 C410,58 430,50 455,49 C480,48 492,62 512,63 C540,64 560,36 598,36 C636,36 652,90 652,140 C652,190 636,244 598,244 C560,244 540,216 512,217 C492,218 480,232 455,231 C425,230 398,226 372,222 C356,220 346,206 352,196 C362,180 388,170 400,159'
+  :'M370,121 C372,90 395,46 440,44 C470,43 485,60 505,61 C530,62 560,11 612,11 C668,11 700,70 700,140 C700,210 668,269 612,269 C560,269 530,218 505,219 C485,220 470,237 440,236 C395,234 372,190 370,159';
+ let s=P('body',`<path class="gl" d="${body}"/>`+(el?'<circle class="gl" cx="600" cy="84" r="8"/><circle class="gl" cx="624" cy="104" r="8"/>':''));
+ if(el)s+=P('pickups',[452,520].map(x=>`<rect class="gl" x="${x}" y="114" width="15" height="52" rx="4"/>`+F7.slice(0,6).map(n=>`<circle class="gd" cx="${x+7.5}" cy="${r(gsy(n,x+7.5))}" r="1.3"/>`).join('')).join(''));
+ else s+=P('soundHole','<circle class="gl" cx="462" cy="140" r="33"/><circle class="gg" cx="462" cy="140" r="38.5"/>')+P('pickguard','<path class="gl" d="M424,130 C418,104 440,76 470,72 C500,68 536,80 532,98 C528,112 512,118 499,127"/>');
+ s+=P('headstock','<path class="gl" d="M132,124 L118,112 C100,107 58,105 32,110 C23,112 20,122 20,140 C20,158 23,168 32,170 C58,175 100,173 118,168 L132,156"/>');
+ s+=P('machineHeads',[100,72,44].map(x=>[-1,1].map(d=>`<line class="gl" x1="${x}" x2="${x}" y1="${140+d*31}" y2="${140+d*41}"/><ellipse class="gl" cx="${x}" cy="${140+d*45.5}" rx="7.5" ry="4.5"/><circle class="gg" cx="${x}" cy="${140+d*16}" r="2.6"/>`).join('')).join(''));
+ s+=P('fingerboard',`<path class="gl" d="M132,126 L${fe},${r(140-ghw(fe))} L${fe},${r(140+ghw(fe))} L132,154"/>`);
+ s+=P('neck',`<path class="gl" d="M132,126 L${bj},${r(140-ghw(bj))} M132,154 L${bj},${r(140+ghw(bj))}"/>`);
+ s+=P('frets',Array.from({length:nf},(_,i)=>{const x=r(gfx(i+1)),h=ghw(x)-1;return `<line class="gg" x1="${x}" x2="${x}" y1="${r(140-h)}" y2="${r(140+h)}"/>`}).join(''));
+ s+=P('nut','<rect class="gl" x="128.5" y="125" width="4.5" height="30" rx="1.5"/>');
+ s+=P('positionMarkers',(el?[3,5,7,9,12,15,17,19,21]:[3,5,7,9,12,15,17]).map(f=>{const x=r((gfx(f-1)+gfx(f))/2);return f===12?`<circle class="gd" cx="${x}" cy="132" r="2.4"/><circle class="gd" cx="${x}" cy="148" r="2.4"/>`:`<circle class="gd" cx="${x}" cy="140" r="2.4"/>`}).join(''));
+ s+=P('bridge',el?'<rect class="gl" x="552" y="114" width="20" height="52" rx="3"/>':'<rect class="gl" x="549" y="96" width="39" height="88" rx="6"/>'+F7.slice(0,6).map(n=>`<circle class="gd" cx="578" cy="${r(gsy(n,561))}" r="1.6"/>`).join(''));
+ s+=P('saddle',el?'<line class="gl" x1="561" x2="561" y1="119" y2="161"/>':'<rect class="gl" x="559.5" y="118" width="3.5" height="44" rx="1.5"/>');
+ const post=n=>n>=4?[[100,72,44][6-n],156]:[[44,72,100][3-n],124];
+ s+=P('strings',[6,5,4,3,2,1].map(n=>{const [px,py]=post(n),w=.8+(n-1)*.34+(sn===n?1.6:0);
+  return `<path class="gs${sn===n?' on':sn?' dim':''}" data-string="${n}" d="M${px},${py} L132,${r(gsy(n,132))} L561,${r(gsy(n,561))} L${se},${r(gsy(n,561))}" style="stroke-width:${w.toFixed(1)}px"/><path class="gh" data-string="${n}" d="M132,${r(gsy(n,132))} L561,${r(gsy(n,561))}"/>`}).join(''));
+ return `<svg class="gart" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 280" width="720" height="280" role="img" aria-label="${el?'An electric guitar':'An acoustic guitar'}">${s}</svg>`}
+/* ---- words for the parts: [id, name, with "the", what it is] ---- */
+const FPART=[['headstock','Headstock','the headstock','The flat end of the guitar, also called the head. The strings finish here.'],
+ ['machineHeads','Machine heads','the machine heads','Also called tuning pegs. Each one tightens or loosens one string. At school, your teacher does the tuning.'],
+ ['nut','Nut','the nut','The thin strip where the head meets the neck. Each string sits in its own groove.'],
+ ['neck','Neck','the neck','The long part your fretting hand holds.'],
+ ['fingerboard','Fingerboard','the fingerboard','The front face of the neck, also called the fretboard. Your fingers press the strings down onto it.'],
+ ['frets','Frets','the frets','The thin metal strips across the fingerboard. Press a string just behind one to change the note.'],
+ ['positionMarkers','Position markers','the position markers','Dots that help you find your place. On most guitars they sit at frets 3, 5, 7 and 9, with two dots at fret 12.'],
+ ['body','Body','the body','The big part that rests on your leg. An acoustic body is a hollow box that makes the strings louder.'],
+ ['soundHole','Sound hole','the sound hole','The round hole under the strings of an acoustic guitar. It lets the sound out of the body.'],
+ ['pickguard','Pickguard','the pickguard','A thin plate beside the sound hole. It protects the wood from your pick.'],
+ ['saddle','Saddle','the saddle','The thin strip set into the bridge. The strings rest on it.'],
+ ['bridge','Bridge','the bridge','It holds the strings onto the body.'],
+ ['strings','Strings','the strings','Six of them, from thick to thin. They run from the machine heads, over the nut, to the bridge.'],
+ ['pickups','Pickups','the pickups','On an electric guitar, where the sound hole would be. A pickup works like a tiny microphone for the strings.']];
+const fpn=id=>FPART.findIndex(p=>p[0]===id)+1,fpt=id=>FPART.find(p=>p[0]===id);
+const SNAME=['','high E','B','G','D','A','low E'],SLET=['','E','B','G','D','A','E'],sOpen=n=>OPEN[6-n];
+const fsNarrow=()=>window.innerWidth<700;
+/* ---- figures ---- */
+/* both guitars standing up (head at the top, string 6 on the left, like a chord diagram), with numbered tags on leader lines. The tags are the tap targets. */
+function fsFigParts(quiz){const k=.52,nw=fsNarrow(),tr=nw?11:8.5,tf=nw?12:9.5,hit=nw?22:15,cx={acoustic:100,electric:262},oy=14,pt=(kind,[x,y])=>[cx[kind]-(y-140)*k,oy+(x-20)*k];
+ const TAGS=[['headstock',16,28],['neck',16,104],['positionMarkers',16,150],['fingerboard',16,196],['soundHole',16,244],['saddle',16,292],['body',16,340],['machineHeads',184,30],['nut',184,76],['frets',184,124],['strings',184,176],['pickguard',184,250],['bridge',184,300],['pickups',344,258]];
+ let lead='',tags='';TAGS.forEach(([id,tx,ty])=>{const pts=[];if(tx<300&&GART.anchor.acoustic[id])pts.push(pt('acoustic',GART.anchor.acoustic[id]));if(tx>100&&GART.anchor.electric[id])pts.push(pt('electric',GART.anchor.electric[id]));
+  pts.forEach(([x,y])=>{lead+=`<line class="gld" x1="${tx}" y1="${ty}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/><circle class="gd" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="1.8"/>`});const num=fpn(id);
+  tags+=`<g class="gtag" role="button" tabindex="0" data-part="${id}" aria-pressed="${!quiz&&fsPart===id}" aria-label="${quiz?'Label '+num:num+': '+fpt(id)[1]}" transform="translate(${tx},${ty})"><circle r="${hit}" fill="transparent"/><circle class="gt-c" r="${tr}"/><text class="gt-n" text-anchor="middle" y="${(tf*.36).toFixed(1)}" font-size="${tf}">${num}</text></g>`});
+ const g=kind=>`<g transform="translate(${cx[kind]+140*k},${oy-20*k}) rotate(90) scale(${k})">${guitarArt({kind,highlight:quiz?null:fsPart||null})}</g>`;
+ return `<svg viewBox="0 0 360 398" role="group" aria-label="An acoustic guitar and an electric guitar with numbered labels">${g('acoustic')}${g('electric')}${lead}${tags}<text class="gtx" x="100" y="392" text-anchor="middle" font-size="${tf}">Acoustic</text><text class="gtx" x="262" y="392" text-anchor="middle" font-size="${tf}">Electric</text></svg>`}
+/* the strings near the bridge, lying flat: string 6 at the bottom, as in TAB. o.on lights one string; o.labels shows numbers and names. */
+function fsFigStrings(o){o=o||{};const tf=fsNarrow()?11.5:10,Y=n=>(gsy(n,561)-80)*2;
+ const lab=o.labels?[1,2,3,4,5,6].map(n=>`<text class="gtx" x="306" y="${(Y(n)+4).toFixed(1)}" font-size="${tf}">${n}</text><text class="gtx" x="326" y="${(Y(n)+4).toFixed(1)}" font-size="${tf}" font-weight="500">${SLET[n]}</text>`).join('')+`<text class="gtx" x="352" y="20" text-anchor="end" font-size="${tf}">string 1: thinnest, highest</text><text class="gtx" x="352" y="226" text-anchor="end" font-size="${tf}">string 6: thickest, lowest</text>`:'';
+ return `<svg class="fst-strfig" viewBox="0 0 360 232" role="group" aria-label="${o.on?'The six strings, with one lit up':'The six strings near the bridge, string 6 at the bottom'}"><g transform="translate(-880,-160) scale(2)">${guitarArt({kind:'acoustic',strings:o.on||null})}</g>${lab}</svg>`}
+/* sitting position: the same drawing as you would see it in a mirror (string 6 on top), head tilted up */
+function fsFigHold(){const tf=fsNarrow()?11.5:10;
+ return `<svg viewBox="0 0 360 232" role="img" aria-label="An acoustic guitar held for playing: the neck points slightly up, the waist rests on the right leg, the fretting hand is near the head and the strumming hand is over the sound hole"><g transform="translate(180,112) rotate(7) scale(.47,-.47) translate(-360,-140)">${guitarArt({kind:'acoustic'})}</g>
+ <path class="gg" d="M210,190 C224,168 260,168 272,190"/><text class="gtx" x="241" y="208" text-anchor="middle" font-size="${tf}">your right leg</text>
+ <ellipse class="gld" cx="101" cy="102" rx="24" ry="15" transform="rotate(7 101 102)" stroke-dasharray="3 3"/><text class="gtx" x="101" y="136" text-anchor="middle" font-size="${tf}">fretting hand</text>
+ <circle class="gld" cx="227.5" cy="118" r="21" stroke-dasharray="3 3"/><text class="gtx" x="228" y="52" text-anchor="middle" font-size="${tf}">strumming hand</text><line class="gld" x1="228" y1="57" x2="228" y2="95"/>
+ <path class="gg" d="M22,74 L32,58 M32,58 L24,60 M32,58 L33,66"/><text class="gtx" x="40" y="60" font-size="${tf}">neck slightly up</text></svg>`}
+const fsHand=()=>`<svg viewBox="0 0 104 132" style="width:116px" role="img" aria-label="A left hand, palm towards you: thumb T, then fingers 1, 2, 3 and 4"><path class="gl" style="vector-effect:non-scaling-stroke" d="M44,126 C40,112 34,104 26,92 L14,70 C10,62 20,56 25,64 L38,84 L38,30 C38,20 50,20 50,30 L50,64 L52,64 L52,22 C52,12 64,12 64,22 L64,64 L66,64 L66,28 C66,18 78,18 78,28 L78,66 L80,66 L80,44 C80,35 91,35 91,44 L91,90 C92,106 88,116 84,126"/>${[['T',8,56],['1',44,15],['2',58,8],['3',72,13],['4',86,31]].map(([t,x,y])=>`<text class="gtx" x="${x}" y="${y}" text-anchor="middle" font-size="12" font-weight="500">${t}</text>`).join('')}</svg>`;
+const fsPick=()=>`<svg viewBox="-20 -20 40 44" style="width:44px" role="img" aria-label="A pick"><path class="gl" style="vector-effect:non-scaling-stroke" d="M0,-14 C10,-14 14,-8 12,0 C10,8 4,16 0,18 C-4,16 -10,8 -12,0 C-14,-8 -10,-14 0,-14 Z"/></svg>`;
+const fsStroke=()=>`<svg viewBox="0 0 80 40" role="img" aria-label="The downstroke sign, like a square arch, and the upstroke sign, like a letter V" style="width:96px"><path class="gl" style="vector-effect:non-scaling-stroke;stroke-width:2.2" d="M12,30 V10 H30 V30"/><path class="gl" style="vector-effect:non-scaling-stroke;stroke-width:2.2" d="M50,10 L59,30 L68,10"/></svg>`;
+/* ---- sound ---- */
+let fsLoopT=null,fsLoopI=0;
+/* the same plain reference voice as the Warm-up tab's reference strings (a triangle wave at the exact pitch), short enough to play two in a row */
+function fsTone(m,t,len){const a=A();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.type='triangle';o.frequency.value=440*2**((m-69)/12);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.3,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+len);o.connect(g).connect(out());o.start(t);o.stop(t+len+.05);track(o)}
+function fsQuiet(){if(fsLoopT){clearInterval(fsLoopT);fsLoopT=null}fsLoopI=0;document.querySelectorAll('[data-fref]').forEach(b=>b.setAttribute('aria-pressed','false'));const b=$('fsBand');if(b)b.textContent='Play with the band'}
+/* a reference string repeats until it is tapped again */
+function fsRef(n){if(fsLoopI===n){stopAll();return}stopAll();fsLoopI=n;tone(sOpen(n));fsLoopT=setInterval(()=>tone(sOpen(n)),2800);document.querySelectorAll('[data-fref]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.fref===n)))}
+function fsPluck(ms,gap){const a=A();if(!a)return;try{a.resume()}catch(e){}const t=a.currentTime+.05;ms.forEach((m,i)=>(Array.isArray(m)?m:[m]).forEach((x,k)=>note(x,t+i*(gap||.7)+k*.02,.28)))}
+/* ---- progress ---- */
+let fsAt=0,fsPart='',fq=null,fe=null,fp=null;
+const fsIsDone=n=>!!(S.fs&&S.fs.done.includes(n));
+const fsCanGo=n=>fsDone()||fsIsDone(n)||F7.slice(0,n-1).every(fsIsDone);
+function fsMark(n){const f=FSF();if(!f.done.includes(n)){f.done.push(n);f.done.sort()}save()}
+function fsLeave(){fq=null;fe=null;fp=null;fsPart='';fsAt=0;fsQuiet()}
+function fsGo(n){if(n<1||n>7||!fsCanGo(n))return;if(playing||fsLoopT)stopAll();fsAt=n;fq=null;fe=null;fsPart='';renderFS();try{window.scrollTo(0,0)}catch(e){}const h=document.querySelector('#v-first-steps h2');if(h)h.focus({preventScroll:true})}
+const fsTick=(n,label,off)=>`<label class="chk"><input type="checkbox" data-ftick="${n}" ${fsIsDone(n)?'checked':''} ${off?'disabled':''}><span>${label}</span></label>`;
+/* ---- questions: {step, ask (what is asked, for tests: never the answer), q, opts [[value,label]], ans, why(value), yes, fig()} ---- */
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function qPart(){const p=FPART[Math.floor(Math.random()*FPART.length)];return {step:1,tap:true,ask:'part:'+p[0],q:`Tap the number for ${p[2]}.`,ans:p[0],why:v=>`You tapped ${fpt(v)[2]}. Look again for ${p[2]}.`,yes:`Yes, that's ${p[2]}.`,fig:()=>fsFigParts(true)}}
+function qStr(kind){const n=1+Math.floor(Math.random()*6),names=[6,5,4,3,2,1].map(x=>[String(x),SNAME[x][0].toUpperCase()+SNAME[x].slice(1)]),yes=`Yes: string ${n} is ${SNAME[n]}.`,cnt='String 6 is the thickest one, low E. Count from there: 6, 5, 4, 3, 2, 1.';
+ if(kind==='hl')return {step:3,ask:'str-hl:'+n,q:'Which string is lit up?',opts:names,ans:String(n),why:()=>'Not this time. '+cnt,yes,fig:()=>fsFigStrings({on:n})};
+ if(kind==='num')return {step:3,ask:'str-num:'+n,q:`Which string is number ${n}?`,opts:names,ans:String(n),why:v=>`${SNAME[v][0].toUpperCase()+SNAME[v].slice(1)} is string ${v}. ${cnt}`,yes,fig:()=>fsFigStrings({})};
+ return {step:3,ask:'str-name:'+n,q:`What number is the ${SNAME[n]} string?`,opts:[6,5,4,3,2,1].map(x=>[String(x),String(x)]),ans:String(n),why:v=>`String ${v} is ${SNAME[v]}. ${cnt}`,yes,fig:()=>fsFigStrings({})}}
+const FQN={1:5,3:5,5:4,6:3};
+function fsGen(step,n,prev){let q,g=0;do{q=step===1?qPart():step===3?qStr(['hl','num','name'][n%3]):fsGen2(step,n)}while(prev&&q.ask===prev.ask&&g++<20);return q}
+function fsQuizStart(step){fq={step,n:0,got:0,need:FQN[step],miss:false,fb:'',pass:false,seed:Math.floor(Math.random()*3)};fq.cur=fsGen(step,0,null)}
+/* a check is passed with the set number of answers right first time; a miss is explained, the question stays until it is right, and one more is asked in its place */
+function fsAnswer(v){const q=fq.cur;if(String(v)===String(q.ans)){if(!fq.miss)fq.got++;if(fq.got>=fq.need){fq.pass=true;fq.fb=q.yes;fsMark(fq.step)}else{fq.fb=q.yes+(fq.miss?' That one took two goes, so here is one more.':'');fq.n++;fq.cur=fsGen(fq.step,fq.n,q);fq.miss=false}}else{fq.miss=true;fq.fb=q.why(v)}}
+const fsOptsH=q=>q.opts?`<div class="fst-opts" role="group" aria-label="Answers">${q.opts.map(([v,l])=>`<button data-fa="${esc(v)}">${esc(l)}</button>`).join('')}</div>`:'';
+function fsQuizH(){const q=fq.cur;if(fq.pass)return `<div id="fsQuiz" data-pass="1"><p class="fst-ask" id="fsAsk" tabindex="-1">Check passed.</p><p class="fst-fb">${esc(fq.fb)}</p><button id="fsQuizEnd">Back to the lesson</button></div>`;
+ return `<div id="fsQuiz" data-ask="${esc(q.ask)}"${q.ev?` data-ev="${esc(JSON.stringify(q.ev))}"`:''}><div class="fst-eye">Right first time: ${fq.got} of ${fq.need}</div><p class="fst-ask" id="fsAsk" tabindex="-1">${esc(q.q)}</p>${fsOptsH(q)}<p class="fst-fb" id="fsFb" role="status">${esc(fq.fb)}</p><p style="margin-top:18px"><button id="fsQuizEnd">Back to the lesson</button></p></div>`}
+const fsCheckH=(n,what)=>`<div class="fst-check"><h3>The check</h3>${fsIsDone(n)?`<p>You have passed this check.</p><button id="fsQuizGo">Try it again</button>`:`<p>${what}</p><button id="fsQuizGo" class="fst-go">Start the check</button>`}</div>`;
+/* ---- the ear check (step 4): two notes, is the second higher or lower? Gaps of two octaves, an octave and a tone, a fourth, then a semitone. ---- */
+const EARG=[[40,24],[45,14],[50,5],[55,1]];
+const fsEarNew=i=>{const [lo,g]=EARG[i];return {i,pair:Math.random()<.5?[lo,lo+g]:[lo+g,lo],played:false,fb:''}};
+function fsEarH(){if(S.fs&&S.fs.ear)return '<p id="fsEar" data-pass="1">Ear check passed.</p>';const e=fe||(fe=fsEarNew(0));
+ return `<div id="fsEar"><div class="fst-eye">Pair ${e.i+1} of 4</div><p class="fst-ask">Is the second note higher or lower than the first?</p><div class="fst-opts"><button id="fsEarPlay">Play the two notes</button><button data-ear="up" ${e.played?'':'disabled'}>Higher</button><button data-ear="down" ${e.played?'':'disabled'}>Lower</button></div><p class="fst-fb" role="status">${esc(e.fb)}</p></div>`}
+/* ---- the steps: each returns {fig, body} ---- */
+const FSV={
+1:()=>{const p=fsPart&&fpt(fsPart);return {fig:fsFigParts(false)+`<p class="fst-cap" id="fsCap" aria-live="polite">${p?`<b>${fpn(p[0])} · ${p[1]}</b><br>${p[3]}`:'<span class="note">Tap a number on the drawing.</span>'}</p><ol class="fst-key">${FPART.map(x=>`<li>${x[1]}</li>`).join('')}</ol>`,
+ body:`<p>Here are an acoustic guitar and an electric guitar. Most of the parts are the same on both.</p><p>Tap a number on the drawing to see what that part is called and what it does. Take your time: there are fourteen.</p>
+ <div class="fst-tip"><p><b>Electric guitars</b> have pickups instead of a sound hole. A pickup works like a tiny microphone for the strings: a magnet inside senses each steel string as it vibrates.</p></div>
+ ${fsCheckH(1,'You will be asked to find five parts on the drawing. You need five right first time. The list of names is hidden while you do it.')}
+ ${fsDone()?'':`<div class="fst-check"><h3>Played before?</h3><p>Answer eight quick questions. Get them all right and the Path opens straight away.</p><div class="row"><button id="fsPlaceGo">I already play</button><a class="lk" href="#record">I have a backup to bring back</a></div></div>`}`}},
+2:()=>({fig:fsFigHold(),body:`<p>These notes are for right-handed players. Your left hand is the fretting hand: it presses the strings. Your right hand strums.</p>
+ <div class="fst-cards"><div class="fst-card"><h3>Sit tall</h3><p>Sit at the front of your chair with your back tall. Rest the waist of the guitar, the curve in its side, on your right leg. Let the neck point slightly up, never down.</p></div>
+ <div class="fst-card">${fsPick()}<h3>Hold the pick</h3><p>Hold it between the pad of your thumb and the side of your first finger. Let only the tip show. Strum from your wrist, not your elbow.</p></div>
+ <div class="fst-card"><h3>Fret it cleanly</h3><p>Press with your fingertips, just behind the fret wire. Keep your thumb behind the neck, pointing up and never towards the head. Arch your fingers so they don't touch the string below. Short fingernails help.</p></div></div>
+ <div class="fst-cards"><div class="fst-card">${fsHand()}<h3>Finger numbers</h3><p>The fingers of your fretting hand have numbers: T thumb, 1 index, 2 middle, 3 ring, 4 little. You will meet them again on chord diagrams.</p></div>
+ <div class="fst-card">${fsStroke()}<h3>Picking signs</h3><p>The square arch means a downstroke: pick towards the floor. The V means an upstroke: pick back up. Play down on the beat and up on the “&amp;”, the “and” between beats.</p></div>
+ <div class="fst-card"><h3>Left-handed?</h3><p>Mirror everything on this page. Many left-handers play a left-handed guitar, and some play the usual way round. Ask your teacher which suits you.</p></div></div>
+ <div class="fst-check"><h3>The check</h3><p>Pick up your guitar and try each card. Tick the box when it feels steady.</p>${fsTick(2,'I can sit and hold it comfortably')}</div>`}),
+3:()=>({fig:fsFigStrings({labels:true})+'<p class="note" style="margin:6px 0 0">The guitar is lying flat on your lap here, strings facing up. Tap a string to hear it.</p>',body:`<p>String 6 is the thickest string and it sounds the lowest. It is called low E.</p><p>String 1 is the thinnest and it sounds the highest. It is high E, and it is the string closest to the floor when you hold the guitar.</p><p>From string 6 to string 1 the names are E A D G B E.</p>
+ <div class="fst-opts" role="group" aria-label="Hear each open string">${[6,5,4,3,2,1].map(n=>`<button data-fpl="${n}" aria-label="Play string ${n}, ${SNAME[n]}">${n} · ${SLET[n]}</button>`).join('')}</div>
+ <p style="margin-top:16px"><label for="fsLine">Make your own memory line (E A D G B E)</label><input id="fsLine" class="fst-line" maxlength="80" autocomplete="off" value="${esc((S.fs&&S.fs.line)||'')}"><span class="note">Six words that start with those letters, in order. Ours, to start you off: Emus And Dingoes Go Bush Early. Yours will stick better.</span></p>
+ <div class="fst-tip"><p><b>Practice tip:</b> one finger per fret. At the first three frets, fret 1 is finger 1, fret 2 is finger 2 and fret 3 is finger 3.</p></div>
+ ${fsCheckH(3,'Five questions on string numbers and names. You need five right first time.')}`}),
+4:()=>({fig:fsFigStrings({labels:true}),body:`<p>Tap a string below to hear its note. It repeats until you tap it again.</p>
+ <div class="fst-opts" role="group" aria-label="Reference notes for the open strings">${[6,5,4,3,2,1].map(n=>`<button data-fref="${n}" aria-pressed="${fsLoopI===n}" aria-label="Play the note of string ${n}, ${SNAME[n]}">${n} · ${SLET[n]}</button>`).join('')}</div>
+ <div class="fst-tip"><p><b>Sing it first.</b> Listen to the note, then sing it back on “loo”. Now hum it while you pluck that open string. When your hum and the string sound like one note, they match.</p></div>
+ <p>This is how you start to hear when a guitar is out of tune: one of its strings will not match its note.</p><p>At school, your teacher tunes the class guitars. Leave the machine heads alone.</p>
+ <p class="note">One thing to know for later: guitar music is written an octave higher than it sounds, so that it fits on the treble clef.</p>
+ <div class="fst-check"><h3>The check</h3><p>First, four pairs of notes for your ears. Then tick the box when you have matched every string.</p>${fsEarH()}${fsTick(4,'I can hear and match all six open strings',!(S.fs&&S.fs.ear))}</div>
+ <div class="fst-home" id="fsHome"><h3>Your own guitar at home</h3><p>Clip a tuner onto the headstock and pluck one string. The screen shows a letter and a needle. Check that the letter is the right one for that string.</p><p>Turn that string's machine head slowly until the needle sits in the middle. If the note is too high, loosen the string until it is below the note, then tune up to it. Coming up to the note from below helps the string stay in tune.</p></div>`})};
+function renderFS(){const el=$('v-first-steps'),d=(S.fs&&S.fs.done)||[];if(!fsAt)fsAt=fsDone()?1:(F7.find(n=>!d.includes(n))||7);if(fp){el.innerHTML=fsPlaceH();return}
+ const [n,title,sub]=FSTEPS[fsAt-1],v=(FSV[fsAt]||(()=>({fig:'',body:'<p>This step is on its way.</p>'})))(),quiz=fq&&fq.step===fsAt,ok=fsIsDone(fsAt)||fsDone(),all7=F7.every(fsIsDone);
+ const fig=quiz&&!fq.pass&&fq.cur.fig?fq.cur.fig():v.fig,body=quiz?fsQuizH():v.body,left=F7.filter(x=>!fsIsDone(x));
+ const dots=`<ol class="fst-dots" aria-label="Steps">${FSTEPS.map(([i,t])=>`<li><button data-fgo="${i}" class="${fsIsDone(i)?'dn':''}" ${i===fsAt?'aria-current="step"':''} ${fsCanGo(i)?'':'disabled'} aria-label="Step ${i}: ${t}${fsIsDone(i)?', passed':''}">${i}</button></li>`).join('')}</ol>`;
+ const fwd=fsAt<7?`${ok?'':'<span class="note">Pass the check to go on.</span>'}<button id="fsNext" class="fst-go" ${ok?'':'disabled'}>Next</button>`:fsDone()?'<button id="fsStart" class="fst-go">Back to the Path</button>':`${all7?'':`<span class="note">Still to pass: step ${left.join(', step ')}.</span>`}<button id="fsStart" class="fst-go" ${all7?'':'disabled'}>Start the Path</button>`;
+ el.innerHTML=`<div class="fst-eye">First Steps · step ${n} of 7</div><h2 tabindex="-1">${title}</h2><p class="fst-sub">${sub}</p>${dots}<div class="fst-grid"><div class="fst-fig">${fig}</div><div class="fst-body">${body}</div></div><div class="fst-nav">${fsAt>1?'<button id="fsBack">Back</button>':''}${fsDone()&&fsAt<7?'<a class="lk" href="#path">Back to the Path</a>':''}<span class="sp"></span>${fwd}</div>`}
+function fsRe(sel){renderFS();const e=(sel&&document.querySelector(sel))||$('fsAsk');if(e)e.focus({preventScroll:true})}
+function fsAct(t){const d=t.dataset||{};
+ if(d.string){if(t.closest('.fst-strfig'))fsPluck([sOpen(+d.string)]);return}
+ if(d.part){if(!t.classList.contains('gtag'))return;if(fq&&fq.step===1&&!fq.pass){fsAnswer(d.part);fsRe('#fsAsk')}else if(fp){fsPlaceAns(d.part)}else{fsPart=d.part;fsRe(`.gtag[data-part="${d.part}"]`)}return}
+ if(d.fgo)fsGo(+d.fgo);else if(t.id==='fsNext')fsGo(fsAt+1);else if(t.id==='fsBack')fsGo(fsAt-1);
+ else if(t.id==='fsQuizGo'){fsQuiet();fsQuizStart(fsAt);fsRe('#fsAsk')}else if(t.id==='fsQuizEnd'){if(playing)stopAll();fq=null;fsRe('#fsQuizGo')}
+ else if(d.fa!==undefined){if(fp)fsPlaceAns(d.fa);else if(fq){fsAnswer(d.fa);fsRe('#fsAsk')}}
+ else if(d.fpl)fsPluck([sOpen(+d.fpl)]);else if(d.fref)fsRef(+d.fref);
+ else if(t.id==='fsEarPlay'){if(fsLoopT)stopAll();const a=A();if(!a||!fe)return;try{a.resume()}catch(e){}const t0=a.currentTime+.08;fsTone(fe.pair[0],t0,.9);fsTone(fe.pair[1],t0+1.1,.9);if(!fe.played){fe.played=true;fe.fb='';fsRe('#fsEarPlay')}}
+ else if(d.ear&&fe){const up=fe.pair[1]>fe.pair[0];if((d.ear==='up')===up){if(fe.i>=3){FSF().ear=true;save();fe=null;fsRe('[data-ftick="4"]')}else{const fb='Yes. Now a closer pair.';fe=fsEarNew(fe.i+1);fe.fb=fb;fsRe('#fsEarPlay')}}else{const i=fe.i;fe=fsEarNew(i);fe.fb='Not this time. Here is a fresh pair. Listen for whether the second note climbs or drops.';fsRe('#fsEarPlay')}}
+ else fsAct2(t)}
+document.addEventListener('click',e=>{if(view!=='first-steps')return;const t=e.target.closest('.gtag,[data-string],button');if(t&&t.closest('#v-first-steps'))fsAct(t)});
+document.addEventListener('keydown',e=>{if(view==='first-steps'&&(e.key==='Enter'||e.key===' ')&&e.target.classList&&e.target.classList.contains('gtag')){e.preventDefault();fsAct(e.target)}});
+document.addEventListener('change',e=>{const n=+(e.target.dataset||{}).ftick;if(!n)return;if(e.target.checked)fsMark(n);else if(!fsDone()){const f=FSF();f.done=f.done.filter(x=>x!==n);save()}fsRe(`[data-ftick="${n}"]`)});
+document.addEventListener('input',e=>{if(e.target.id==='fsLine'){const v=e.target.value.slice(0,80),f=FSF();if(v.trim())f.line=v;else delete f.line;save()}});
+function fsGen2(){return qPart()}
+function fsPlaceH(){return ''}
+function fsAct2(){}
+function fsPlaceAns(){}
 
 /* end first steps */
 /* sequencing */
