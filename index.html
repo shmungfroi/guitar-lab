@@ -148,7 +148,7 @@ table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px
 .fst-line{display:block;width:100%;max-width:420px;margin-top:4px}
 .fst .tab{font-size:15px;line-height:1.3;max-width:max-content}
 .fst .chk{border-top:0;padding:6px 0}
-.tabnote p{margin:4px 0 0}
+.tabnote{margin-bottom:12px}.tabnote p{margin:4px 0 0}#fsSoon{margin:0 0 8px}
 /* the guitar drawing: single-weight line, ivory with gold detail; every part and string carries its id */
 .gart *{vector-effect:non-scaling-stroke}
 .gl{fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
@@ -186,10 +186,11 @@ table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px
 
 <section id="v-first-steps" class="view fst hide"></section>
 <section id="v-path" class="view">
+<div id="tabMsg" aria-live="polite"></div>
 <div class="next" id="next"></div>
 <nav class="neck" id="neck" aria-label="Stages on the neck"></nav>
 <div class="legend"><span>The bar under each fret shows steps at Consistent or better.</span><span>Inlays sit at frets 3, 5 and 7 as on a real neck (Hallelujah carries the double), and turn gold when that stage's gate passes.</span></div>
-<div id="gateMsg" aria-live="polite"></div>
+<div id="gateMsg"></div>
 <div class="cols" style="margin-top:12px"><div class="stk" id="stage"></div><aside class="stk" id="side"></aside></div>
 </section>
 <section id="v-warm-up" class="view hide"></section>
@@ -658,7 +659,7 @@ function openTabs(){if(S.teacher||!fsOn()||fsAll())return VIEWS.slice();if(!fsDo
 /* a tab is announced once, the moment it opens; quiet=true (start-up, import) just records what is already open */
 function noteTabs(quiet){if(!fsDone()||fsAll()||S.teacher||!fsOn())return;const seen=S.fs.seen||(S.fs.seen=[]),nw=VIEWS.filter(v=>openTabs().includes(v)&&!seen.includes(v));if(!nw.length)return;seen.push(...nw);if(!quiet){tabNote=nw;save()}}
 function renderTabs(){const t=openTabs();document.querySelectorAll('#tabs a').forEach(a=>{const v=a.getAttribute('href').slice(1);a.classList.toggle('hide',v==='first-steps'?!(fsOn()&&!fsDone()):!(t.includes(v)||v===view))})}
-function renderMsg(){const g=$('gateMsg');let h='';if(tabNote.length)h+=`<div class="gate tabnote" id="tabNote"><b style="font-weight:500">New for you</b>${tabNote.map(v=>`<p>${TABNAME[v]} is open: ${TABWHY[v]}.</p>`).join('')}</div>`;
+function renderMsg(){const g=$('tabMsg');let h='';if(tabNote.length)h+=`<div class="gate tabnote" id="tabNote"><b style="font-weight:500">New for you</b>${tabNote.map(v=>`<p>${TABNAME[v]} is open: ${TABWHY[v]}.</p>`).join('')}</div>`;
  if(!fsOn())h+=`<p class="note" id="fsSoon">First Steps for ${INST.find(x=>x[0]===S.inst)[1].toLowerCase()} is coming. Until then, every tab is open.</p>`;if(g.innerHTML!==h)g.innerHTML=h}
 const goTo=h=>{let same=false;try{same=location.hash==='#'+h;if(!same)location.hash=h}catch(e){same=true}if(same)route()};
 const FSTEPS=[[1,'Meet the guitar','Two guitars, one set of names.'],[2,'Get ready','How to sit, hold the pick and place your fingers.'],[3,'The strings','Six strings, each with a number and a name.'],[4,'Hear the open strings','Listen, sing, then pluck.'],[5,'Chord diagrams','A picture of where your fingers go.'],[6,'TAB','Six lines for six strings.'],[7,'First sound','Your first chord, then your first three notes.']];
@@ -863,7 +864,7 @@ function fsPlaceStart(){const line=QT[Math.floor(Math.random()*3)],a=qPart();let
 function fsPlaceAns(v){if(!fp||fp.end)return;const q=fp.qs[fp.i];if(String(v)!==String(q.ans)){fp.wrong++;if(!fp.miss.includes(q.step))fp.miss.push(q.step)}fp.i++;
  if(fp.i>=fp.qs.length){const f=FSF();if(!fp.miss.length){f.done=F7.slice();f.placed=true;fp=null;fsFinish();return}fp.end=true;fp.miss.sort();f.done=[...new Set(f.done.concat(F7.filter(n=>!fp.miss.includes(n))))].sort();save()}fsRe('#fsAsk')}
 function fsPlaceH(){const eye='<div class="fst-eye">First Steps · played before?</div>';
- if(fp.end)return `${eye}<h2 tabindex="-1">Nearly there</h2><p class="fst-sub">${8-fp.wrong} of 8 right.</p><div class="fst-body" id="fsPlace" data-miss="${fp.miss.join(',')}" style="margin-top:18px"><p id="fsAsk" tabindex="-1">These steps are worth a visit:</p><ul>${fp.miss.map(n=>`<li>Step ${n}: ${FSTEPS[n-1][1]}</li>`).join('')}</ul><p>The other steps are ticked off for you. Pass ${fp.miss.length>1?'these checks':'this check'} and the Path opens.</p><button id="fsPlaceOpen" class="fst-go">Open step ${fp.miss[0]}</button></div>`;
+ if(fp.end)return `${eye}<h2 tabindex="-1">A few steps first</h2><p class="fst-sub">${8-fp.wrong} of 8 right.</p><div class="fst-body" id="fsPlace" data-miss="${fp.miss.join(',')}" style="margin-top:18px"><p id="fsAsk" tabindex="-1">These steps are worth a visit:</p><ul>${fp.miss.map(n=>`<li>Step ${n}: ${FSTEPS[n-1][1]}</li>`).join('')}</ul><p>The other steps are ticked off for you. Pass ${fp.miss.length>1?'these checks':'this check'} and the Path opens.</p><button id="fsPlaceOpen" class="fst-go">Open step ${fp.miss[0]}</button></div>`;
  const q=fp.qs[fp.i];return `${eye}<h2 tabindex="-1">Show what you know</h2><p class="fst-sub">Question ${fp.i+1} of 8. One go at each.</p><div class="fst-grid"><div class="fst-fig">${q.fig()}</div><div class="fst-body"><div id="fsQuiz" data-place="${fp.i}" data-ask="${esc(q.ask)}"${q.ev?` data-ev="${esc(JSON.stringify(q.ev))}"`:''}><p class="fst-ask" id="fsAsk" tabindex="-1">${esc(q.q)}</p>${fsOptsH(q)}</div></div></div><div class="fst-nav"><button id="fsPlaceQuit">Back to step 1</button></div>`}
 function fsAct2(t){const d=t.dataset||{};
  if(d.ftab){let ev=[];try{ev=JSON.parse(d.ftab)}catch(e){}if(playing||fsLoopT)stopAll();fsPluck(ev.map(evM))}

@@ -1,11 +1,12 @@
 # Tests for The Guitar Lab (index.html)
 
-Three pytest suites. They read `index.html` and never edit it.
+Four pytest suites. They read `index.html` and never edit it.
 
 | Suite | What it checks | Time |
 |---|---|---|
 | `test_chords.py` | The 18 chord shapes (frets, fingers, barres, the notes they sound against their spelling), fretboard diagrams, key spellings, roman numerals and functions, sol-fa roots, bass root/fifth positions, song maps vs keys and labelled progressions, strum and Finish patterns, capo sounding keys | ~1 s |
 | `test_ui.py` | Render matrix (8 stages x 7 tabs x 5 instruments x 360/768/1280 px x light/dark: no console errors, no page-level horizontal overflow, key panels present); functional tests (gates, sign-off, grading, playback start/stop, capo, mute, gig max four, gig timer, roles); one or more tests per register item M1-M5, S1-S15 in `reports/spec06/SPEC_06.md` R1-R11 in `reports/spec07/SPEC_07.md` (`test_R<n>_...`; R6 and R7 also have data tests in `test_chords.py`) T1-T5 in `reports/spec08/SPEC_08.md` (`test_T<n>_...`) and U1, U3 in `reports/spec09/SPEC_09.md` (`test_U<n>_...`) | ~4 min |
+| `test_firststeps.py` | First Steps (0.11): F1-F17 of `reports/firststeps/SPEC_FS.md` plus the booklet amendments: first open, each step's check gating Next, wrong answers, the parts on both drawings (by `data-part`), string numbers and names, reference tones and the ear check, chord diagram answers read off the drawn diagram, TAB as printed and as played (pitch estimated from the plucked samples), Em against the Path's Em box, Start the Path, placement, tabs as needed, returning saves, `fs` in saves and backups, other instruments, layout at 360 and 1280 in both themes, the design checker, and Path/Gig/Record against 0.9 | ~40 s |
 | `test_timing.py` | Records every WebAudio source start via an init script and checks the schedule against the beat grid (4/4 at two tempos, swung shuffle, 3/4, 6/8), that nothing is scheduled late, and that a double tap on Play can't stack two bands (S2) | ~30 s |
 
 ## Setup (fresh session)
@@ -89,3 +90,11 @@ SHREDDER_INDEX=/tmp/shredder05/index.html python3 -m pytest tests -q -p no:cache
   browser build may need them re-measured with `SHREDDER_INDEX` pointed at 0.8.
 - 0.9 version: `test_version_0_9_...` import 0.7, 0.8 and 0.9 wrappers and a bare state, and check the newer-version message.
 - Results for each build go in `reports/<spec>/TEST_BASELINE.md` or that spec's `BUILD_REPORT.md`.
+- 0.11 First Steps: a guitar student with nothing saved now sees only First Steps, and tabs open as gates pass. `uihelp.open_app`
+  therefore seeds a returning student's save by default (`fs` complete with every tab kept), so `test_ui.py` and `test_timing.py` go on
+  testing the app with every tab open; a seed that already holds progress is left exactly as given. `returning=False` gives a true first
+  visit. `sandbox()` (storage blocked, so always a first visit) turns Teacher mode on to reach a tab other than Record.
+  `test_firststeps.py` never depends on the drawing's geometry: parts are `data-part`, strings are `data-string`, and each question says
+  what it asks in `data-ask` (never the answer). `test_path_gig_and_record_are_as_0_9_once_open` needs commit 90719f9 in the clone and
+  skips without it; F17 needs the shmungfroi-design skill installed and skips without it. Quiz questions are drawn at random, so the
+  quiz tests answer whatever is asked.
